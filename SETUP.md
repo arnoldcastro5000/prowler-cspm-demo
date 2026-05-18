@@ -41,18 +41,18 @@ Same GCP account hosts the VM, database, Terraform state, and dashboard.
 
 ### 3. Prowler credentials (stored in GCP Secret Manager)
 - [ ] AWS: create an IAM user with `SecurityAudit` managed policy attached
-      → generate access key pair → store as two secrets:
-      `prowler/aws/access_key_id` and `prowler/aws/secret_access_key`
+      → generate access key pair → store as two secrets in Secret Manager
+      (`<aws-access-key-id-secret>` and `<aws-secret-access-key-secret>`)
       → [AWS IAM docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
 - [ ] GCP: create a service account with `Viewer`, `Security Reviewer`,
-      and `Cloud Datastore User` roles → generate key file → store as one secret:
-      `prowler/gcp/service_account_key`
+      and `Cloud Datastore User` roles → generate key file → store as one secret
+      (`<gcp-service-account-key-secret>`) in Secret Manager
       → [GCP service accounts](https://cloud.google.com/iam/docs/service-accounts-create)
 - [ ] Azure: create a service principal with `Reader` role on the subscription
-      → consolidate all four values into one JSON secret:
-      `prowler/azure/credentials` → `{"client_id":"...","client_secret":"...","tenant_id":"...","subscription_id":"..."}`
+      → consolidate all four values into one JSON secret (`<azure-credentials-secret>`):
+      `{"client_id":"...","client_secret":"...","tenant_id":"...","subscription_id":"..."}`
       → [Azure service principal](https://learn.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli)
-- [ ] Cloudflare: store CF-Access-Secret value as: `prowler/cloudflare/cf_access_secret`
+- [ ] Cloudflare: store CF-Access-Secret value as `<cloudflare-cf-access-secret>` in Secret Manager
 - [ ] Grant the e2-micro Compute Engine service account
       `Secret Manager Secret Accessor` role on all `prowler/*` secrets
 - [ ] Do NOT store any credentials in `/etc/environment` or any file on disk
@@ -138,11 +138,11 @@ All findings (Prowler) share this normalised shape:
 
 | Secret | Where it lives | Used by |
 |---|---|---|
-| AWS access key ID | Secret Manager: `prowler/aws/access_key_id` | Prowler |
-| AWS secret access key | Secret Manager: `prowler/aws/secret_access_key` | Prowler |
-| GCP service account key | Secret Manager: `prowler/gcp/service_account_key` | Prowler + export_json.py |
-| Azure credentials (JSON) | Secret Manager: `prowler/azure/credentials` | Prowler |
-| `CF-Access-Secret` | Secret Manager: `prowler/cloudflare/cf_access_secret` + Cloud Run env var | Origin protection |
+| AWS access key ID | Secret Manager: `<aws-access-key-id-secret>` | Prowler |
+| AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler |
+| GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler + export_json.py |
+| Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler |
+| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | Origin protection |
 
 The e2-micro fetches all secrets at runtime via the Secret Manager API.
 No credentials are stored on disk. The VM's attached service account

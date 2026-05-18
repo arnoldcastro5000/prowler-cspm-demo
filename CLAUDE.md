@@ -171,11 +171,11 @@ environment inside the other's directory.
 
 | Secret | Where it lives | Used by |
 |---|---|---|
-| AWS access key ID | Secret Manager: `prowler/aws/access_key_id` | Prowler |
-| AWS secret access key | Secret Manager: `prowler/aws/secret_access_key` | Prowler |
-| GCP service account key | Secret Manager: `prowler/gcp/service_account_key` | Prowler + export_json.py |
-| Azure credentials (JSON) | Secret Manager: `prowler/azure/credentials` | Prowler |
-| `CF-Access-Secret` | Secret Manager: `prowler/cloudflare/cf_access_secret` + Cloud Run env var | Origin protection |
+| AWS access key ID | Secret Manager: `<aws-access-key-id-secret>` | Prowler |
+| AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler |
+| GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler + export_json.py |
+| Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler |
+| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | Origin protection |
 
 
 ---
