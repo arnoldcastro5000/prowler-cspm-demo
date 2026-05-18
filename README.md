@@ -2,7 +2,7 @@
 
 A DevSecOps reference project that scans real cloud infrastructure across AWS, GCP, and Azure for misconfigurations, then displays a before/after remediation dashboard. Built entirely on free-tier services.
 
-Live demo → `[your-domain]/before` and `[your-domain]/after`
+Live demo → `prowler.cloudsecuritypractice.com/before` and `prowler.cloudsecuritypractice.com/after`
 
 ---
 
@@ -47,7 +47,7 @@ The dashboard shows the before state (15 findings across critical, high, and med
                 │ bundled into
 ┌───────────────▼─────────────────────────────────────────┐
 │  GCP Cloud Run · React + Vite (containerised)           │
-│  /before  ·  /after                                     │
+│  prowler.cloudsecuritypractice.com                      │
 └───────────────┬─────────────────────────────────────────┘
                 │ origin — proxied through
 ┌───────────────▼─────────────────────────────────────────┐

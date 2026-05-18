@@ -200,6 +200,6 @@ At the start of every AI session, before doing any work:
 - **Do not** add IAM users outside of what is defined in the Terraform modules.
 - **Do not** put credentials, keys, or secrets in any file tracked by git.
 - **Do not** use Flexible SSL mode — only Full (Strict).
-- **Do not** expose Cloud Run directly — all traffic routes through Cloudflare.
+- **Do not** expose Cloud Run directly — all traffic routes through Cloudflare at `prowler.cloudsecuritypractice.com`.
 - **Do not** store credentials in `/etc/environment` or any file on disk. All secrets are fetched from GCP Secret Manager at runtime by run_scan.sh.
 - The ingest script is ingest_prowler.py. The export script is export_json.py. There is no ingest_semgrep.py.

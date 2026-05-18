@@ -265,7 +265,7 @@ Implement as Tailwind CSS utility classes. Do not use inline styles.
 
 ## What This Spec Does Not Cover
 
-- Authentication — the dashboard is public behind Cloudflare. No login screen.
+- Authentication — the dashboard is public at `prowler.cloudsecuritypractice.com` behind Cloudflare. No login screen.
 - Pagination — 15 documents maximum, no pagination needed.
 - Search — not required.
 - Export — not required.

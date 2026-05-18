@@ -64,7 +64,7 @@ Same GCP account hosts the VM, database, Terraform state, and dashboard.
 ### 5. Cloudflare
 - [ ] Acquire a domain (any registrar)
 - [ ] Add site to Cloudflare and point domain nameservers to Cloudflare → [Cloudflare DNS setup](https://developers.cloudflare.com/dns/zone-setups/full-setup/)
-- [ ] Create a DNS CNAME record pointing to your Cloud Run service URL
+- [ ] Create a DNS CNAME record for `prowler.cloudsecuritypractice.com` pointing to your Cloud Run service URL
 - [ ] Set SSL/TLS mode to **Full (Strict)** — not Flexible
 - [ ] Add a WAF custom rule to block requests not originating from Cloudflare IPs
 - [ ] Generate a `CF-Access-Secret` header value and configure it in both Cloudflare (send on all requests) and Cloud Run (reject if missing)
