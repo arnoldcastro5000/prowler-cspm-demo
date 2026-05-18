@@ -161,9 +161,9 @@ environment inside the other's directory.
 | Target | Runs where | What it does |
 |---|---|---|
 | `make before` | Locally | `terraform apply` for `iac/environments/before` |
-| `make scan` | e2-micro VM | Fetches secrets, runs Prowler, ingests to Firestore, exports JSON, rebuilds and deploys container |
+| `make scan` | e2-micro VM (via IAP tunnel) | git pull, fetches secrets, runs Prowler, ingests to Firestore, exports JSON, rebuilds and deploys container |
 | `make after` | Locally | `terraform apply` for `iac/environments/after` |
-| `make rescan` | e2-micro VM | Same as scan, writes to `findings_after` |
+| `make rescan` | e2-micro VM (via IAP tunnel) | Same as scan, writes to `findings_after` |
 
 ---
 

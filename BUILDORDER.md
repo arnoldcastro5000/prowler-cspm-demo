@@ -367,7 +367,8 @@ Depends on: all previous phases complete and tested end-to-end at least once man
   Four targets per `CLAUDE.md` → Makefile Targets:
 
   - `make before` — runs `terraform apply` in `iac/environments/before` locally
-  - `make scan` — SSHs to e2-micro, runs `prowler/run_scan.sh`,
+  - `make scan` — connects to e2-micro via IAP tunnel (`gcloud compute ssh --tunnel-through-iap`),
+    runs `git pull` to fetch latest scripts, then `prowler/run_scan.sh`,
     then `ingest/ingest_prowler.py`, then `ingest/export_json.py`,
     then rebuilds and deploys the Cloud Run container
   - `make after` — runs `terraform apply` in `iac/environments/after` locally
@@ -375,6 +376,7 @@ Depends on: all previous phases complete and tested end-to-end at least once man
 
   Include a guard at the top of `scan` and `rescan` to confirm the e2-micro
   VM name and zone before executing remote commands.
+  All remote connections use IAP tunneling — port 22 is not open to the internet.
 
 ---
 
