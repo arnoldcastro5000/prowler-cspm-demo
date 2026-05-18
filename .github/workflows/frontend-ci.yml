@@ -3,7 +3,11 @@ name: Frontend CI
 on:
   push:
     branches: [main]
+    paths:
+      - 'dashboard/**'
   pull_request:
+    paths:
+      - 'dashboard/**'
 
 jobs:
   ci:
@@ -14,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: '18'
           cache: 'npm'
