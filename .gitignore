@@ -1,0 +1,48 @@
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+override.tf
+override.tf.json
+
+# Terraform variable overrides — never commit credentials
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+
+# Node / Vite
+node_modules/
+dist/
+.env
+.env.*
+*.local
+
+# Credentials and keys — belt-and-suspenders
+*.json.key
+*-key.json
+service-account*.json
+*credentials*.json
+gcp-key*.json
+prowler-key.json
+
+# Prowler output
+prowler/output/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
