@@ -33,6 +33,19 @@ Same GCP account hosts the VM, database, Terraform state, and dashboard.
 - [ ] Create a GCP project
 - [ ] Enable Firestore in Native mode → [Firestore setup](https://cloud.google.com/firestore/docs/quickstart-servers)
 - [ ] Create a Cloud Storage bucket for Terraform state
+- [ ] Enable Compute Engine API
+
+  > **Warning:** enabling the Compute Engine API automatically creates four default
+  > firewall rules that open SSH (port 22), RDP (port 3389), and ICMP to the
+  > entire internet (`0.0.0.0/0`). These must be deleted immediately before
+  > provisioning any VM.
+
+- [ ] Delete default firewall rules immediately after enabling Compute Engine:
+  - Delete `default-allow-ssh`
+  - Delete `default-allow-rdp`
+  - Delete `default-allow-icmp`
+- [ ] Enable IAP API and create `allow-ssh-iap` firewall rule (source: `35.235.240.0/20`, TCP 22)
+- [ ] Grant your user account `roles/iap.tunnelResourceAccessor`
 - [ ] Provision an e2-micro Compute Engine instance (US region) → [free tier details](https://cloud.google.com/free/docs/free-cloud-features#compute)
 - [ ] Enable Cloud Run API → [Cloud Run setup](https://cloud.google.com/run/docs/setup)
 - [ ] Enable Secret Manager API → [Secret Manager setup](https://cloud.google.com/secret-manager/docs/quickstart)
