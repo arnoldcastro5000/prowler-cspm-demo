@@ -1,16 +1,13 @@
 #!/usr/bin/env python3
-"""Normalise Prowler OCSF JSON output and write FAIL findings to Firestore."""
+"""Normalise Prowler OCSF JSON output and write findings to dashboard/public/."""
 
 import json
+import os
 import sys
 import uuid
 
-from google.cloud import firestore
+DASHBOARD_PUBLIC = os.path.join(os.path.dirname(__file__), "..", "dashboard", "public")
 
-PROJECT_ID = "***REDACTED-GCP-PROJECT***"
-
-# Maps Prowler check IDs to our schema category values.
-# Only checks in this map will be ingested — unknown check IDs are skipped.
 CHECK_CATEGORY = {
     # AWS
     "s3_bucket_level_public_access_block": "storage",
@@ -33,18 +30,16 @@ CHECK_CATEGORY = {
 }
 
 
-def ingest(json_file: str, collection_name: str) -> None:
-    db = firestore.Client(project=PROJECT_ID)
-    collection = db.collection(collection_name)
-
+def ingest(json_file: str, target: str) -> None:
     with open(json_file) as f:
         findings = json.load(f)
 
-    ingested = skipped = 0
+    docs = []
+    skipped = 0
 
     for finding in findings:
         status_code = finding.get("status_code", "").upper()
-        if status_code != "FAIL":
+        if status_code not in ("FAIL", "PASS"):
             skipped += 1
             continue
 
@@ -58,36 +53,38 @@ def ingest(json_file: str, collection_name: str) -> None:
         resources = finding.get("resources", [])
         resource_uid = resources[0].get("uid", "") if resources else ""
 
-        doc_id = str(uuid.uuid4())
-        doc = {
-            "id": doc_id,
+        docs.append({
+            "id": str(uuid.uuid4()),
             "source": "prowler",
             "check_id": check_id,
             "title": finding.get("finding_info", {}).get("title", ""),
-            "status": "fail",
+            "status": status_code.lower(),
             "severity": finding.get("severity", "").lower(),
             "provider": finding.get("unmapped", {}).get("provider", "").lower(),
             "category": category,
             "resource": resource_uid,
             "scanned_at": finding.get("time_dt", ""),
             "raw": finding,
-        }
+        })
 
-        collection.document(doc_id).set(doc)
-        ingested += 1
+    os.makedirs(DASHBOARD_PUBLIC, exist_ok=True)
+    out_path = os.path.join(DASHBOARD_PUBLIC, f"{target}.json")
+    with open(out_path, "w") as f:
+        json.dump(docs, f, indent=2)
 
-    print(f"Ingested {ingested} findings into '{collection_name}' ({skipped} skipped).")
+    print(f"Wrote {len(docs)} findings to '{out_path}' ({skipped} skipped).")
 
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print(f"Usage: {sys.argv[0]} <json_file> <collection_name>")
+        print(f"Usage: {sys.argv[0]} <json_file> <target>")
+        print("  target: findings_before | findings_after")
         sys.exit(1)
 
-    json_file, collection_name = sys.argv[1], sys.argv[2]
+    json_file, target = sys.argv[1], sys.argv[2]
 
-    if collection_name not in ("findings_before", "findings_after"):
-        print("ERROR: collection_name must be 'findings_before' or 'findings_after'")
+    if target not in ("findings_before", "findings_after"):
+        print("ERROR: target must be 'findings_before' or 'findings_after'")
         sys.exit(1)
 
-    ingest(json_file, collection_name)
+    ingest(json_file, target)
