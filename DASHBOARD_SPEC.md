@@ -11,8 +11,8 @@ listed in this file.
 
 | Route | Page Component | JSON File |
 |---|---|---|
-| `/before` | `Before.tsx` | `findings_before` |
-| `/after` | `After.tsx` | `findings_after` |
+| `/before` | `Before.tsx` | `findings_before.json` |
+| `/after` | `After.tsx` | `findings_after.json` |
 | `/` | Redirects to `/before` | — |
 
 The Before page fetches `findings_before.json` only. The After page fetches both JSON files.
@@ -54,7 +54,7 @@ Every page has the following top-to-bottom structure:
 - Page label: "Before Remediation" on `/before`, "After Remediation" on `/after`
 - Navigation links to switch between `/before` and `/after`
 - Scan timestamp: `scanned_at` value from the most recent document in the
-  collection (ISO 8601, formatted as human-readable date and time)
+  fetched array (ISO 8601, formatted as human-readable date and time)
 
 ---
 
@@ -122,7 +122,7 @@ Every page has the following top-to-bottom structure:
 provider alphabetically.
 
 **Empty state (After page):**
-When the collection returns zero documents or all documents have
+When the fetched array is empty or all documents have
 `status === "pass"`, display a message: *"No findings — all checks passed."*
 Do not render the table. Do not render the Filter Bar.
 
@@ -162,27 +162,27 @@ Do not display a blank page or throw an unhandled exception.
 
 **Location:** Below Provider Status. **After page only — not rendered on `/before`.**
 
-**Purpose:** Shows every finding that moved from `fail` in `findings_before`
-to `pass` in `findings_after`, matched by `check_id`.
+**Purpose:** Shows every finding that moved from `fail` in `findings_before.json`
+to `pass` in `findings_after.json`, matched by `check_id`.
 
 **How it is computed (frontend only, no backend calls):**
-1. Read the already-fetched array from `findings_before`.
-2. Read the already-fetched array from `findings_after`.
-3. For each document in `findings_before` where `status === "fail"`:
-   find the matching document in `findings_after` by `check_id`.
+1. Read the already-fetched array from `findings_before.json`.
+2. Read the already-fetched array from `findings_after.json`.
+3. For each document in `findings_before.json` where `status === "fail"`:
+   find the matching document in `findings_after.json` by `check_id`.
 4. If the match has `status === "pass"`, include in changelog.
 5. Sort by severity descending, then provider alphabetically.
 
 **Columns:**
 
-| Column | Field | Source collection |
+| Column | Field | Source file |
 |---|---|---|
 | Provider | `provider` | Either (should match) |
-| Severity | `severity` | `findings_before` |
-| Category | `category` | `findings_before` |
+| Severity | `severity` | `findings_before.json` |
+| Category | `category` | `findings_before.json` |
 | Check ID | `check_id` | Either (should match) |
-| Title | `title` | `findings_before` |
-| Resource | `resource` | `findings_before` |
+| Title | `title` | `findings_before.json` |
+| Resource | `resource` | `findings_before.json` |
 | Status change | — | Static: renders "FAIL → PASS" |
 
 **Header label:** "Remediation Changelog — 15 issues resolved" (count is
@@ -194,7 +194,7 @@ have 0 findings). If shown, display: *"No remediated findings to display."*
 **Loading state:** Same skeleton loader pattern as Findings Table.
 
 **Data source:** Requires two parallel fetch() calls. Both JSON files are fetched when the /after route loads.
- The Before page does not fetch `findings_before` for this purpose.
+The Before page does not fetch `findings_before.json` for this purpose.
 
 ---
 
@@ -269,6 +269,5 @@ Implement as Tailwind CSS utility classes. Do not use inline styles.
 - Pagination — 15 documents maximum, no pagination needed.
 - Search — not required.
 - Export — not required.
-- Real-time updates — findings are point-in-time snapshots. No Firestore
-  listeners or live updates.
+- Real-time updates — findings are point-in-time snapshots. No live updates.
 - Any route other than `/before` and `/after`.
