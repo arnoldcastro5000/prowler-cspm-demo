@@ -116,20 +116,20 @@ Every document in both collections shares this exact shape:
 ### AWS
 | Check ID | Severity | Category | Terraform Variable |
 |---|---|---|---|
-| `s3_bucket_public_access_block` | critical | storage | `s3_bucket_public` |
+| `s3_bucket_level_public_access_block` | high | storage | `s3_bucket_public` |
 | `iam_password_policy_minimum_length_14` | medium | iam | `iam_password_policy_min_length` |
-| `ec2_securitygroup_allow_ingress_from_internet_to_ssh_port_22` | critical | networking | `security_group_open_ssh` |
+| `ec2_instance_port_ssh_exposed_to_internet` | critical | networking | `security_group_open_ssh` |
 | `cloudtrail_multi_region_enabled` | high | logging | `cloudtrail_enabled` |
-| `s3_bucket_server_side_encryption_enabled` | high | encryption | `s3_encryption_enabled` |
+| `s3_bucket_default_encryption` | medium | encryption | `s3_encryption_enabled` |
 
 ### GCP
 | Check ID | Severity | Category | Terraform Variable |
 |---|---|---|---|
-| `gcs_bucket_public_access_prevention` | critical | storage | `gcs_bucket_public` |
-| `gcp_compute_firewall_allows_ingress_from_internet_to_ssh` | critical | networking | `firewall_open_ssh` |
-| `iam_service_account_admin_privileges` | high | iam | `service_account_admin` |
-| `logging_log_metric_filter_audit_config_changes` | high | logging | `audit_logging_enabled` |
-| `kms_key_rotation_enabled` | high | encryption | `kms_rotation_enabled` |
+| `cloudstorage_bucket_public_access` | critical | storage | `gcs_bucket_public` |
+| `compute_firewall_ssh_access_from_the_internet_allowed` | critical | networking | `firewall_open_ssh` |
+| `iam_sa_no_administrative_privileges` | high | iam | `service_account_admin` |
+| `logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled` | medium | logging | `audit_logging_enabled` |
+| `kms_key_rotation_enabled` | low | encryption | `kms_rotation_enabled` |
 
 ### Azure
 | Check ID | Severity | Category | Terraform Variable |

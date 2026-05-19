@@ -387,7 +387,7 @@ All items above checked off, plus:
 - [ ] `make before` runs without errors
 - [ ] `make scan` produces 15 findings in `findings_before` Firestore collection
 - [ ] `findings_before.json` contains 15 documents matching the schema
-- [ ] Dashboard `/before` shows 15 findings (6 critical, 8 high, 1 medium)
+- [ ] Dashboard `/before` shows 15 findings (5 critical, 6 high, 3 medium, 1 low — Azure severities TBD)
 - [ ] `make after` runs without errors
 - [ ] `make rescan` produces 0 findings in `findings_after` Firestore collection
 - [ ] `findings_after.json` contains 0 documents

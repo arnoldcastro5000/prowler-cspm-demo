@@ -71,7 +71,7 @@ Every page has the following top-to-bottom structure:
 | High | Count where `severity === "high"` | filtered count |
 | Providers | Count of distinct `provider` values in `findings_before.json` | If count ≠ 3, display error state on card |
 
-**Before page expected values:** 15 total (6 critical, 8 high, 1 medium), 3 providers.
+**Before page expected values (AWS + GCP confirmed, Azure TBD):** 15 total (5 critical, 6 high, 3 medium, 1 low), 3 providers.
 **After page expected values:** 0 total, 0 critical, 0 high, 3 providers.
 
 **Data source:** Total, Critical, and High derived from the page's primary findings array. Providers always derived from `findings_before.json` — the Before page uses its own fetched data; the After page uses the already-fetched `findings_before.json`.

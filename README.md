@@ -93,20 +93,20 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 ### AWS
 | Check ID | Severity | Category |
 |---|---|---|
-| `s3_bucket_public_access_block` | Critical | Storage |
+| `s3_bucket_level_public_access_block` | High | Storage |
 | `iam_password_policy_minimum_length_14` | Medium | IAM |
-| `ec2_securitygroup_allow_ingress_from_internet_to_ssh_port_22` | Critical | Networking |
+| `ec2_instance_port_ssh_exposed_to_internet` | Critical | Networking |
 | `cloudtrail_multi_region_enabled` | High | Logging |
-| `s3_bucket_server_side_encryption_enabled` | High | Encryption |
+| `s3_bucket_default_encryption` | Medium | Encryption |
 
 ### GCP
 | Check ID | Severity | Category |
 |---|---|---|
-| `gcs_bucket_public_access_prevention` | Critical | Storage |
-| `gcp_compute_firewall_allows_ingress_from_internet_to_ssh` | Critical | Networking |
-| `iam_service_account_admin_privileges` | High | IAM |
-| `logging_log_metric_filter_audit_config_changes` | High | Logging |
-| `kms_key_rotation_enabled` | High | Encryption |
+| `cloudstorage_bucket_public_access` | Critical | Storage |
+| `compute_firewall_ssh_access_from_the_internet_allowed` | Critical | Networking |
+| `iam_sa_no_administrative_privileges` | High | IAM |
+| `logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled` | Medium | Logging |
+| `kms_key_rotation_enabled` | Low | Encryption |
 
 ### Azure
 | Check ID | Severity | Category |
