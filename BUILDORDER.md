@@ -186,9 +186,9 @@ Do not build this until the Secret Manager prerequisites are complete.
   2. Export AWS credentials as environment variables for boto3
   3. Write GCP service account key to a temp file, set `GOOGLE_APPLICATION_CREDENTIALS`
   4. Parse Azure credentials JSON, export as environment variables
-  5. Run Prowler for AWS: `prowler aws --checks [5 check IDs] --output-formats json`
-  6. Run Prowler for GCP: `prowler gcp --checks [5 check IDs] --output-formats json`
-  7. Run Prowler for Azure: `prowler azure --checks [5 check IDs] --output-formats json`
+  5. Run Prowler for AWS: `prowler aws --check [5 check IDs] --output-formats json-ocsf --output-directory [path]`
+  6. Run Prowler for GCP: `prowler gcp --check [5 check IDs] --project-id [project] --output-formats json-ocsf --output-directory [path]`
+  7. Run Prowler for Azure: `prowler azure --check [5 check IDs] --output-formats json-ocsf --output-directory [path]`
   8. Clean up temp credential file
 
   Prowler runs sequentially, not in parallel, to stay within e2-micro 1GB RAM limit.
