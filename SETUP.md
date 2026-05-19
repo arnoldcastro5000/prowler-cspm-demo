@@ -8,16 +8,25 @@ Full reproduction instructions for the Prowler CSPM demo. Everything here assume
 
 All targets run locally on WSL2. GitHub Actions must be green on `main` before running any make target.
 
+Infrastructure is created once during setup and toggled between misconfigured and hardened
+states — resources are never destroyed and recreated between scan cycles.
+
 ```bash
-make before     # provisions misconfigured infrastructure (local Terraform)
+# One-time setup — run from iac/environments/
+terraform init
+terraform apply -var-file=after.tfvars   # creates all resources in hardened state, EC2 stopped
+
+# Scan cycle
+make before     # misconfigs all 15 checks, starts EC2
 make scan       # runs Prowler locally, writes findings_before.json to dashboard/public/
-make after      # provisions hardened infrastructure (local Terraform)
+make after      # hardens all 15 checks, stops EC2
 make rescan     # runs Prowler locally, writes findings_after.json to dashboard/public/
 make deploy     # docker build (JSON baked in) → docker push → deploy to Cloud Run
 ```
 
-`make before` and `make after` apply Terraform against the cloud providers using locally
-authenticated CLIs. State is written to local `terraform.tfstate` files — no remote backend.
+`make before` and `make after` run `terraform apply -var-file=<before|after>.tfvars` in
+`iac/environments/`. A single Terraform state file tracks all resources. State is written
+locally — no remote backend.
 
 `make scan` and `make rescan` fetch credentials from Secret Manager using local `gcloud auth`
 ADC, run Prowler locally against all three providers, and run `ingest_prowler.py` to write
@@ -46,7 +55,7 @@ quality gate is green on main.
 - [ ] Run `gcloud auth login` and `gcloud auth application-default login`
 - [ ] Run `gcloud auth configure-docker <region>-docker.pkg.dev` to authenticate Docker to Artifact Registry
 - [ ] Authenticate to AWS, GCP, and Azure CLIs for Terraform
-- [ ] Add `terraform.tfstate` and `terraform.tfstate.backup` to `.gitignore` in both `iac/environments/before/` and `iac/environments/after/`
+- [ ] Confirm `terraform.tfstate` and `terraform.tfstate.backup` are in `.gitignore` (already present in repo root `.gitignore`)
 
 ### 3. GCP infrastructure
 Same GCP account hosts the dashboard, image registry, and credentials.
@@ -86,7 +95,7 @@ Same GCP account hosts the dashboard, image registry, and credentials.
 
 ## Prowler Check → Terraform Variable Mapping
 
-Each check maps 1:1 to a Terraform variable in `iac/environments/before/terraform.tfvars` (all set to `true`) and `iac/environments/after/terraform.tfvars` (all set to `false`).
+Each check maps 1:1 to a Terraform variable in `iac/environments/before.tfvars` (all set to `true`) and `iac/environments/after.tfvars` (all set to `false`).
 
 ### AWS
 | Check ID | Severity | Category | Terraform Variable |

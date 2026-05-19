@@ -27,15 +27,11 @@ continuous monitoring — all findings are point-in-time scan snapshots.
 │   │   ├── aws/                     # Reusable AWS Terraform resources
 │   │   ├── gcp/                     # Reusable GCP Terraform resources
 │   │   └── azure/                   # Reusable Azure Terraform resources
-│   └── environments/
-│       ├── before/                  # Misconfigured state
-│       │   ├── main.tf
-│       │   ├── terraform.tfvars     # All insecure toggles = true
-│       │   └── terraform.tfstate    # Local state — do not commit
-│       └── after/                   # Hardened state
-│           ├── main.tf
-│           ├── terraform.tfvars     # All insecure toggles = false
-│           └── terraform.tfstate    # Local state — do not commit
+│   └── environments/                # Single environment, one Terraform state
+│       ├── main.tf
+│       ├── before.tfvars            # All insecure toggles = true, EC2 running
+│       ├── after.tfvars             # All hardened toggles = false, EC2 stopped
+│       └── terraform.tfstate        # Local state — do not commit
 ├── prowler/
 │   └── run_scan.sh                  # Fetches secrets from Secret Manager, scans all three providers, writes JSON output files locally
 ├── ingest/
@@ -138,15 +134,19 @@ Every document in both files shares this exact shape:
 
 ## The Two-Environment Pattern
 
-`before` = misconfigured state. All Terraform variables that control
-misconfigurations are set to `true`. Prowler fires on all 15 checks.
+One Terraform state file in `iac/environments/` manages all resources.
+`before.tfvars` and `after.tfvars` drive different configurations via
+`terraform apply -var-file=`.
 
-`after` = hardened state. All Terraform variables are set to `false`. Prowler reports
-zero findings.
+`before.tfvars` — all 15 misconfiguration variables set to `true`, EC2 instance
+running. Prowler fires on all 15 checks.
 
-The `before` and `after` environments use separate local Terraform state files.
-They are not the same state — never run `terraform apply` for one
-environment inside the other's directory.
+`after.tfvars` — all 15 variables set to `false`, EC2 instance stopped. Prowler
+reports zero findings.
+
+Resources are created once during setup (`terraform apply -var-file=after.tfvars`)
+and toggled between misconfigured and hardened states by subsequent applies.
+Never recreate resources between scans — always apply against the existing state.
 
 ---
 
@@ -154,9 +154,9 @@ environment inside the other's directory.
 
 | Target | Runs where | What it does |
 |---|---|---|
-| `make before` | WSL2 | `terraform apply` for `iac/environments/before` |
+| `make before` | WSL2 | `terraform apply -var-file=before.tfvars` in `iac/environments` — misconfigs all 15 checks, starts EC2 |
 | `make scan` | WSL2 | Fetches credentials from Secret Manager, runs Prowler locally, runs ingest_prowler.py → writes `findings_before.json` to `dashboard/public/` |
-| `make after` | WSL2 | `terraform apply` for `iac/environments/after` |
+| `make after` | WSL2 | `terraform apply -var-file=after.tfvars` in `iac/environments` — hardens all 15 checks, stops EC2 |
 | `make rescan` | WSL2 | Same as scan, writes `findings_after.json` to `dashboard/public/` |
 | `make deploy` | WSL2 | docker build (both JSON files baked in), docker push to Artifact Registry, deploys to Cloud Run — only run after GitHub Actions quality gate is green |
 
@@ -193,7 +193,8 @@ At the start of every AI session, before doing any work:
 - **Do not** add IAM users outside of what is defined in the Terraform modules.
 - **Do not** put credentials, keys, or secrets in any file tracked by git.
 - **Do not** commit `terraform.tfstate` files — state is local only.
-- **Do not** use a GCS backend for Terraform — state is stored locally.
+- **Do not** use a GCS backend for Terraform — state is stored locally in `iac/environments/`.
+- **Do not** create separate before/ and after/ Terraform directories — one environment, one state file.
 - **Do not** use Flexible SSL mode — only Full (Strict).
 - **Do not** expose Cloud Run directly — all traffic routes through Cloudflare at `prowler.cloudsecuritypractice.com`.
 - **Do not** store credentials in `/etc/environment` or any file on disk. All secrets are fetched at runtime from GCP Secret Manager by WSL2 using `gcloud auth` ADC.

@@ -16,9 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    strategy:
-      matrix:
-        environment: [before, after]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
@@ -30,12 +27,12 @@ jobs:
 
       - name: Terraform Format Check
         run: terraform fmt --check -recursive
-        working-directory: iac/environments/${{ matrix.environment }}
+        working-directory: iac/environments
 
       - name: Terraform Init
         run: terraform init -backend=false
-        working-directory: iac/environments/${{ matrix.environment }}
+        working-directory: iac/environments
 
       - name: Terraform Validate
         run: terraform validate
-        working-directory: iac/environments/${{ matrix.environment }}
+        working-directory: iac/environments

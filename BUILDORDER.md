@@ -29,7 +29,7 @@ only triggers when relevant files change.
 
 - [ ] **`.github/workflows/terraform-validate.yml`**
 
-  Path filter: `iac/**`. Matrix over `before` and `after` environments.
+  Path filter: `iac/**`. Runs against `iac/environments/`.
   Steps: `terraform fmt --check`, `terraform init -backend=false`, `terraform validate`.
 
 - [ ] **`.github/workflows/secret-scan.yml`**
@@ -81,18 +81,19 @@ no provider configuration, no backend.
 
 - [ ] **`iac/modules/aws/main.tf`**
 
-  Define the 5 AWS resources controlled by Terraform variables.
+  Define the AWS resources controlled by Terraform variables.
   Each variable is a boolean — `true` = misconfigured, `false` = hardened.
 
   | Variable | Resource | Misconfigured when true |
   |---|---|---|
+  | `instance_running` | `aws_ec2_instance_state` | EC2 instance running (for scan); stopped when false |
   | `s3_bucket_public` | `aws_s3_bucket_public_access_block` | public access block disabled |
   | `iam_password_policy_min_length` | `aws_iam_account_password_policy` | `minimum_password_length = 8` |
   | `security_group_open_ssh` | `aws_security_group` | ingress port 22 open to `0.0.0.0/0` |
   | `cloudtrail_enabled` | `aws_cloudtrail` | trail not created |
   | `s3_encryption_enabled` | `aws_s3_bucket_server_side_encryption_configuration` | encryption not applied |
 
-  Hardened equivalents: public access block enabled, `minimum_password_length = 14`,
+  Hardened equivalents: EC2 stopped, public access block enabled, `minimum_password_length = 14`,
   SSH restricted to no source, CloudTrail multi-region trail created, SSE-S3 applied.
 
 ---
@@ -131,37 +132,43 @@ no provider configuration, no backend.
 
 ---
 
-## Phase 2 — Terraform Environments
+## Phase 2 — Terraform Environment
 
-Environments consume the modules. Build `before` first — it is the
-reference state. `after` mirrors it with all variables flipped.
+A single environment in `iac/environments/` with one state file. Resources are
+created once and toggled between misconfigured and hardened states via two tfvars
+files. Never destroy and recreate resources between scan cycles.
 
 ---
 
-- [ ] **`iac/environments/before/main.tf`**
+- [ ] **`iac/environments/main.tf`**
 
-  Call all three modules. Pass provider configurations.
-  All misconfiguration variables set to `true`.
+  Calls all three modules. Passes provider configurations.
+  Declares all 16 variables (15 misconfiguration toggles + `instance_running`).
   Reference: `CLAUDE.md` → Two-Environment Pattern.
 
 ---
 
-- [ ] **`iac/environments/before/terraform.tfvars`**
+- [ ] **`iac/environments/before.tfvars`**
 
-  All 15 Terraform variables set to `true`.
+  All 15 misconfiguration variables set to `true`. `instance_running = true`.
   Reference: `CLAUDE.md` → Prowler Checks — All 15 for variable names.
 
 ---
 
-- [ ] **`iac/environments/after/main.tf`**
+- [ ] **`iac/environments/after.tfvars`**
 
-  Identical structure to `before/main.tf`. All variables set to `false`.
+  All 15 misconfiguration variables set to `false`. `instance_running = false`.
 
 ---
 
-- [ ] **`iac/environments/after/terraform.tfvars`**
-
-  All 15 Terraform variables set to `false`.
+**Setup (one-time, run before first `make before`):**
+```bash
+cd iac/environments
+terraform init
+terraform apply -var-file=after.tfvars
+```
+Creates all resources in the hardened state with EC2 stopped. Subsequent
+`make before` and `make after` apply against this same state file.
 
 ---
 
@@ -348,10 +355,12 @@ Depends on: all previous phases complete and tested end-to-end at least once man
 
   Five targets per `CLAUDE.md` → Makefile Targets. All run locally on WSL2.
 
-  - `make before` — runs `terraform apply` in `iac/environments/before`
+  - `make before` — runs `terraform apply -var-file=before.tfvars` in `iac/environments`
+    — misconfigs all 15 checks, starts EC2 via `aws_ec2_instance_state`
   - `make scan` — runs `prowler/run_scan.sh`, then `ingest/ingest_prowler.py`
     with `findings_before` as the target — writes `dashboard/public/findings_before.json`
-  - `make after` — runs `terraform apply` in `iac/environments/after`
+  - `make after` — runs `terraform apply -var-file=after.tfvars` in `iac/environments`
+    — hardens all 15 checks, stops EC2 via `aws_ec2_instance_state`
   - `make rescan` — same as `scan` with `findings_after` as the target —
     writes `dashboard/public/findings_after.json`
   - `make deploy` — runs `docker build` (both JSON files must already exist in

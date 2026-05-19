@@ -121,10 +121,16 @@ Full check-to-Terraform variable mapping in [SETUP.md](SETUP.md).
 
 All workflows are gated by GitHub Actions — verify all checks are green on main before running any make target.
 
+Infrastructure is created once during setup. `make before` and `make after` toggle the same resources between misconfigured and hardened states — no destroy/recreate between scans.
+
 ```bash
-make before     # provisions misconfigured infrastructure (local Terraform)
+# One-time setup (from iac/environments/)
+terraform init && terraform apply -var-file=after.tfvars
+
+# Scan cycle
+make before     # misconfigs all 15 checks, starts EC2
 make scan       # runs Prowler locally, writes findings_before.json
-make after      # provisions hardened infrastructure (local Terraform)
+make after      # hardens all 15 checks, stops EC2
 make rescan     # runs Prowler locally, writes findings_after.json
 make deploy     # docker build + push + deploy to Cloud Run (after CI is green)
 ```
@@ -151,7 +157,7 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 - Cloudflare's free WAF provides managed rulesets only. Custom rules and advanced rate limiting require a paid plan.
 - A domain name is required for Cloudflare integration and is not free.
 - GCP Secret Manager free tier covers 6 active secret versions. Azure credentials are consolidated into one JSON secret to stay within this limit.
-- Terraform state is stored locally. If the local machine is lost, state must be reconstructed via `terraform import`.
+- Terraform state is stored locally in `iac/environments/`. If the local machine is lost, resources still exist in the cloud but state must be reconstructed via `terraform import`.
 
 ---
 
