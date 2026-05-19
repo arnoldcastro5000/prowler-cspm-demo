@@ -1,18 +1,16 @@
-name: Shellcheck
+name: Dependency Review
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'prowler/**'
   pull_request:
     paths:
-      - 'prowler/**'
+      - 'dashboard/package.json'
+      - 'dashboard/package-lock.json'
+      - 'ingest/requirements.txt'
 
 permissions: {}
 
 jobs:
-  shellcheck:
+  review:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,6 +19,4 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: ludeeus/action-shellcheck@00b27aa7cb85167568cb48a3838b75f4265f2bca # master
-        with:
-          scandir: prowler
+      - uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
