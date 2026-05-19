@@ -66,13 +66,17 @@ Every page has the following top-to-bottom structure:
 
 | Card | Value | How computed |
 |---|---|---|
-| Total Findings | Count of all documents | `findings.length` |
-| Critical | Count where `severity === "critical"` | filtered count |
-| High | Count where `severity === "high"` | filtered count |
+| Total Findings | Count of documents where `status === "fail"` | `findings.filter(f => f.status === "fail").length` |
+| Critical | Count where `severity === "critical"` and `status === "fail"` | filtered count |
+| High | Count where `severity === "high"` and `status === "fail"` | filtered count |
 | Providers | Count of distinct `provider` values in `findings_before.json` | If count ≠ 3, display error state on card |
 
 **Before page expected values:** 15 total (3 critical, 7 high, 4 medium, 1 low), 3 providers.
 **After page expected values:** 0 total, 0 critical, 0 high, 3 providers.
+
+Note: `findings_after.json` contains 15 documents with `status === "pass"`. These are not
+counted in the Summary Bar (which counts only FAIL findings) but are required by the
+Remediation Changelog to confirm each check_id moved from fail to pass.
 
 **Data source:** Total, Critical, and High derived from the page's primary findings array. Providers always derived from `findings_before.json` — the Before page uses its own fetched data; the After page uses the already-fetched `findings_before.json`.
 
