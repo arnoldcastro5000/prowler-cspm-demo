@@ -87,7 +87,7 @@ if __name__ == "__main__":
     json_file, collection_name = sys.argv[1], sys.argv[2]
 
     if collection_name not in ("findings_before", "findings_after"):
-        print(f"ERROR: collection_name must be 'findings_before' or 'findings_after'")
+        print("ERROR: collection_name must be 'findings_before' or 'findings_after'")
         sys.exit(1)
 
     ingest(json_file, collection_name)
