@@ -1,11 +1,14 @@
-variable "project_id"            { type = string }
-variable "project_prefix"        { type = string }
-variable "region"                { type = string; default = "us-central1" }
-variable "gcs_bucket_public"     { type = bool }
-variable "firewall_open_ssh"     { type = bool }
+variable "project_id" { type = string }
+variable "project_prefix" { type = string }
+variable "region" {
+  type    = string
+  default = "us-central1"
+}
+variable "gcs_bucket_public" { type = bool }
+variable "firewall_open_ssh" { type = bool }
 variable "service_account_admin" { type = bool }
 variable "audit_logging_enabled" { type = bool }
-variable "kms_rotation_enabled"  { type = bool }
+variable "kms_rotation_enabled" { type = bool }
 
 # ─── GCS bucket public access ────────────────────────────────────────────────
 resource "google_storage_bucket" "public_test" {

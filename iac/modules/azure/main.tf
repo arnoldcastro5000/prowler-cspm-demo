@@ -1,11 +1,14 @@
-variable "project_prefix"    { type = string }
-variable "location"          { type = string; default = "East US" }
-variable "subscription_id"   { type = string }
-variable "blob_public_access"  { type = bool }
-variable "nsg_rdp_open"        { type = bool }
-variable "custom_owner_role"   { type = bool }
+variable "project_prefix" { type = string }
+variable "location" {
+  type    = string
+  default = "East US"
+}
+variable "subscription_id" { type = string }
+variable "blob_public_access" { type = bool }
+variable "nsg_rdp_open" { type = bool }
+variable "custom_owner_role" { type = bool }
 variable "activity_log_alerts" { type = bool }
-variable "defender_enabled"    { type = bool }
+variable "defender_enabled" { type = bool }
 
 resource "azurerm_resource_group" "prowler" {
   name     = "${var.project_prefix}-rg"

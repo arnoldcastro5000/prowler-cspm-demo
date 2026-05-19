@@ -26,47 +26,47 @@ provider "google" {
 }
 
 provider "azurerm" {
-  features        {}
+  features {}
   subscription_id = var.azure_subscription_id
 }
 
 # ─── Shared variables ────────────────────────────────────────────────────────
-variable "project_prefix"        { type = string }
-variable "gcp_project_id"        { type = string }
+variable "project_prefix" { type = string }
+variable "gcp_project_id" { type = string }
 variable "azure_subscription_id" { type = string }
 
 # ─── AWS ─────────────────────────────────────────────────────────────────────
-variable "instance_running"              { type = bool }
-variable "s3_bucket_public"              { type = bool }
+variable "instance_running" { type = bool }
+variable "s3_bucket_public" { type = bool }
 variable "iam_password_policy_min_length" { type = bool }
-variable "security_group_open_ssh"        { type = bool }
-variable "cloudtrail_enabled"             { type = bool }
-variable "s3_encryption_enabled"          { type = bool }
+variable "security_group_open_ssh" { type = bool }
+variable "cloudtrail_enabled" { type = bool }
+variable "s3_encryption_enabled" { type = bool }
 
 # ─── GCP ─────────────────────────────────────────────────────────────────────
-variable "gcs_bucket_public"     { type = bool }
-variable "firewall_open_ssh"     { type = bool }
+variable "gcs_bucket_public" { type = bool }
+variable "firewall_open_ssh" { type = bool }
 variable "service_account_admin" { type = bool }
 variable "audit_logging_enabled" { type = bool }
-variable "kms_rotation_enabled"  { type = bool }
+variable "kms_rotation_enabled" { type = bool }
 
 # ─── Azure ───────────────────────────────────────────────────────────────────
-variable "blob_public_access"  { type = bool }
-variable "nsg_rdp_open"        { type = bool }
-variable "custom_owner_role"   { type = bool }
+variable "blob_public_access" { type = bool }
+variable "nsg_rdp_open" { type = bool }
+variable "custom_owner_role" { type = bool }
 variable "activity_log_alerts" { type = bool }
-variable "defender_enabled"    { type = bool }
+variable "defender_enabled" { type = bool }
 
 module "aws" {
   source = "../modules/aws"
 
-  project_prefix                = var.project_prefix
-  instance_running              = var.instance_running
-  s3_bucket_public              = var.s3_bucket_public
+  project_prefix                 = var.project_prefix
+  instance_running               = var.instance_running
+  s3_bucket_public               = var.s3_bucket_public
   iam_password_policy_min_length = var.iam_password_policy_min_length
-  security_group_open_ssh       = var.security_group_open_ssh
-  cloudtrail_enabled            = var.cloudtrail_enabled
-  s3_encryption_enabled         = var.s3_encryption_enabled
+  security_group_open_ssh        = var.security_group_open_ssh
+  cloudtrail_enabled             = var.cloudtrail_enabled
+  s3_encryption_enabled          = var.s3_encryption_enabled
 }
 
 module "gcp" {

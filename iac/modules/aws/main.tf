@@ -1,10 +1,10 @@
-variable "project_prefix"                { type = string }
-variable "instance_running"              { type = bool }
-variable "s3_bucket_public"              { type = bool }
+variable "project_prefix" { type = string }
+variable "instance_running" { type = bool }
+variable "s3_bucket_public" { type = bool }
 variable "iam_password_policy_min_length" { type = bool }
-variable "security_group_open_ssh"        { type = bool }
-variable "cloudtrail_enabled"             { type = bool }
-variable "s3_encryption_enabled"          { type = bool }
+variable "security_group_open_ssh" { type = bool }
+variable "cloudtrail_enabled" { type = bool }
+variable "s3_encryption_enabled" { type = bool }
 
 # ─── S3 public access block ──────────────────────────────────────────────────
 resource "aws_s3_bucket" "public_test" {
