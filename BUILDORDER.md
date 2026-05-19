@@ -50,10 +50,11 @@ only triggers when relevant files change.
 
   Path filter: `prowler/**`. Lints `run_scan.sh` with `ludeeus/action-shellcheck`.
 
-- [ ] **`.github/workflows/tfsec.yml`**
+- [ ] **`.github/workflows/trivy.yml`**
 
-  Path filter: `iac/**`. Runs on PRs only. Scans Terraform for misconfigurations
-  using `aquasecurity/tfsec-action`.
+  Path filter: `iac/**`. Runs on PRs and push to main. Scans Terraform for
+  misconfigurations using `aquasecurity/trivy-action` (replaces deprecated tfsec).
+  Uploads findings to GitHub Security tab via SARIF.
 
 - [ ] **`.github/workflows/zizmor.yml`**
 
