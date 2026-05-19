@@ -153,13 +153,6 @@ reference state. `after` mirrors it with all variables flipped.
 
 ---
 
-- [ ] **`iac/environments/before/backend.tf`**
-
-  GCS backend configuration. Bucket name and prefix for `before` state.
-  State file must not share a prefix with the `after` environment.
-
----
-
 - [ ] **`iac/environments/after/main.tf`**
 
   Identical structure to `before/main.tf`. All variables set to `false`.
@@ -172,25 +165,19 @@ reference state. `after` mirrors it with all variables flipped.
 
 ---
 
-- [ ] **`iac/environments/after/backend.tf`**
-
-  GCS backend configuration. Same bucket as `before`, different prefix.
-
----
-
 ## Phase 3 — Scanner
 
-Depends on: GCP Secret Manager secrets already created per `SETUP.md` §3.
+Depends on: credentials created and stored in Secret Manager per `SETUP.md` §4.
 Do not build this until the Secret Manager prerequisites are complete.
 
 ---
 
 - [ ] **`prowler/run_scan.sh`**
 
-  Bash script that runs on the e2-micro VM.
+  Bash script that runs locally on WSL2.
 
   Sequence:
-  1. Fetch all secrets from GCP Secret Manager using `gcloud secrets versions access`
+  1. Fetch AWS, GCP, and Azure secrets from GCP Secret Manager using `gcloud secrets versions access` — do not fetch the CF-Access-Secret
   2. Export AWS credentials as environment variables for boto3
   3. Write GCP service account key to a temp file, set `GOOGLE_APPLICATION_CREDENTIALS`
   4. Parse Azure credentials JSON, export as environment variables
@@ -199,7 +186,7 @@ Do not build this until the Secret Manager prerequisites are complete.
   7. Run Prowler for Azure: `prowler azure --check [5 check IDs] --output-formats json-ocsf --output-directory [path]`
   8. Clean up temp credential file
 
-  Prowler runs sequentially, not in parallel, to stay within e2-micro 1GB RAM limit.
+  Prowler runs sequentially, not in parallel.
   Reference: `CLAUDE.md` → Prowler Checks — All 15 for exact check IDs.
   Reference: `SETUP.md` → Credentials Reference for secret names.
 
@@ -217,39 +204,25 @@ the field mapping reference.
 - [ ] **`ingest/ingest_prowler.py`**
 
   Python 3.11 script. Accepts two arguments: path to Prowler JSON output
-  file, and target Firestore collection name (`findings_before` or `findings_after`).
+  file, and target output filename (`findings_before` or `findings_after`).
 
   For each finding in the JSON:
-  - Map Prowler fields to the normalised schema in `CLAUDE.md` → Document Schema
+  - Map Prowler fields to the normalised schema in `CLAUDE.md` → Findings JSON Schema
   - Generate a UUID for `id`
   - Set `source` to `"prowler"`
-  - Write document to the target Firestore collection
+  - Write all findings as a JSON array directly to `dashboard/public/<target>.json`
 
   Do not infer field mappings — use the actual Prowler JSON output as the reference.
-  Do not write to any collection other than `findings_before` or `findings_after`.
-
----
-
-- [ ] **`ingest/export_json.py`**
-
-  Python 3.11 script. Reads both Firestore collections and writes two
-  static JSON files to `dashboard/public/`.
-
-  Output files:
-  - `dashboard/public/findings_before.json` — all documents from `findings_before`
-  - `dashboard/public/findings_after.json` — all documents from `findings_after`
-
-  Each file is a JSON array of documents matching the schema in `CLAUDE.md`.
-  Uses the GCP service account key from Secret Manager for Firestore access.
-  No arguments required — always exports both collections in one run.
+  Do not write to any destination other than `dashboard/public/findings_before.json`
+  or `dashboard/public/findings_after.json`.
 
 ---
 
 ## Phase 5 — Dashboard
 
-Depends on: `export_json.py` having produced real `findings_before.json`
-and `findings_after.json` files. Build components against real data, not
-placeholder arrays.
+Depends on: `ingest_prowler.py` having produced real `findings_before.json`
+and `findings_after.json` in `dashboard/public/`. Build components against
+real data, not placeholder arrays.
 
 Reference `DASHBOARD_SPEC.md` for every component — do not invent
 behaviour, states, or fields not listed there.
@@ -354,13 +327,14 @@ behaviour, states, or fields not listed there.
 
 - [ ] **`dashboard/Dockerfile`**
 
-  Multi-stage build: `node:18-alpine` build stage → `nginx:1.30-alpine` serve stage.
+  Multi-stage build: `node:20-alpine` build stage → `nginx:1.27-alpine` serve stage.
+  Both base images pinned by SHA digest.
   Copies `dashboard/public/findings_before.json` and
   `dashboard/public/findings_after.json` into the nginx public directory.
   Exposes port 8080 (Cloud Run default).
   No credentials, no environment variables required at runtime.
 
-  Do not use `nginx:latest` or `node:latest` — pin to these exact versions.
+  Do not use `nginx:latest` or `node:latest` — pin to exact versions with SHA digest.
 
 ---
 
@@ -372,19 +346,18 @@ Depends on: all previous phases complete and tested end-to-end at least once man
 
 - [ ] **`Makefile`**
 
-  Four targets per `CLAUDE.md` → Makefile Targets:
+  Five targets per `CLAUDE.md` → Makefile Targets. All run locally on WSL2.
 
-  - `make before` — runs `terraform apply` in `iac/environments/before` locally
-  - `make scan` — connects to e2-micro via IAP tunnel (`gcloud compute ssh --tunnel-through-iap`),
-    runs `git pull` to fetch latest scripts, then `prowler/run_scan.sh`,
-    then `ingest/ingest_prowler.py`, then `ingest/export_json.py`,
-    then rebuilds and deploys the Cloud Run container
-  - `make after` — runs `terraform apply` in `iac/environments/after` locally
-  - `make rescan` — same as `scan`, writes to `findings_after` collection
-
-  Include a guard at the top of `scan` and `rescan` to confirm the e2-micro
-  VM name and zone before executing remote commands.
-  All remote connections use IAP tunneling — port 22 is not open to the internet.
+  - `make before` — runs `terraform apply` in `iac/environments/before`
+  - `make scan` — runs `prowler/run_scan.sh`, then `ingest/ingest_prowler.py`
+    with `findings_before` as the target — writes `dashboard/public/findings_before.json`
+  - `make after` — runs `terraform apply` in `iac/environments/after`
+  - `make rescan` — same as `scan` with `findings_after` as the target —
+    writes `dashboard/public/findings_after.json`
+  - `make deploy` — runs `docker build` (both JSON files must already exist in
+    `dashboard/public/`), pushes image to Artifact Registry, deploys to Cloud Run.
+    Fetches CF-Access-Secret from Secret Manager and sets it as a Cloud Run env var.
+    Only run after the GitHub Actions quality gate is green on main.
 
 ---
 
@@ -393,12 +366,12 @@ Depends on: all previous phases complete and tested end-to-end at least once man
 All items above checked off, plus:
 
 - [ ] `make before` runs without errors
-- [ ] `make scan` produces 15 findings in `findings_before` Firestore collection
-- [ ] `findings_before.json` contains 15 documents matching the schema
+- [ ] `make scan` produces `dashboard/public/findings_before.json` with 15 documents
+- [ ] `findings_before.json` contains 15 documents matching the schema in `CLAUDE.md`
 - [ ] Dashboard `/before` shows 15 findings (3 critical, 7 high, 4 medium, 1 low)
 - [ ] `make after` runs without errors
-- [ ] `make rescan` produces 0 findings in `findings_after` Firestore collection
-- [ ] `findings_after.json` contains 0 documents
+- [ ] `make rescan` produces `dashboard/public/findings_after.json` with 0 documents
 - [ ] Dashboard `/after` shows findings after remediation, Provider Status shows all 3 providers and findings status, and Remediation Changelog shows status of all findings from `/before`
 - [ ] Cloud Run origin is not directly accessible — Cloudflare header required
 - [ ] No credentials committed to the repository
+- [ ] `terraform.tfstate` files are not committed to the repository

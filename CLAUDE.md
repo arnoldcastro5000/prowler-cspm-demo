@@ -31,16 +31,15 @@ continuous monitoring — all findings are point-in-time scan snapshots.
 │       ├── before/                  # Misconfigured state
 │       │   ├── main.tf
 │       │   ├── terraform.tfvars     # All insecure toggles = true
-│       │   └── backend.tf           # GCS backend
+│       │   └── terraform.tfstate    # Local state — do not commit
 │       └── after/                   # Hardened state
 │           ├── main.tf
 │           ├── terraform.tfvars     # All insecure toggles = false
-│           └── backend.tf           # GCS backend
+│           └── terraform.tfstate    # Local state — do not commit
 ├── prowler/
-│   └── run_scan.sh                  # Fetches secrets from Secret Manager, scans all three providers, writes JSON output files
+│   └── run_scan.sh                  # Fetches secrets from Secret Manager, scans all three providers, writes JSON output files locally
 ├── ingest/
-│   ├── ingest_prowler.py            # Normalises Prowler JSON → Firestore schema
-│   └── export_json.py               # Reads Firestore → writes static JSON to dashboard/public/
+│   └── ingest_prowler.py            # Normalises Prowler JSON → writes findings JSON directly to dashboard/public/
 ├── dashboard/
 │   ├── src/
 │   │   ├── pages/
@@ -62,34 +61,29 @@ continuous monitoring — all findings are point-in-time scan snapshots.
 
 | Layer | Technology | Notes |
 |---|---|---|
-| IaC | Terraform ≥ 1.6 | HCL only, no CDK |
-| Scanner | Prowler (latest stable) | CLI, not SDK |
-| Ingest | Python 3.11 | ingest_prowler.py + export_json.py |
-| Database | GCP Firestore (Native mode) | No SQL, no other collections |
+| IaC | Terraform ≥ 1.6 | HCL only, no CDK. State stored locally — do not use GCS backend |
+| Scanner | Prowler (latest stable) | CLI, not SDK. Runs locally on WSL2 |
+| Ingest | Python 3.11 | ingest_prowler.py only — writes findings JSON directly to dashboard/public/ |
 | Backend | GCP Cloud Run | Serves the React app as a container |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS + shadcn/ui | No other UI frameworks |
 | Validation | zod | Runtime schema validation for fetched JSON; `Finding` type inferred from zod schema |
 | Linting | ESLint + @typescript-eslint/parser + @typescript-eslint/eslint-plugin | `recommended-type-checked` ruleset; type-aware linting combined with tsc and vite build in CI |
 | Edge | Cloudflare (free tier) | DNS, WAF, CDN, DDoS |
-| Secrets | GCP Secret Manager | All cloud provider credentials |
-| Export | Python 3.11 | export_json.py only |
+| Secrets | GCP Secret Manager | All cloud provider credentials — fetched at runtime by WSL2 |
+| Registry | GCP Artifact Registry | Docker image storage |
 
 ---
 
-## Firestore
+## Findings JSON Schema
 
-### Collections
+`ingest_prowler.py` writes two static JSON files directly to `dashboard/public/`:
 
-| Collection | Written by | Read by |
+| File | Written by | Baked into image by |
 |---|---|---|
-| `findings_before` | Prowler ingest script | export_json.py → findings_before.json |
-| `findings_after`  | Prowler ingest script | export_json.py → findings_after.json  |
+| `dashboard/public/findings_before.json` | `ingest_prowler.py` after `make scan` | `make deploy` |
+| `dashboard/public/findings_after.json` | `ingest_prowler.py` after `make rescan` | `make deploy` |
 
-**Do not create any other collections.**
-
-### Document Schema
-
-Every document in both collections shares this exact shape:
+Every document in both files shares this exact shape:
 
 ```json
 {
@@ -150,8 +144,8 @@ misconfigurations are set to `true`. Prowler fires on all 15 checks.
 `after` = hardened state. All Terraform variables are set to `false`. Prowler reports
 zero findings.
 
-The `before` and `after` environments use separate Terraform state files
-in GCS. They are not the same state — never run `terraform apply` for one
+The `before` and `after` environments use separate local Terraform state files.
+They are not the same state — never run `terraform apply` for one
 environment inside the other's directory.
 
 ---
@@ -160,10 +154,11 @@ environment inside the other's directory.
 
 | Target | Runs where | What it does |
 |---|---|---|
-| `make before` | Locally | `terraform apply` for `iac/environments/before` |
-| `make scan` | e2-micro VM (via IAP tunnel) | git pull, fetches secrets, runs Prowler, ingests to Firestore, exports JSON, rebuilds and deploys container |
-| `make after` | Locally | `terraform apply` for `iac/environments/after` |
-| `make rescan` | e2-micro VM (via IAP tunnel) | Same as scan, writes to `findings_after` |
+| `make before` | WSL2 | `terraform apply` for `iac/environments/before` |
+| `make scan` | WSL2 | Fetches credentials from Secret Manager, runs Prowler locally, runs ingest_prowler.py → writes `findings_before.json` to `dashboard/public/` |
+| `make after` | WSL2 | `terraform apply` for `iac/environments/after` |
+| `make rescan` | WSL2 | Same as scan, writes `findings_after.json` to `dashboard/public/` |
+| `make deploy` | WSL2 | docker build (both JSON files baked in), docker push to Artifact Registry, deploys to Cloud Run — only run after GitHub Actions quality gate is green |
 
 ---
 
@@ -171,11 +166,11 @@ environment inside the other's directory.
 
 | Secret | Where it lives | Used by |
 |---|---|---|
-| AWS access key ID | Secret Manager: `<aws-access-key-id-secret>` | Prowler |
-| AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler |
-| GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler + export_json.py |
-| Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler |
-| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | Origin protection |
+| AWS access key ID | Secret Manager: `<aws-access-key-id-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | `make deploy` on WSL2 — sets Cloud Run env var at deploy time |
 
 
 ---
@@ -194,12 +189,12 @@ At the start of every AI session, before doing any work:
 
 - **Do not** add npm packages, pip packages, or Terraform providers not already
   in the stack.
-- **Do not** create Firestore collections other than `findings_before` and
-  `findings_after`.
-- **Do not** add fields to the Firestore document schema.
+- **Do not** add fields to the findings JSON schema without explicit instruction.
 - **Do not** add IAM users outside of what is defined in the Terraform modules.
 - **Do not** put credentials, keys, or secrets in any file tracked by git.
+- **Do not** commit `terraform.tfstate` files — state is local only.
+- **Do not** use a GCS backend for Terraform — state is stored locally.
 - **Do not** use Flexible SSL mode — only Full (Strict).
 - **Do not** expose Cloud Run directly — all traffic routes through Cloudflare at `prowler.cloudsecuritypractice.com`.
-- **Do not** store credentials in `/etc/environment` or any file on disk. All secrets are fetched from GCP Secret Manager at runtime by run_scan.sh.
-- The ingest script is ingest_prowler.py. The export script is export_json.py. There is no ingest_semgrep.py.
+- **Do not** store credentials in `/etc/environment` or any file on disk. All secrets are fetched at runtime from GCP Secret Manager by WSL2 using `gcloud auth` ADC.
+- The ingest script is `ingest_prowler.py`. There is no `export_json.py` and no `ingest_semgrep.py`.

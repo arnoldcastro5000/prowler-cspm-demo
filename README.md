@@ -21,40 +21,36 @@ The dashboard shows the before state (15 findings across critical, high, medium,
 ```
 
 ┌─────────────────────────────────────────────────────────┐
-│  GCP Secret Manager                                     │
-│  AWS · GCP · Azure · Cloudflare credentials             │
+│  GitHub Actions (quality gate)                          │
+│  Validates all code before any infrastructure work      │
 └───────────────┬─────────────────────────────────────────┘
-                │ fetched at runtime by
+                │ must pass before proceeding
 ┌───────────────▼─────────────────────────────────────────┐
-│  Cloud Targets (demo accounts)                          │
-│  AWS  ·  GCP  ·  Azure                                  │
-└───────────────┬─────────────────────────────────────────┘
-                │ scanned by (on demand)
-┌───────────────▼─────────────────────────────────────────┐
-│  GCP e2-micro (always-free VM)                          │
-│  Prowler open-source · on-demand                        │
-└───────────────┬─────────────────────────────────────────┘
-                │ writes findings
-┌───────────────▼─────────────────────────────────────────┐
-│  GCP Firestore (always-free)                            │
-│  findings_before  ·  findings_after                     │
-└───────────────┬─────────────────────────────────────────┘
-                │ exported by
-┌───────────────▼─────────────────────────────────────────┐
-│  export_json.py (runs on e2-micro)                      │
-│  findings_before.json  ·  findings_after.json           │
-└───────────────┬─────────────────────────────────────────┘
-                │ bundled into
-┌───────────────▼─────────────────────────────────────────┐
-│  GCP Cloud Run · React + Vite (containerised)           │
-│  prowler.cloudsecuritypractice.com                      │
-└───────────────┬─────────────────────────────────────────┘
-                │ origin — proxied through
-┌───────────────▼─────────────────────────────────────────┐
-│  Cloudflare (CDN · WAF · DDoS protection · DNS)         │
-│  All public traffic enters here. Direct access to       │
-│  Cloud Run origin is blocked.                           │
-└─────────────────────────────────────────────────────────┘
+│  WSL2 (local)                                           │
+│  Terraform · Prowler · ingest_prowler.py                │
+│  docker build · docker push · gcloud run deploy         │
+└──────┬────────────────────────────────────┬─────────────┘
+       │ fetches credentials at runtime     │ scans
+┌──────▼──────────────────┐   ┌────────────▼────────────────────────┐
+│  GCP Secret Manager     │   │  Cloud Targets (demo accounts)      │
+│  All credentials        │   │  AWS · GCP · Azure                  │
+└─────────────────────────┘   └─────────────────────────────────────┘
+
+                     findings JSON baked into image at build time
+                              ┌────────────────────────────────────┐
+                              │  GCP Artifact Registry             │
+                              └────────────┬───────────────────────┘
+                                           │ deployed to
+                              ┌────────────▼───────────────────────┐
+                              │  GCP Cloud Run · React + Vite      │
+                              │  prowler.cloudsecuritypractice.com │
+                              └────────────┬───────────────────────┘
+                                           │ origin — proxied through
+                              ┌────────────▼───────────────────────┐
+                              │  Cloudflare (CDN · WAF · DDoS · DNS│
+                              │  All public traffic enters here.   │
+                              │  Direct Cloud Run access blocked.  │
+                              └────────────────────────────────────┘
 
 ```
 
@@ -76,13 +72,13 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 |---|---|---|
 | Scanner | Prowler (open source) | Native multi-cloud CSPM, structured JSON output |
 | IaC | Terraform | Reproducible before/after infrastructure states |
-| Database | GCP Firestore | Always-free, schemaless, no server to manage |
+| Ingest | Python 3.11 (ingest_prowler.py) | Normalises Prowler output → findings JSON baked into image |
 | Backend | GCP Cloud Run | Serverless containers, always-free tier, GCP-native |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind + shadcn/ui | Static bundle, modern UI components, containerises cleanly |
 | Validation | zod | Runtime schema validation for fetched JSON |
 | Edge security | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS |
 | Secrets | GCP Secret Manager | Credential storage for all cloud provider keys |
-| Export | Python 3.11 (export_json.py) | Firestore → static JSON for frontend |
+| Registry | GCP Artifact Registry | Docker image storage |
 
 ---
 
@@ -123,11 +119,14 @@ Full check-to-Terraform variable mapping in [SETUP.md](SETUP.md).
 
 ## Reproducing the Demo
 
+All workflows are gated by GitHub Actions — verify all checks are green on main before running any make target.
+
 ```bash
-make before     # provisions misconfigured infrastructure
-make scan       # runs Prowler, writes to findings_before
-make after      # provisions hardened infrastructure
-make rescan     # runs Prowler, writes to findings_after
+make before     # provisions misconfigured infrastructure (local Terraform)
+make scan       # runs Prowler locally, writes findings_before.json
+make after      # provisions hardened infrastructure (local Terraform)
+make rescan     # runs Prowler locally, writes findings_after.json
+make deploy     # docker build + push + deploy to Cloud Run (after CI is green)
 ```
 
 Full setup instructions, prerequisites, and credential configuration in [SETUP.md](SETUP.md).
@@ -138,25 +137,21 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 
 | Service | Provider | Cost |
 |---|---|---|
-| e2-micro VM (Prowler runner) | GCP | Always free |
-| Firestore (findings store) | GCP | Always free up to 1 GB / 20K writes per day |
-| Cloud Storage (Terraform state) | GCP | Always free up to 5 GB |
 | Cloud Run (dashboard hosting) | GCP | Always free up to 2M requests/month |
+| Artifact Registry (image storage) | GCP | Free up to 0.5 GB |
+| Secret Manager (credentials) | GCP | Free up to 6 secret versions / 10K access ops per month |
 | Cloudflare (CDN, WAF, DDoS, DNS) | Cloudflare | Always free |
 | Prowler | Open source | Free |
-| Secret Manager | GCP | Free up to 6 secret versions / 10K access ops per month |
 
 ---
 
 ## Known Limitations
 
 - Prowler is a point-in-time scanner, not continuous monitoring. The dashboard reflects scan snapshots, not live state.
-- The e2-micro has 1 GB RAM. Prowler scans each provider sequentially to stay within memory limits.
-- Firestore free tier resets daily. High-volume rescanning could approach write limits.
 - Cloudflare's free WAF provides managed rulesets only. Custom rules and advanced rate limiting require a paid plan.
 - A domain name is required for Cloudflare integration and is not free.
-- GCP Secret Manager free tier covers 6 active secret versions. Azure credentials
-  are consolidated into one JSON secret to stay within this limit.
+- GCP Secret Manager free tier covers 6 active secret versions. Azure credentials are consolidated into one JSON secret to stay within this limit.
+- Terraform state is stored locally. If the local machine is lost, state must be reconstructed via `terraform import`.
 
 ---
 

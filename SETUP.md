@@ -6,17 +6,26 @@ Full reproduction instructions for the Prowler CSPM demo. Everything here assume
 
 ## Makefile Workflow
 
+All targets run locally on WSL2. GitHub Actions must be green on `main` before running any make target.
+
 ```bash
-make before     # provisions misconfigured infrastructure (runs locally)
-make scan       # runs Prowler → ingests to Firestore → exports JSON → rebuilds and deploys container
-make after      # provisions hardened infrastructure (runs locally)
-make rescan     # runs Prowler → ingests to Firestore → exports JSON → rebuilds and deploys container
+make before     # provisions misconfigured infrastructure (local Terraform)
+make scan       # runs Prowler locally, writes findings_before.json to dashboard/public/
+make after      # provisions hardened infrastructure (local Terraform)
+make rescan     # runs Prowler locally, writes findings_after.json to dashboard/public/
+make deploy     # docker build (JSON baked in) → docker push → deploy to Cloud Run
 ```
 
-`make before` and `make after` run locally with your cloud CLIs authenticated.
-`make scan` and `make rescan` execute on the GCP e2-micro VM: they run Prowler,
-ingest findings to Firestore, export static JSON files, rebuild the container,
-and redeploy to Cloud Run.
+`make before` and `make after` apply Terraform against the cloud providers using locally
+authenticated CLIs. State is written to local `terraform.tfstate` files — no remote backend.
+
+`make scan` and `make rescan` fetch credentials from Secret Manager using local `gcloud auth`
+ADC, run Prowler locally against all three providers, and run `ingest_prowler.py` to write
+normalised findings JSON directly to `dashboard/public/`.
+
+`make deploy` builds the Docker image with the JSON files already in `dashboard/public/`,
+pushes to Artifact Registry, and deploys to Cloud Run. Only run after GitHub Actions
+quality gate is green on main.
 
 ---
 
@@ -27,52 +36,43 @@ and redeploy to Cloud Run.
 - [ ] GCP free tier account → [cloud.google.com/free](https://cloud.google.com/free)
 - [ ] Azure free tier account → [azure.microsoft.com/free](https://azure.microsoft.com/en-us/free)
 
-### 2. GCP infrastructure
-Same GCP account hosts the VM, database, Terraform state, and dashboard.
+### 2. Local tools (WSL2)
+
+- [ ] Docker → [Install Docker on WSL2](https://docs.docker.com/desktop/wsl/)
+- [ ] gcloud CLI → [Install gcloud](https://cloud.google.com/sdk/docs/install)
+- [ ] Terraform ≥ 1.6 → [developer.hashicorp.com/terraform/install](https://developer.hashicorp.com/terraform/install)
+- [ ] Prowler (latest stable) → [Prowler installation](https://docs.prowler.com/projects/prowler-open-source/en/latest/getting-started/installation/)
+- [ ] Node.js + npm → [nodejs.org](https://nodejs.org/)
+- [ ] Run `gcloud auth login` and `gcloud auth application-default login`
+- [ ] Run `gcloud auth configure-docker <region>-docker.pkg.dev` to authenticate Docker to Artifact Registry
+- [ ] Authenticate to AWS, GCP, and Azure CLIs for Terraform
+- [ ] Add `terraform.tfstate` and `terraform.tfstate.backup` to `.gitignore` in both `iac/environments/before/` and `iac/environments/after/`
+
+### 3. GCP infrastructure
+Same GCP account hosts the dashboard, image registry, and credentials.
 
 - [ ] Create a GCP project
-- [ ] Enable Firestore in Native mode → [Firestore setup](https://cloud.google.com/firestore/docs/quickstart-servers)
-- [ ] Create a Cloud Storage bucket for Terraform state
-- [ ] Enable Compute Engine API
-
-  > **Warning:** enabling the Compute Engine API automatically creates four default
-  > firewall rules that open SSH (port 22), RDP (port 3389), and ICMP to the
-  > entire internet (`0.0.0.0/0`). These must be deleted immediately before
-  > provisioning any VM.
-
-- [ ] Delete default firewall rules immediately after enabling Compute Engine:
-  - Delete `default-allow-ssh`
-  - Delete `default-allow-rdp`
-  - Delete `default-allow-icmp`
-- [ ] Enable IAP API and create `allow-ssh-iap` firewall rule (source: `35.235.240.0/20`, TCP 22)
-- [ ] Grant your user account `roles/iap.tunnelResourceAccessor`
-- [ ] Provision an e2-micro Compute Engine instance (US region) → [free tier details](https://cloud.google.com/free/docs/free-cloud-features#compute)
 - [ ] Enable Cloud Run API → [Cloud Run setup](https://cloud.google.com/run/docs/setup)
 - [ ] Enable Secret Manager API → [Secret Manager setup](https://cloud.google.com/secret-manager/docs/quickstart)
-- [ ] Enable Container Registry or Artifact Registry API for container builds
+- [ ] Enable Artifact Registry API → [Artifact Registry setup](https://cloud.google.com/artifact-registry/docs/docker/quickstart)
+- [ ] Create a Docker repository in Artifact Registry
 - [ ] Set Cloud Run to require `CF-Access-Secret` header — reject all requests that omit it
 
-### 3. Prowler credentials (stored in GCP Secret Manager)
+### 4. Credentials (stored in GCP Secret Manager)
 - [ ] AWS: create an IAM user with `SecurityAudit` managed policy attached
       → generate access key pair → store as two secrets in Secret Manager
       (`<aws-access-key-id-secret>` and `<aws-secret-access-key-secret>`)
       → [AWS IAM docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
-- [ ] GCP: create a service account with `Viewer`, `Security Reviewer`,
-      and `Cloud Datastore User` roles → generate key file → store as one secret
-      (`<gcp-service-account-key-secret>`) in Secret Manager
+- [ ] GCP: create a service account with `Viewer` and `Security Reviewer` roles
+      → generate key file → store as one secret (`<gcp-service-account-key-secret>`) in Secret Manager
       → [GCP service accounts](https://cloud.google.com/iam/docs/service-accounts-create)
 - [ ] Azure: create a service principal with `Reader` role on the subscription
       → consolidate all four values into one JSON secret (`<azure-credentials-secret>`):
       `{"client_id":"...","client_secret":"...","tenant_id":"...","subscription_id":"..."}`
       → [Azure service principal](https://learn.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli)
 - [ ] Cloudflare: store CF-Access-Secret value as `<cloudflare-cf-access-secret>` in Secret Manager
-- [ ] Grant the e2-micro Compute Engine service account
-      `Secret Manager Secret Accessor` role on all `prowler/*` secrets
+- [ ] Grant your local user account `Secret Manager Secret Accessor` role on all five secrets
 - [ ] Do NOT store any credentials in `/etc/environment` or any file on disk
-
-### 4. Terraform CLI
-- [ ] Install Terraform ≥ 1.6 → [developer.hashicorp.com/terraform/install](https://developer.hashicorp.com/terraform/install)
-- [ ] Authenticate to AWS, GCP, and Azure CLIs locally before running `make before`
 
 ### 5. Cloudflare
 - [ ] Acquire a domain (any registrar)
@@ -117,17 +117,16 @@ Each check maps 1:1 to a Terraform variable in `iac/environments/before/terrafor
 
 ---
 
-## Firestore Collections
+## Findings JSON Schema
 
-| Collection | Written by | Read by |
-|---|---|---|
-| `findings_before` | Prowler ingest script | export_json.py → findings_before.json |
-| `findings_after`  | Prowler ingest script | export_json.py → findings_after.json  |
+`ingest_prowler.py` writes two static JSON files directly to `dashboard/public/`:
 
+| File | Written by |
+|---|---|
+| `dashboard/public/findings_before.json` | `ingest_prowler.py` after `make scan` |
+| `dashboard/public/findings_after.json` | `ingest_prowler.py` after `make rescan` |
 
-### Document schema
-
-All findings (Prowler) share this normalised shape:
+Both files are JSON arrays. Every document shares this shape:
 
 ```json
 {
@@ -151,14 +150,13 @@ All findings (Prowler) share this normalised shape:
 
 | Secret | Where it lives | Used by |
 |---|---|---|
-| AWS access key ID | Secret Manager: `<aws-access-key-id-secret>` | Prowler |
-| AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler |
-| GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler + export_json.py |
-| Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler |
-| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | Origin protection |
+| AWS access key ID | Secret Manager: `<aws-access-key-id-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler (fetched by WSL2 during `make scan`) |
+| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | `make deploy` on WSL2 — sets Cloud Run env var at deploy time |
 
-The e2-micro fetches all secrets at runtime via the Secret Manager API.
-No credentials are stored on disk. The VM's attached service account
-is the only identity that needs to exist outside Secret Manager.
+All secrets are fetched at runtime from Secret Manager by WSL2 using `gcloud auth` ADC.
+No credentials are stored on disk.
 
 Never commit any of the above to the repository.
