@@ -122,7 +122,7 @@ Each check maps 1:1 to a Terraform variable in `iac/environments/before.tfvars` 
 | `network_rdp_internet_access_restricted` | High | Networking | `nsg_rdp_open` |
 | `iam_subscription_roles_owner_custom_not_created` | High | IAM | `custom_owner_role` |
 | `monitor_alert_create_update_security_solution` | Medium | Logging | `activity_log_alerts` |
-| `defender_ensure_defender_for_server_is_on` | High | threat-protection | `defender_enabled` |
+| `storage_secure_transfer_required_is_enabled` | High | Storage | `storage_https_disabled` |
 
 ---
 

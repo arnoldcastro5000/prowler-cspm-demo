@@ -8,7 +8,7 @@ variable "blob_public_access" { type = bool }
 variable "nsg_rdp_open" { type = bool }
 variable "custom_owner_role" { type = bool }
 variable "activity_log_alerts" { type = bool }
-variable "defender_enabled" { type = bool }
+variable "storage_https_disabled" { type = bool }
 
 resource "azurerm_resource_group" "prowler" {
   name     = "${var.project_prefix}-rg"
@@ -23,6 +23,7 @@ resource "azurerm_storage_account" "prowler_test" {
   account_tier                    = "Standard"
   account_replication_type        = "LRS"
   allow_nested_items_to_be_public = var.blob_public_access
+  https_traffic_only_enabled      = !var.storage_https_disabled
 }
 
 # ─── NSG — RDP open to internet ──────────────────────────────────────────────
@@ -88,8 +89,3 @@ resource "azurerm_monitor_activity_log_alert" "security_solution" {
   }
 }
 
-# ─── Defender for Cloud ──────────────────────────────────────────────────────
-resource "azurerm_security_center_subscription_pricing" "servers" {
-  tier          = var.defender_enabled ? "Free" : "Standard"
-  resource_type = "VirtualMachines"
-}

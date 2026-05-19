@@ -20,8 +20,8 @@ audit_logging_enabled = true
 kms_rotation_enabled  = true
 
 # Azure — all misconfigured
-blob_public_access  = true
-nsg_rdp_open        = true
-custom_owner_role   = true
-activity_log_alerts = true
-defender_enabled    = true
+blob_public_access     = true
+nsg_rdp_open           = true
+custom_owner_role      = true
+activity_log_alerts    = true
+storage_https_disabled = true

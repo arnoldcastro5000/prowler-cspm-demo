@@ -20,8 +20,8 @@ audit_logging_enabled = false
 kms_rotation_enabled  = false
 
 # Azure — all hardened
-blob_public_access  = false
-nsg_rdp_open        = false
-custom_owner_role   = false
-activity_log_alerts = false
-defender_enabled    = false
+blob_public_access     = false
+nsg_rdp_open           = false
+custom_owner_role      = false
+activity_log_alerts    = false
+storage_https_disabled = false

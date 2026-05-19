@@ -111,7 +111,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 | `network_rdp_internet_access_restricted` | High | Networking |
 | `iam_subscription_roles_owner_custom_not_created` | High | IAM |
 | `monitor_alert_create_update_security_solution` | Medium | Logging |
-| `defender_ensure_defender_for_server_is_on` | High | threat-protection |
+| `storage_secure_transfer_required_is_enabled` | High | Storage |
 
 Full check-to-Terraform variable mapping in [SETUP.md](SETUP.md).
 

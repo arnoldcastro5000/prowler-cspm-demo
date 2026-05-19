@@ -128,7 +128,7 @@ Every document in both files shares this exact shape:
 | `network_rdp_internet_access_restricted` | high | networking | `nsg_rdp_open` |
 | `iam_subscription_roles_owner_custom_not_created` | high | iam | `custom_owner_role` |
 | `monitor_alert_create_update_security_solution` | medium | logging | `activity_log_alerts` |
-| `defender_ensure_defender_for_server_is_on` | high | threat-protection | `defender_enabled` |
+| `storage_secure_transfer_required_is_enabled` | high | storage | `storage_https_disabled` |
 
 ---
 

@@ -55,7 +55,7 @@ variable "blob_public_access" { type = bool }
 variable "nsg_rdp_open" { type = bool }
 variable "custom_owner_role" { type = bool }
 variable "activity_log_alerts" { type = bool }
-variable "defender_enabled" { type = bool }
+variable "storage_https_disabled" { type = bool }
 
 module "aws" {
   source = "../modules/aws"
@@ -84,13 +84,13 @@ module "gcp" {
 module "azure" {
   source = "../modules/azure"
 
-  project_prefix      = var.project_prefix
-  subscription_id     = var.azure_subscription_id
-  blob_public_access  = var.blob_public_access
-  nsg_rdp_open        = var.nsg_rdp_open
-  custom_owner_role   = var.custom_owner_role
-  activity_log_alerts = var.activity_log_alerts
-  defender_enabled    = var.defender_enabled
+  project_prefix         = var.project_prefix
+  subscription_id        = var.azure_subscription_id
+  blob_public_access     = var.blob_public_access
+  nsg_rdp_open           = var.nsg_rdp_open
+  custom_owner_role      = var.custom_owner_role
+  activity_log_alerts    = var.activity_log_alerts
+  storage_https_disabled = var.storage_https_disabled
 }
 
 # ─── Outputs ─────────────────────────────────────────────────────────────────

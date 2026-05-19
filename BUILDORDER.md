@@ -125,10 +125,10 @@ no provider configuration, no backend.
   | `nsg_rdp_open` | `azurerm_network_security_group` | ingress port 3389 open to `0.0.0.0/0` |
   | `custom_owner_role` | `azurerm_role_definition` | custom role with `Owner`-equivalent permissions created |
   | `activity_log_alerts` | `azurerm_monitor_activity_log_alert` | alert for security policy changes not created |
-  | `defender_enabled` | `azurerm_security_center_subscription_pricing` | Defender for Cloud set to `Free` tier |
+  | `storage_https_disabled` | `azurerm_storage_account` | `https_traffic_only_enabled = false` |
 
   Hardened equivalents: `allow_nested_items_to_be_public = false`, RDP rule removed,
-  custom owner role not created, activity log alert created, Defender set to `Standard` tier.
+  custom owner role not created, activity log alert created, HTTPS-only enforced on storage account.
 
 ---
 
