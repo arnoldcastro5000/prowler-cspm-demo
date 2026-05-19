@@ -268,8 +268,9 @@ behaviour, states, or fields not listed there.
 
 - [ ] **`dashboard/src/components/SummaryBar.tsx`**
 
-  Four stat cards: Total Findings, Critical, High, Providers.
-  Computed from the full unfiltered findings array passed as a prop.
+  Six stat cards: Total Findings, Critical, High, Medium, Low, Providers.
+  All severity counts filter on `status === "fail"`. Computed from the
+  full findings array passed as a prop.
   Reference: `DASHBOARD_SPEC.md` → Component 2.
 
 ---
