@@ -26,6 +26,35 @@ run_check() {
 
 mkdir -p "$OUTPUT_DIR"
 
+# ─── Guard 1: run_scan.sh must have no uncommitted changes ────────────────────
+echo "=== Checking run_scan.sh is committed ==="
+REPO_ROOT=$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$REPO_ROOT" ]; then
+    echo "ERROR: Could not find git repository root."
+    exit 1
+fi
+if [ -n "$(git -C "$REPO_ROOT" diff HEAD -- prowler/run_scan.sh 2>/dev/null)" ] || \
+   [ -n "$(git -C "$REPO_ROOT" diff --cached -- prowler/run_scan.sh 2>/dev/null)" ]; then
+    echo "ERROR: prowler/run_scan.sh has uncommitted local changes."
+    echo "Commit and push to GitHub before running a scan."
+    exit 1
+fi
+echo "OK: run_scan.sh is committed."
+
+# ─── Guard 2: GitHub Actions must all be green ───────────────────────────────
+echo "=== Checking GitHub Actions status ==="
+NOT_GREEN=$(gh run list --branch main --limit 50 \
+    --json workflowName,status,conclusion,createdAt \
+    --jq 'group_by(.workflowName) | map(sort_by(.createdAt) | last) | .[] | select(.conclusion != "success") | "\(.workflowName): \(.conclusion // .status)"' \
+    2>/dev/null)
+if [ -n "$NOT_GREEN" ]; then
+    echo "ERROR: GitHub Actions workflows are not all green:"
+    echo "$NOT_GREEN"
+    echo "Fix all failing workflows before running a scan."
+    exit 1
+fi
+echo "OK: GitHub Actions all green."
+
 # ─── AWS credentials ──────────────────────────────────────────────────────────
 echo "=== Fetching AWS credentials ==="
 if AWS_KEY_ID=$(gcloud secrets versions access latest --secret=prowler-aws-access-key-id --project="$PROJECT_ID" 2>&1) && \
