@@ -109,11 +109,11 @@ Each check maps 1:1 to a Terraform variable in `iac/environments/before/terrafor
 ### Azure
 | Check ID | Severity | Category | Terraform Variable |
 |---|---|---|---|
-| `storage_blob_public_access_level_is_disabled` | Critical | Storage | `blob_public_access` |
-| `network_rdp_access_restricted_from_internet` | Critical | Networking | `nsg_rdp_open` |
+| `storage_blob_public_access_level_is_disabled` | High | Storage | `blob_public_access` |
+| `network_rdp_internet_access_restricted` | High | Networking | `nsg_rdp_open` |
 | `iam_subscription_roles_owner_custom_not_created` | High | IAM | `custom_owner_role` |
-| `monitor_activity_log_alert_create_update_security` | High | Logging | `activity_log_alerts` |
-| `defender_ensure_microsoft_defender_for_cloud_is_set_to_on` | High | threat-protection | `defender_enabled` |
+| `monitor_alert_create_update_security_solution` | Medium | Logging | `activity_log_alerts` |
+| `defender_ensure_defender_for_server_is_on` | High | threat-protection | `defender_enabled` |
 
 ---
 

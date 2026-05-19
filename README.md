@@ -12,7 +12,7 @@ Live demo → `prowler.cloudsecuritypractice.com/before` and `prowler.cloudsecur
 Prowler scans 15 high-signal checks across AWS, GCP, and Azure — covering IAM, storage, networking, logging, and encryption. The demo environment is intentionally misconfigured using Terraform. Findings are captured as a snapshot, the infrastructure is hardened, and a second snapshot is taken. Both states are published to the dashboard.
 
 
-The dashboard shows the before state (15 findings across critical, high, and medium severity across three clouds), the after state (zero findings), and the full remediation changelog between the two scans.
+The dashboard shows the before state (15 findings across critical, high, medium, and low severity across three clouds), the after state (zero findings), and the full remediation changelog between the two scans.
 
 ---
 
@@ -111,11 +111,11 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 ### Azure
 | Check ID | Severity | Category |
 |---|---|---|
-| `storage_blob_public_access_level_is_disabled` | Critical | Storage |
-| `network_rdp_access_restricted_from_internet` | Critical | Networking |
+| `storage_blob_public_access_level_is_disabled` | High | Storage |
+| `network_rdp_internet_access_restricted` | High | Networking |
 | `iam_subscription_roles_owner_custom_not_created` | High | IAM |
-| `monitor_activity_log_alert_create_update_security` | High | Logging |
-| `defender_ensure_microsoft_defender_for_cloud_is_set_to_on` | High | threat-protection |
+| `monitor_alert_create_update_security_solution` | Medium | Logging |
+| `defender_ensure_defender_for_server_is_on` | High | threat-protection |
 
 Full check-to-Terraform variable mapping in [SETUP.md](SETUP.md).
 
