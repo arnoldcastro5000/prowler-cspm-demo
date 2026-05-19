@@ -55,6 +55,13 @@ only triggers when relevant files change.
   Path filter: `iac/**`. Runs on PRs only. Scans Terraform for misconfigurations
   using `aquasecurity/tfsec-action`.
 
+- [ ] **`.github/workflows/zizmor.yml`**
+
+  Path filter: `.github/workflows/**`. Runs on PRs and push to main.
+  Static security analysis of GitHub Actions workflow files using
+  `zizmorcore/zizmor-action`. Findings uploaded to GitHub Security tab
+  (Advanced Security — free for public repos).
+
 - [ ] **`.github/dependabot.yml`**
 
   Runs every Monday 09:00 UTC. Opens automated PRs for outdated or vulnerable
