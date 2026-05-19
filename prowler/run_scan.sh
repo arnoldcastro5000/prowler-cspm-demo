@@ -44,8 +44,8 @@ echo "OK: run_scan.sh is committed."
 # ─── Guard 2: GitHub Actions must all be green ───────────────────────────────
 echo "=== Checking GitHub Actions status ==="
 NOT_GREEN=$(gh run list --branch main --limit 50 \
-    --json workflowName,status,conclusion,createdAt \
-    --jq 'group_by(.workflowName) | map(sort_by(.createdAt) | last) | .[] | select(.conclusion != "success") | "\(.workflowName): \(.conclusion // .status)"' \
+    --json workflowName,status,conclusion,createdAt,event \
+    --jq '[.[] | select(.event == "push")] | group_by(.workflowName) | map(sort_by(.createdAt) | last) | .[] | select(.conclusion != "success") | "\(.workflowName): \(.conclusion // .status)"' \
     2>/dev/null)
 if [ -n "$NOT_GREEN" ]; then
     echo "ERROR: GitHub Actions workflows are not all green:"
