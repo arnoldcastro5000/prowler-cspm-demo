@@ -3,7 +3,7 @@ set -uo pipefail
 
 PROJECT_ID="***REDACTED-GCP-PROJECT***"
 OUTPUT_DIR="/var/tmp/prowler-output"
-PROWLER="$HOME/prowler-venv/bin/prowler"
+PROWLER="prowler"
 GCP_KEY_FILE=""
 SCAN_ERRORS=()
 
@@ -14,10 +14,6 @@ cleanup() {
     unset AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID
 }
 trap cleanup EXIT
-
-drop_cache() {
-    sudo sync && sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'
-}
 
 run_check() {
     "$@"
@@ -76,7 +72,6 @@ fi
 
 # ─── AWS scan ─────────────────────────────────────────────────────────────────
 echo "=== Running Prowler AWS scan ==="
-drop_cache
 if [ "$AWS_READY" = true ]; then
     for CHECK in \
         s3_bucket_level_public_access_block \
@@ -100,7 +95,6 @@ fi
 
 # ─── GCP scan ─────────────────────────────────────────────────────────────────
 echo "=== Running Prowler GCP scan ==="
-drop_cache
 if [ "$GCP_READY" = true ]; then
     for CHECK in \
         cloudstorage_bucket_public_access \
@@ -124,7 +118,6 @@ fi
 
 # ─── Azure scan ───────────────────────────────────────────────────────────────
 echo "=== Running Prowler Azure scan ==="
-drop_cache
 if [ "$AZURE_READY" = true ]; then
     for CHECK in \
         storage_blob_public_access_level_is_disabled \
