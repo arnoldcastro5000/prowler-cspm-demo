@@ -23,6 +23,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# shellcheck disable=SC2329
 run_check() {
     "$@"
     local EXIT_CODE=$?
