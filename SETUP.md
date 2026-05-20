@@ -141,7 +141,7 @@ Both files are JSON arrays. Every document shares this shape:
 {
   "id": "uuid",
   "source": "prowler",
-  "category": "storage | iam | networking | logging | encryption | threat-protection",
+  "category": "storage | iam | networking | logging | encryption",
   "provider": "aws | gcp | azure",
   "severity": "critical | high | medium | low",
   "title": "string",
