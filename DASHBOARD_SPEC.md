@@ -94,7 +94,7 @@ Remediation Changelog to confirm each check_id moved from fail to pass.
 |---|---|---|
 | Provider | Multi-select toggle | `aws`, `gcp`, `azure` |
 | Severity | Multi-select toggle | `critical`, `high`, `medium`, `low` |
-| Category | Multi-select toggle | `storage`, `iam`, `networking`, `logging`, `encryption`, `threat-protection` |
+| Category | Multi-select toggle | `storage`, `iam`, `networking`, `logging`, `encryption` |
 
 **Behaviour:**
 - Filters are additive (AND logic within a group, i.e. selecting `aws` and
@@ -215,7 +215,7 @@ import { z } from "zod"
 export const FindingSchema = z.object({
   id: z.string(),
   source: z.literal("prowler"),
-  category: z.enum(["storage", "iam", "networking", "logging", "encryption", "threat-protection"]),
+  category: z.enum(["storage", "iam", "networking", "logging", "encryption"]),
   provider: z.enum(["aws", "gcp", "azure"]),
   severity: z.enum(["critical", "high", "medium", "low"]),
   title: z.string(),
