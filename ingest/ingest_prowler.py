@@ -26,7 +26,7 @@ CHECK_CATEGORY = {
     "network_rdp_internet_access_restricted": "networking",
     "iam_subscription_roles_owner_custom_not_created": "iam",
     "monitor_alert_create_update_security_solution": "logging",
-    "defender_ensure_defender_for_server_is_on": "threat-protection",
+    "storage_secure_transfer_required_is_enabled": "storage",
 }
 
 
