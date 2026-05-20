@@ -85,7 +85,7 @@ Every document in both files shares this exact shape:
 {
   "id": "uuid",
   "source": "prowler",
-  "category": "storage | iam | networking | logging | encryption | threat-protection",
+  "category": "storage | iam | networking | logging | encryption",
   "provider": "aws | gcp | azure",
   "severity": "critical | high | medium | low",
   "title": "string",
