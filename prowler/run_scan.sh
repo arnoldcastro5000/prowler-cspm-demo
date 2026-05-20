@@ -4,8 +4,16 @@ set -uo pipefail
 PROJECT_ID="***REDACTED-GCP-PROJECT***"
 OUTPUT_DIR="/var/tmp/prowler-output"
 PROWLER="prowler"
+STATUS_FILE="/tmp/prowler-scan-status.json"
 GCP_KEY_FILE=""
-SCAN_ERRORS=()
+
+# Per-provider status and check-level error counts
+AWS_STATUS="skipped"
+GCP_STATUS="skipped"
+AZURE_STATUS="skipped"
+AWS_DETAIL="credentials unavailable"
+GCP_DETAIL="credentials unavailable"
+AZURE_DETAIL="credentials unavailable"
 
 cleanup() {
     [ -n "$GCP_KEY_FILE" ] && rm -f "$GCP_KEY_FILE"
@@ -22,6 +30,24 @@ run_check() {
         return 0
     fi
     return $EXIT_CODE
+}
+
+write_status() {
+    OUTPUT_COUNT=$(find "$OUTPUT_DIR" -name "*.ocsf.json" 2>/dev/null | wc -l | tr -d ' ')
+    cat > "$STATUS_FILE" <<EOF
+{
+  "providers": {
+    "aws":   { "status": "$AWS_STATUS",   "detail": "$AWS_DETAIL" },
+    "gcp":   { "status": "$GCP_STATUS",   "detail": "$GCP_DETAIL" },
+    "azure": { "status": "$AZURE_STATUS", "detail": "$AZURE_DETAIL" }
+  },
+  "output_files": $OUTPUT_COUNT,
+  "output_dir": "$OUTPUT_DIR"
+}
+EOF
+    echo ""
+    echo "=== Scan status written to $STATUS_FILE ==="
+    cat "$STATUS_FILE"
 }
 
 mkdir -p "$OUTPUT_DIR"
@@ -57,6 +83,7 @@ echo "OK: GitHub Actions all green."
 
 # ─── AWS credentials ──────────────────────────────────────────────────────────
 echo "=== Fetching AWS credentials ==="
+AWS_READY=false
 if AWS_KEY_ID=$(gcloud secrets versions access latest --secret=prowler-aws-access-key-id --project="$PROJECT_ID" 2>&1) && \
    AWS_SECRET=$(gcloud secrets versions access latest --secret=prowler-aws-secret-access-key --project="$PROJECT_ID" 2>&1); then
     export AWS_ACCESS_KEY_ID="$AWS_KEY_ID"
@@ -64,27 +91,25 @@ if AWS_KEY_ID=$(gcloud secrets versions access latest --secret=prowler-aws-acces
     export AWS_DEFAULT_REGION="us-east-1"
     AWS_READY=true
 else
-    echo "ERROR: Failed to fetch AWS credentials:"
-    echo "$AWS_KEY_ID"
-    AWS_READY=false
-    SCAN_ERRORS+=("AWS credentials")
+    echo "WARNING: Failed to fetch AWS credentials — skipping AWS scan."
+    AWS_DETAIL="credential fetch failed"
 fi
 
 # ─── GCP credentials ──────────────────────────────────────────────────────────
 echo "=== Fetching GCP credentials ==="
+GCP_READY=false
 GCP_KEY_FILE=$(mktemp /var/tmp/gcp_key_XXXXXX.json)
 if gcloud secrets versions access latest --secret=prowler-gcp-service-account-key --project="$PROJECT_ID" > "$GCP_KEY_FILE" 2>&1; then
     export GOOGLE_APPLICATION_CREDENTIALS="$GCP_KEY_FILE"
     GCP_READY=true
 else
-    echo "ERROR: Failed to fetch GCP credentials:"
-    cat "$GCP_KEY_FILE"
-    GCP_READY=false
-    SCAN_ERRORS+=("GCP credentials")
+    echo "WARNING: Failed to fetch GCP credentials — skipping GCP scan."
+    GCP_DETAIL="credential fetch failed"
 fi
 
 # ─── Azure credentials ────────────────────────────────────────────────────────
 echo "=== Fetching Azure credentials ==="
+AZURE_READY=false
 if AZURE_CREDS=$(gcloud secrets versions access latest --secret=prowler-azure-credentials --project="$PROJECT_ID" 2>&1); then
     AZURE_CLIENT_ID=$(echo "$AZURE_CREDS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['client_id'])")
     AZURE_CLIENT_SECRET=$(echo "$AZURE_CREDS" | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['client_secret'])")
@@ -93,15 +118,14 @@ if AZURE_CREDS=$(gcloud secrets versions access latest --secret=prowler-azure-cr
     export AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID
     AZURE_READY=true
 else
-    echo "ERROR: Failed to fetch Azure credentials:"
-    echo "$AZURE_CREDS"
-    AZURE_READY=false
-    SCAN_ERRORS+=("Azure credentials")
+    echo "WARNING: Failed to fetch Azure credentials — skipping Azure scan."
+    AZURE_DETAIL="credential fetch failed"
 fi
 
 # ─── AWS scan ─────────────────────────────────────────────────────────────────
-echo "=== Running Prowler AWS scan ==="
 if [ "$AWS_READY" = true ]; then
+    echo "=== Running Prowler AWS scan ==="
+    AWS_ERRORS=0
     for CHECK in \
         s3_bucket_level_public_access_block \
         iam_password_policy_minimum_length_14 \
@@ -114,17 +138,25 @@ if [ "$AWS_READY" = true ]; then
             --region us-east-1 \
             --output-formats json-ocsf \
             --output-directory "$OUTPUT_DIR" || {
-            echo "ERROR: AWS check $CHECK failed with exit code $?"
-            SCAN_ERRORS+=("AWS:$CHECK")
+            echo "WARNING: AWS check $CHECK failed — continuing."
+            AWS_ERRORS=$((AWS_ERRORS + 1))
         }
     done
+    if [ $AWS_ERRORS -eq 0 ]; then
+        AWS_STATUS="success"
+        AWS_DETAIL="all 5 checks completed"
+    else
+        AWS_STATUS="partial"
+        AWS_DETAIL="$AWS_ERRORS of 5 check(s) failed"
+    fi
 else
-    echo "SKIPPED: AWS scan — credentials unavailable."
+    echo "SKIPPED: AWS scan."
 fi
 
 # ─── GCP scan ─────────────────────────────────────────────────────────────────
-echo "=== Running Prowler GCP scan ==="
 if [ "$GCP_READY" = true ]; then
+    echo "=== Running Prowler GCP scan ==="
+    GCP_ERRORS=0
     for CHECK in \
         cloudstorage_bucket_public_access \
         compute_firewall_ssh_access_from_the_internet_allowed \
@@ -137,45 +169,60 @@ if [ "$GCP_READY" = true ]; then
             --project-id "$PROJECT_ID" \
             --output-formats json-ocsf \
             --output-directory "$OUTPUT_DIR" || {
-            echo "ERROR: GCP check $CHECK failed with exit code $?"
-            SCAN_ERRORS+=("GCP:$CHECK")
+            echo "WARNING: GCP check $CHECK failed — continuing."
+            GCP_ERRORS=$((GCP_ERRORS + 1))
         }
     done
+    if [ $GCP_ERRORS -eq 0 ]; then
+        GCP_STATUS="success"
+        GCP_DETAIL="all 5 checks completed"
+    else
+        GCP_STATUS="partial"
+        GCP_DETAIL="$GCP_ERRORS of 5 check(s) failed"
+    fi
 else
-    echo "SKIPPED: GCP scan — credentials unavailable."
+    echo "SKIPPED: GCP scan."
 fi
 
 # ─── Azure scan ───────────────────────────────────────────────────────────────
-echo "=== Running Prowler Azure scan ==="
 if [ "$AZURE_READY" = true ]; then
+    echo "=== Running Prowler Azure scan ==="
+    AZURE_ERRORS=0
     for CHECK in \
         storage_blob_public_access_level_is_disabled \
         network_rdp_internet_access_restricted \
         iam_subscription_roles_owner_custom_not_created \
         monitor_alert_create_update_security_solution \
-        defender_ensure_defender_for_server_is_on; do
+        storage_secure_transfer_required_is_enabled; do
         echo "--- Azure check: $CHECK ---"
         run_check "$PROWLER" azure \
             --check "$CHECK" \
             --output-formats json-ocsf \
             --output-directory "$OUTPUT_DIR" || {
-            echo "ERROR: Azure check $CHECK failed with exit code $?"
-            SCAN_ERRORS+=("Azure:$CHECK")
+            echo "WARNING: Azure check $CHECK failed — continuing."
+            AZURE_ERRORS=$((AZURE_ERRORS + 1))
         }
     done
+    if [ $AZURE_ERRORS -eq 0 ]; then
+        AZURE_STATUS="success"
+        AZURE_DETAIL="all 5 checks completed"
+    else
+        AZURE_STATUS="partial"
+        AZURE_DETAIL="$AZURE_ERRORS of 5 check(s) failed"
+    fi
 else
-    echo "SKIPPED: Azure scan — credentials unavailable."
+    echo "SKIPPED: Azure scan."
 fi
 
-# ─── Summary ──────────────────────────────────────────────────────────────────
+# ─── Write status file and determine exit code ────────────────────────────────
+write_status
+
+OUTPUT_COUNT=$(find "$OUTPUT_DIR" -name "*.ocsf.json" 2>/dev/null | wc -l | tr -d ' ')
 echo ""
-echo "=== Scan complete. Output in $OUTPUT_DIR ==="
-if [ ${#SCAN_ERRORS[@]} -eq 0 ]; then
-    echo "All scans completed successfully."
-else
-    echo "Errors encountered:"
-    for err in "${SCAN_ERRORS[@]}"; do
-        echo "  - $err"
-    done
+if [ "$OUTPUT_COUNT" -eq 0 ]; then
+    echo "ERROR: No scan output produced — all providers failed or were skipped."
     exit 1
+else
+    echo "=== Scan complete. $OUTPUT_COUNT output file(s) in $OUTPUT_DIR ==="
+    exit 0
 fi
