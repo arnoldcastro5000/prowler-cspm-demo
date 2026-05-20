@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2329
 set -uo pipefail
 
 PROJECT_ID="***REDACTED-GCP-PROJECT***"
@@ -23,7 +24,6 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# shellcheck disable=SC2329
 run_check() {
     "$@"
     local EXIT_CODE=$?
