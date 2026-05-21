@@ -199,3 +199,19 @@ At the start of every AI session, before doing any work:
 - **Do not** expose Cloud Run directly — all traffic routes through Cloudflare at `prowler.cloudsecuritypractice.com`.
 - **Do not** store credentials in `/etc/environment` or any file on disk. All secrets are fetched at runtime from GCP Secret Manager by WSL2 using `gcloud auth` ADC.
 - The ingest script is `ingest_prowler.py`. There is no `export_json.py` and no `ingest_semgrep.py`.
+
+---
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues for `arnoldcastro5000/prowler-cspm-demo`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label vocabulary — needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
