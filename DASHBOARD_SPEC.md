@@ -242,7 +242,6 @@ export const FindingSchema = z.object({
   check_id: z.string(),
   status: z.enum(["fail", "pass"]),
   scanned_at: z.string(),
-  raw: z.record(z.unknown()),
 })
 
 export type Finding = z.infer<typeof FindingSchema>

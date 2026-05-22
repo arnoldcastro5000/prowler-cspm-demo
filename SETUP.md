@@ -150,8 +150,7 @@ Both files are JSON arrays. Every document shares this shape:
   "resource": "arn",
   "check_id": "prowler check ID",
   "status": "fail | pass",
-  "scanned_at": "ISO 8601 timestamp",
-  "raw": {}
+  "scanned_at": "ISO 8601 timestamp"
 }
 ```
 

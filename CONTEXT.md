@@ -22,7 +22,7 @@ _Avoid_: cloud, vendor, platform (when meaning a specific scannable cloud provid
 > **Dev:** "A check is the rule — `s3_bucket_default_encryption` — it exists whether or not you've scanned. A finding is what you get when Prowler runs that check against a specific S3 bucket at a point in time. One check can produce many findings across different resources."
 >
 > **Reviewer:** "So the Scorecard shows all 15 findings as critical?"
-> **Dev:** "No — the Scorecard counts only failing findings by severity. In the Before snapshot there are 3 critical, 6 high, 4 medium, 2 low. In the After snapshot everything passes, so the scorecard shows all zeros."
+> **Dev:** "No — the Scorecard counts only failing findings by severity. In the Before snapshot there are 4 critical, 7 high, 4 medium, 1 low across the 15 target checks. In the After snapshot all target checks pass, so the scorecard shows zero for those."
 >
 > **Reviewer:** "Where does the ISO27001 mapping show up?"
 > **Dev:** "That's the Framework View — a third tab that's visible but disabled in the initial release. When it's built, it'll show coverage per framework. For now you just see the Coming soon label."
@@ -46,7 +46,7 @@ A global filter control on the Before/After pages that narrows the findings list
 _Avoid_: severity dropdown, filter panel
 
 **Finding Row**:
-A single row in the findings list representing one Finding. Shows title, severity badge, and resource by default. Expandable to reveal category, check_id, scanned_at, and a "Show raw" toggle that reveals the raw Prowler JSON blob (collapsed by default).
+A single row in the findings list representing one Finding. Shows title, severity badge, and resource by default. Expandable to reveal category, check_id, and scanned_at. Raw Prowler output is not exposed in the UI.
 _Avoid_: finding card, finding item
 
 **Landing Page**:
