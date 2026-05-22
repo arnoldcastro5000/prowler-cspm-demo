@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import sys
 import uuid
 
@@ -30,6 +31,40 @@ CHECK_CATEGORY = {
 }
 
 
+def redact_resource(uid: str, provider: str) -> str:
+    """Strip account/subscription/project identifiers, keep resource type and name."""
+    if provider == "aws":
+        # arn:aws:s3:::bucket-name → aws:s3:::*** (bucket names redacted)
+        if uid.startswith("arn:aws:s3:::"):
+            return "aws:s3:::***"
+        # arn:aws:cloudtrail:...:trail/name → aws:cloudtrail:*** (trail names redacted)
+        if ":cloudtrail:" in uid:
+            return "aws:cloudtrail:***"
+        # arn:aws:ec2:us-east-1:123456789012:instance/i-abc → aws:ec2:instance/i-abc
+        uid = re.sub(r"^arn:aws:", "aws:", uid)
+        uid = re.sub(r":\d{12}:", ":", uid)
+        uid = re.sub(r":[a-z0-9-]+:\d{12}", "", uid)
+        return uid
+    if provider == "azure":
+        # /subscriptions/<uuid>/resourceGroups/rg/providers/Type/name → azure:Type/name
+        uid = re.sub(r"/subscriptions/[^/]+", "", uid)
+        uid = re.sub(r"/resourceGroups/[^/]+", "", uid, flags=re.IGNORECASE)
+        uid = re.sub(r"/providers/", "", uid, count=1)
+        return f"azure:{uid.lstrip('/')}" if uid.strip("/") else "azure:subscription"
+    if provider == "gcp":
+        # projects/<project-id>/... → gcp:...
+        uid = re.sub(r"projects/[^/]+/", "", uid)
+        # strip project ID from service account emails
+        uid = re.sub(r"@[^.]+\.iam\.gserviceaccount\.com", "@***.iam.gserviceaccount.com", uid)
+        # strip numeric prefix from default compute SA (1234567890-compute@developer...)
+        uid = re.sub(r"^\d+-compute@developer\.gserviceaccount\.com$", "***-compute@developer.gserviceaccount.com", uid)
+        # strip bare project IDs or bare numeric resource IDs (no slashes, not a known safe form)
+        if "/" not in uid and "gserviceaccount.com" not in uid and not uid.startswith("locations/"):
+            uid = "***"
+        return f"gcp:{uid}"
+    return uid
+
+
 def ingest(json_file: str, target: str) -> None:
     with open(json_file) as f:
         findings = json.load(f)
@@ -51,7 +86,9 @@ def ingest(json_file: str, target: str) -> None:
             continue
 
         resources = finding.get("resources", [])
-        resource_uid = resources[0].get("uid", "") if resources else ""
+        raw_uid = resources[0].get("uid", "") if resources else ""
+        provider = finding.get("unmapped", {}).get("provider", "").lower()
+        resource_uid = redact_resource(raw_uid, provider)
 
         docs.append({
             "id": str(uuid.uuid4()),
@@ -60,7 +97,7 @@ def ingest(json_file: str, target: str) -> None:
             "title": finding.get("finding_info", {}).get("title", ""),
             "status": status_code.lower(),
             "severity": finding.get("severity", "").lower(),
-            "provider": finding.get("unmapped", {}).get("provider", "").lower(),
+            "provider": provider,
             "category": category,
             "resource": resource_uid,
             "scanned_at": finding.get("time_dt", ""),
