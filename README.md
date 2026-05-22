@@ -70,6 +70,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 
 | Layer | Technology | Rationale |
 |---|---|---|
+| CI/CD | GitHub Actions + Dependabot | Quality gate (tsc, eslint, docker build, shellcheck, trivy, zizmor) + automated dependency updates |
 | Scanner | Prowler (open source) | Native multi-cloud CSPM, structured JSON output |
 | IaC | Terraform | Reproducible before/after infrastructure states |
 | Ingest | Python 3.11 (ingest_prowler.py) | Normalises Prowler output → findings JSON baked into image |

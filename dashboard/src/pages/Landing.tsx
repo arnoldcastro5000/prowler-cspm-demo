@@ -70,6 +70,7 @@ GCP Cloud Run ← Cloudflare (CDN · WAF · DDoS)
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {[
+                  ['CI/CD', 'GitHub Actions + Dependabot'],
                   ['Scanner', 'Prowler (open source)'],
                   ['IaC', 'Terraform ≥ 1.6'],
                   ['Ingest', 'Python 3.11'],
