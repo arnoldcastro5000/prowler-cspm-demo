@@ -9,7 +9,7 @@ A consolidated reference of all security decisions and controls applied to this 
 - All cloud credentials (AWS, GCP, Azure) are stored in **GCP Secret Manager** — never on disk, never in environment files, never committed to git.
 - Credentials are fetched at runtime by WSL2 using `gcloud auth` ADC. See `prowler/run_scan.sh` and `Makefile`.
 - `run_scan.sh` uses a `trap cleanup EXIT` to unset all exported credential environment variables on exit, whether the scan succeeds or fails.
-- The Cloudflare `CF-Access-Secret` is fetched from Secret Manager at deploy time and set as a Cloud Run environment variable — it is never stored in the image or repository.
+- The Cloudflare origin validation secret is fetched from Secret Manager at deploy time and set as a Cloud Run environment variable — it is never stored in the image or repository.
 
 ## Secret Scanning
 
@@ -22,14 +22,14 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ## Infrastructure Security
 
-- **Cloudflare origin protection** — Cloud Run rejects any request missing the `CF-Access-Secret` header, preventing direct origin access. All public traffic enters through Cloudflare only. SSL mode is Full (Strict) end-to-end.
+- **Cloudflare origin protection** — Cloud Run validates a shared secret on every inbound request, preventing direct origin bypass. All public traffic enters through Cloudflare only. SSL mode is Full (Strict) end-to-end.
 - **No public Cloud Run URL** — the service is not directly accessible; all traffic routes through `prowler.cloudsecuritypractice.com`.
 - **Static findings JSON** — no backend API, no database, no authentication surface. Findings are baked into the Docker image at build time. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
 
 ## IaC Security
 
 - **Trivy** scans Terraform modules for misconfigurations on every push and PR (`.github/workflows/trivy.yml`). Findings upload to the GitHub Security tab via SARIF.
-- **Terraform state** is stored locally in `iac/environments/` and excluded from git via `.gitignore`. No remote backend.
+- **Terraform state** is stored locally on the WSL2 machine and excluded from git via `.gitignore`. No remote backend.
 - The intentional misconfigurations in `iac/modules/` are expected Trivy findings — they represent the before-state infrastructure this project is designed to demonstrate.
 
 ## CI/CD Pipeline Security
@@ -49,11 +49,8 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ## Data Redaction
 
-- `ingest_prowler.py` strips all cloud account identifiers from the `resource` field before writing findings JSON:
-  - AWS: S3 bucket names, CloudTrail trail names, account IDs, EC2 instance IDs, regions
-  - Azure: subscription IDs, resource group paths — retains `Microsoft.Namespace/ResourceType` only
-  - GCP: all resource UIDs replaced with `gcp:***`
-- The `raw` Prowler field is not written to findings JSON — it contained unsanitized scan output including internal UUIDs and account identifiers.
+- All cloud account identifiers are stripped from findings JSON before publication — account IDs, subscription IDs, resource IDs, and bucket names are removed or replaced with placeholders.
+- The raw Prowler output field is not written to findings JSON, as it contains unsanitized scan data.
 
 ## HTTP Security Headers
 
@@ -67,7 +64,7 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | Enforces HTTPS for 1 year |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Disables unused browser features |
 
-`Content-Security-Policy` is not yet enforced — it will be added after tuning in report-only mode.
+`Content-Security-Policy` is implemented in report-only mode during tuning.
 
 ## AI Development Sandbox
 
