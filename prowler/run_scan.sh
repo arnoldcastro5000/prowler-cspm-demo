@@ -3,6 +3,7 @@
 set -uo pipefail
 
 PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
+AWS_REGION="us-east-1"
 OUTPUT_DIR="/var/tmp/prowler-output"
 PROWLER="prowler"
 STATUS_FILE="/tmp/prowler-scan-status.json"
@@ -89,7 +90,7 @@ if AWS_KEY_ID=$(gcloud secrets versions access latest --secret=prowler-aws-acces
    AWS_SECRET=$(gcloud secrets versions access latest --secret=prowler-aws-secret-access-key --project="$PROJECT_ID" 2>&1); then
     export AWS_ACCESS_KEY_ID="$AWS_KEY_ID"
     export AWS_SECRET_ACCESS_KEY="$AWS_SECRET"
-    export AWS_DEFAULT_REGION="us-east-1"
+    export AWS_DEFAULT_REGION="$AWS_REGION"
     AWS_READY=true
 else
     echo "WARNING: Failed to fetch AWS credentials — skipping AWS scan."
@@ -136,7 +137,7 @@ if [ "$AWS_READY" = true ]; then
         echo "--- AWS check: $CHECK ---"
         run_check "$PROWLER" aws \
             --check "$CHECK" \
-            --region us-east-1 \
+            --region "$AWS_REGION" \
             --output-formats json-ocsf \
             --output-directory "$OUTPUT_DIR" || {
             echo "WARNING: AWS check $CHECK failed — continuing."

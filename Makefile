@@ -12,7 +12,7 @@ ENV_DIR    := iac/environments
 OUTPUT_DIR := /var/tmp/prowler-output
 COMBINED   := /tmp/prowler-combined.ocsf.json
 
-TF_VARS    = -var="project_prefix=$(PROJECT_PREFIX)" -var="gcp_project_id=$(PROJECT_ID)"
+TF_VARS    = -var="project_prefix=$(PROJECT_PREFIX)" -var="aws_region=$(AWS_REGION)" -var="gcp_project_id=$(PROJECT_ID)"
 TF_APPLY   = bash iac/tf_apply.sh -chdir=$(ENV_DIR) apply
 
 .PHONY: setup before scan after rescan deploy _prowl
@@ -35,6 +35,8 @@ setup:
 	$(TF_APPLY) -target=module.aws -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
 	echo "=== [2/3] Creating GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
+	echo "=== Waiting 10 minutes for GCP logging metric to propagate ===" && \
+	for i in $$(seq 600 -10 10); do printf "\r    %3ds remaining..." $$i; sleep 10; done && echo "" && \
 	echo "=== [3/3] Creating Azure resources ===" && \
 	$(TF_APPLY) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
 	echo "=== Setup complete. Run 'make before' to begin. ==="

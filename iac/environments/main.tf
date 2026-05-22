@@ -17,7 +17,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = var.aws_region
 }
 
 provider "google" {
@@ -32,6 +32,7 @@ provider "azurerm" {
 
 # ─── Shared variables ────────────────────────────────────────────────────────
 variable "project_prefix" { type = string }
+variable "aws_region" { type = string }
 variable "gcp_project_id" { type = string }
 variable "azure_subscription_id" { type = string }
 

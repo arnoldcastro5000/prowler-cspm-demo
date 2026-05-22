@@ -99,7 +99,6 @@ def ingest(json_file: str, target: str) -> None:
             "category": category,
             "resource": resource_uid,
             "scanned_at": finding.get("time_dt", ""),
-            "raw": finding,
         })
 
     os.makedirs(DASHBOARD_PUBLIC, exist_ok=True)

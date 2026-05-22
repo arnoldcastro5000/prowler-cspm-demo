@@ -1,0 +1,94 @@
+name: Hardcoded Config Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Check for hardcoded IDs and regions
+        run: |
+          set +e
+          FAILED=0
+
+          # Files to scan (exclude generated/binary/lock files)
+          FILES=$(find . \
+            -type f \
+            \( -name "*.sh" -o -name "*.py" -o -name "*.tf" -o -name "*.tfvars" \
+               -o -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "Makefile" \
+               -o -name "*.yml" -o -name "*.yaml" \) \
+            -not -path "./.git/*" \
+            -not -path "*/node_modules/*" \
+            -not -path "*/dist/*" \
+            -not -name "package-lock.json" \
+            -not -name "hardcoded-config-check.yml")
+
+          echo "=== Checking for hardcoded AWS account IDs (12-digit standalone numbers) ==="
+          MATCHES=$(grep -rn '\b[0-9]\{12\}\b' $FILES 2>/dev/null | grep -v '^\s*#')
+          if [ -n "$MATCHES" ]; then
+            echo "FAIL: Possible AWS account IDs found:"
+            echo "$MATCHES"
+            FAILED=1
+          else
+            echo "OK"
+          fi
+
+          echo ""
+          echo "=== Checking for hardcoded Azure subscription/tenant UUIDs ==="
+          MATCHES=$(grep -rPn '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}' $FILES 2>/dev/null | grep -v '^\s*#' | grep -v 'REDACTED')
+          if [ -n "$MATCHES" ]; then
+            echo "FAIL: Possible Azure UUIDs found:"
+            echo "$MATCHES"
+            FAILED=1
+          else
+            echo "OK"
+          fi
+
+          echo ""
+          echo "=== Checking for hardcoded AWS resource IDs ==="
+          MATCHES=$(grep -rPn '\b(sg|vpc|ami|subnet)-[0-9a-f]{8,}\b' $FILES 2>/dev/null | grep -v '^\s*#' | grep -v 'REDACTED')
+          if [ -n "$MATCHES" ]; then
+            echo "FAIL: Possible AWS resource IDs found:"
+            echo "$MATCHES"
+            FAILED=1
+          else
+            echo "OK"
+          fi
+
+          echo ""
+          echo "=== Checking for hardcoded cloud regions outside config variables ==="
+          MATCHES=$(grep -rn 'us-east-1\|us-east-2\|eu-west-1\|ap-southeast-1\|eastus\|westeurope' $FILES 2>/dev/null \
+            | grep -v '^\s*#' \
+            | grep -v 'AWS_REGION\s*:=\|AWS_REGION\s*=\|REGION\s*:=\|AWS_DEFAULT_REGION="\$' \
+            | grep -v 'location\s*=\s*"eastus"\|location\s*=\s*var\.' \
+            | grep -v 'hardcoded-config-check.yml')
+          if [ -n "$MATCHES" ]; then
+            echo "FAIL: Possible hardcoded regions found:"
+            echo "$MATCHES"
+            FAILED=1
+          else
+            echo "OK"
+          fi
+
+          echo ""
+          echo "=== Checking for personal email addresses ==="
+          MATCHES=$(grep -rPn '[a-zA-Z0-9._%+-]+@(?!noreply|github|anthropic)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}' $FILES 2>/dev/null | grep -v '^\s*#')
+          if [ -n "$MATCHES" ]; then
+            echo "FAIL: Possible personal email addresses found:"
+            echo "$MATCHES"
+            FAILED=1
+          else
+            echo "OK"
+          fi
+
+          exit $FAILED
