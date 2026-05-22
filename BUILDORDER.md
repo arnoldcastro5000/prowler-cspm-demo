@@ -243,8 +243,9 @@ behaviour, states, or fields not listed there.
   Configure `tsconfig.json` with `strict: true`.
   Configure ESLint with `@typescript-eslint/recommended-type-checked` ruleset
   and `parserOptions.project` pointing to `tsconfig.json`.
-  Configure routing: `/before` → `Before.tsx`, `/after` → `After.tsx`,
-  `/` → redirect to `/before`.
+  Configure routing: `/` → `Landing.tsx`, `/before` → `Before.tsx`, `/after` → `After.tsx`.
+  Add a disabled placeholder entry for `/frameworks` in the tab bar — no page component needed.
+  No other routes.
   No other routes.
 
 ---

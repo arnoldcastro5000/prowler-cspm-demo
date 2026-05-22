@@ -12,9 +12,8 @@ Infrastructure is created once during setup and toggled between misconfigured an
 states — resources are never destroyed and recreated between scan cycles.
 
 ```bash
-# One-time setup — run from iac/environments/
-terraform init
-terraform apply -var-file=after.tfvars   # creates all resources in hardened state, EC2 stopped
+# One-time setup — fetches credentials, runs terraform init, creates all resources in hardened state
+make setup
 
 # Scan cycle
 make before     # misconfigs all 15 checks, starts EC2
@@ -68,14 +67,17 @@ Same GCP account hosts the dashboard, image registry, and credentials.
 - [ ] Set Cloud Run to require `CF-Access-Secret` header — reject all requests that omit it
 
 ### 4. Credentials (stored in GCP Secret Manager)
-- [ ] AWS: create an IAM user with `SecurityAudit` managed policy attached
+- [ ] AWS: create an IAM user → attach `PowerUserAccess` + `IAMFullAccess` managed policies
+      (PowerUserAccess covers S3/EC2/CloudTrail; IAMFullAccess covers password policy)
       → generate access key pair → store as two secrets in Secret Manager
       (`<aws-access-key-id-secret>` and `<aws-secret-access-key-secret>`)
       → [AWS IAM docs](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html)
 - [ ] GCP: create a service account with `Viewer` and `Security Reviewer` roles
       → generate key file → store as one secret (`<gcp-service-account-key-secret>`) in Secret Manager
       → [GCP service accounts](https://cloud.google.com/iam/docs/service-accounts-create)
-- [ ] Azure: create a service principal with `Reader` role on the subscription
+- [ ] Azure: create a service principal → assign `Contributor` + `User Access Administrator` roles
+      at the subscription level (Contributor for resource management; User Access Administrator
+      for custom role definition creation/deletion)
       → consolidate all four values into one JSON secret (`<azure-credentials-secret>`):
       `{"client_id":"...","client_secret":"...","tenant_id":"...","subscription_id":"..."}`
       → [Azure service principal](https://learn.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli)

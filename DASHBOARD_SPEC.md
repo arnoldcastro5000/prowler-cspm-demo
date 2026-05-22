@@ -11,27 +11,52 @@ listed in this file.
 
 | Route | Page Component | JSON File |
 |---|---|---|
+| `/` | `Landing.tsx` | — |
 | `/before` | `Before.tsx` | `findings_before.json` |
 | `/after` | `After.tsx` | `findings_after.json` |
-| `/` | Redirects to `/before` | — |
+| `/frameworks` | Disabled tab — not implemented | — |
+
+The Landing page is a standalone portfolio entry point — not a redirect. It targets hiring managers with a cloud security background. See Landing Page section below.
 
 The Before page fetches `findings_before.json` only. The After page fetches both JSON files.
 
+The tab bar (`Before | After | Frameworks`) appears on `/before` and `/after` only — not on the Landing page. The Frameworks tab is visible but disabled with a "Coming soon" tooltip.
+
 ---
 
-## Shared Layout
+## Landing Page
 
-Every page has the following top-to-bottom structure:
+**Route:** `/`
+
+**Layout:** Standalone — no tab bar, no Summary Bar, no findings.
+
+**Sections top to bottom:**
+
+1. **Hero** — two sentences establishing the scans are real, not mocked
+2. **Credibility** — pipeline explanation: Terraform-provisioned resources, credentials in Secret Manager, scans from WSL2, hosted on Cloud Run behind Cloudflare
+3. **Infrastructure diagram** — Mermaid diagram of the full pipeline: Terraform → cloud resources → Prowler → ingest → React dashboard → Cloud Run → Cloudflare
+4. **Tech stack table** — IaC, scanner, frontend, hosting
+5. **CTAs** — "View Before Scan →", "View After Scan →", "GitHub →"
+
+---
+
+## Dashboard Layout (Before and After pages)
+
+Every dashboard page (`/before`, `/after`) has the following top-to-bottom structure:
 
 ```
 ┌─────────────────────────────────┐
+│  Tab Bar (Before | After | *)   │
+│  (* Frameworks — disabled)      │
+├─────────────────────────────────┤
 │  Page Header                    │
 ├─────────────────────────────────┤
 │  Summary Bar (6 stat cards)     │
 ├─────────────────────────────────┤
-│  Filter Bar                     │
+│  Severity Filter                │
 ├─────────────────────────────────┤
 │  Findings Table                 │
+│  (grouped by Provider)          │
 ├─────────────────────────────────┤
 │  Provider Status                │
 │  (After page only)              │
@@ -73,8 +98,7 @@ Every page has the following top-to-bottom structure:
 | Low | Count where `severity === "low"` and `status === "fail"` | filtered count |
 | Providers | Count of distinct `provider` values in `findings_before.json` | If count ≠ 3, display error state on card |
 
-**Before page expected values:** 15 total (3 critical, 7 high, 4 medium, 1 low), 3 providers.
-**After page expected values:** 0 total, 0 critical, 0 high, 0 medium, 0 low, 3 providers.
+**Note:** Prowler scans the entire cloud account, not just Terraform-provisioned resources. The Summary Bar reflects all findings in the JSON file. The 15 target checks are a subset of what Prowler may return.
 
 Note: `findings_after.json` contains 15 documents with `status === "pass"`. These are not
 counted in the Summary Bar (which counts only FAIL findings) but are required by the
@@ -84,25 +108,16 @@ Remediation Changelog to confirm each check_id moved from fail to pass.
 
 ---
 
-### 3. Filter Bar
+### 3. Severity Filter
 
 **Location:** Below Summary Bar, above Findings Table.
 
-**Controls:**
-
-| Filter | Type | Options |
-|---|---|---|
-| Provider | Multi-select toggle | `aws`, `gcp`, `azure` |
-| Severity | Multi-select toggle | `critical`, `high`, `medium`, `low` |
-| Category | Multi-select toggle | `storage`, `iam`, `networking`, `logging`, `encryption` |
+**Controls:** Single severity selector — `all`, `critical`, `high`, `medium`, `low`.
 
 **Behaviour:**
-- Filters are additive (AND logic within a group, i.e. selecting `aws` and
-  `gcp` shows findings from either).
-- Default state: all options selected (unfiltered).
-- Filters apply to the Findings Table only. Summary Bar always reflects the
-  full unfiltered dataset.
-- A "Clear filters" control resets all filters to default.
+- Filters apply globally across all provider sections simultaneously.
+- Default state: all severities shown.
+- Applies to the Findings Table only. Summary Bar always reflects the full unfiltered dataset.
 
 **Data source:** No fetches. Operates on the in-memory findings array.
 
@@ -110,7 +125,11 @@ Remediation Changelog to confirm each check_id moved from fail to pass.
 
 ### 4. Findings Table
 
-**Location:** Below Filter Bar.
+**Location:** Below Severity Filter.
+
+**Grouping:** Findings are grouped by provider (`aws`, then `gcp`, then `azure`). Each provider is a collapsible section header. Within each section, rows are sorted severity descending.
+
+**Expandable rows:** Each row is expandable. Collapsed state shows Provider, Severity, Title, Resource. Expanded state additionally shows Category, Check ID, scanned_at, and a "Show raw" toggle that reveals the raw Prowler JSON blob (collapsed by default).
 
 **Columns:**
 
@@ -276,4 +295,4 @@ Implement as Tailwind CSS utility classes. Do not use inline styles.
 - Search — not required.
 - Export — not required.
 - Real-time updates — findings are point-in-time snapshots. No live updates.
-- Any route other than `/before` and `/after`.
+- `/frameworks` tab implementation — placeholder only in initial release.

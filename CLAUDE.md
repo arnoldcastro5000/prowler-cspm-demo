@@ -144,8 +144,8 @@ running. Prowler fires on all 15 checks.
 `after.tfvars` — all 15 variables set to `false`, EC2 instance stopped. Prowler
 reports zero findings.
 
-Resources are created once during setup (`terraform apply -var-file=after.tfvars`)
-and toggled between misconfigured and hardened states by subsequent applies.
+Resources are created once during setup (`make setup`) and toggled between
+misconfigured and hardened states by subsequent applies.
 Never recreate resources between scans — always apply against the existing state.
 
 ---
@@ -154,7 +154,8 @@ Never recreate resources between scans — always apply against the existing sta
 
 | Target | Runs where | What it does |
 |---|---|---|
-| `make before` | WSL2 | `terraform apply -var-file=before.tfvars` in `iac/environments` — misconfigs all 15 checks, starts EC2 |
+| `make setup` | WSL2 | Fetches credentials from Secret Manager, runs `terraform init`, creates all resources in hardened state — one-time only |
+| `make before` | WSL2 | Fetches credentials, runs `terraform apply -var-file=before.tfvars` in `iac/environments` — misconfigs all 15 checks, starts EC2 |
 | `make scan` | WSL2 | Fetches credentials from Secret Manager, runs Prowler locally, runs ingest_prowler.py → writes `findings_before.json` to `dashboard/public/` |
 | `make after` | WSL2 | `terraform apply -var-file=after.tfvars` in `iac/environments` — hardens all 15 checks, stops EC2 |
 | `make rescan` | WSL2 | Same as scan, writes `findings_after.json` to `dashboard/public/` |
