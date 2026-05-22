@@ -14,20 +14,22 @@ export default function Landing() {
         <div>
           <h1 className="text-4xl font-bold text-white mb-4">Prowler CSPM</h1>
           <p className="text-xl text-gray-300 leading-relaxed mb-4">
-            Real Prowler scans against live AWS, GCP, and Azure infrastructure — not mocked data.
-            15 checks across 5 security categories, with full before/after remediation.
-          </p>
-          <p className="text-gray-400 leading-relaxed">
             Cloud misconfiguration is the{' '}
             <a
-              href="https://cloudsecurityalliance.org/blog/2024/08/20/top-threat-1-misconfig-misadventures-taming-the-change-control-chaos"
+              href="https://www.rsaconference.com/library/blog/cloud-misconfigurations-still-the-biggest-threat-in-2025"
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-400 underline hover:text-blue-300"
             >
-              #1 cloud security threat according to the Cloud Security Alliance
+              #1 cloud security threat
             </a>
-            {' '}— responsible for 68% of cloud security issues.
+            {' '}— the average breach costs <span className="text-white font-semibold">$4.3 million</span> and
+            takes over 180 days to detect. This project demonstrates end-to-end detection
+            and remediation across AWS, GCP, and Azure using real Prowler scans against
+            live infrastructure.
+          </p>
+          <p className="text-xl text-gray-300 leading-relaxed">
+            Scan. Remediate. Verify. End-to-end across three clouds.
           </p>
         </div>
 
@@ -43,8 +45,8 @@ export default function Landing() {
           </ul>
 
           {/* Security boundary callout */}
-          <div className="mt-6 border border-yellow-500/40 bg-yellow-950/30 rounded-lg p-4">
-            <p className="text-xs font-semibold text-yellow-400 uppercase tracking-widest mb-2">Security boundary enforced</p>
+          <div className="mt-6 border border-gray-600/50 bg-gray-800/40 rounded-lg p-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Defence in depth</p>
             <p className="text-gray-300 text-sm leading-relaxed">
               Cloud Run rejects any request missing a Cloudflare-issued <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">CF-Access-Secret</code> header —
               preventing origin bypass, a common misconfiguration in reverse proxy setups.
@@ -86,7 +88,7 @@ export default function Landing() {
                   ['Edge', 'Cloudflare (free tier)'],
                   ['Secrets', 'GCP Secret Manager'],
                   ['Registry', 'GCP Artifact Registry'],
-                  ['AI Development', 'Claude Code + mattpocock/skills + andrej-karpathy-skills'],
+                  ['AI Development', 'Claude Code (sandboxed) + andrej-karpathy-skills + mattpocock/skills'],
                 ].map(([layer, tech]) => (
                   <tr key={layer} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{layer}</td>
@@ -119,6 +121,7 @@ export default function Landing() {
                   ['Secret Scan', 'secret-scan.yml'],
                   ['Trivy', 'trivy.yml'],
                   ['Zizmor', 'zizmor.yml'],
+                  ['Hardcoded Config Check', 'hardcoded-config-check.yml'],
                 ].map(([name, file]) => (
                   <tr key={file} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{name}</td>
