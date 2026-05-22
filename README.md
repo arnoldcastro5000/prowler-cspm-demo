@@ -12,7 +12,7 @@ Live demo → `prowler.cloudsecuritypractice.com/before` and `prowler.cloudsecur
 Prowler scans 15 high-signal checks across AWS, GCP, and Azure — covering IAM, storage, networking, logging, and encryption. The demo environment is intentionally misconfigured using Terraform. Findings are captured as a snapshot, the infrastructure is hardened, and a second snapshot is taken. Both states are published to the dashboard.
 
 
-The dashboard shows the before state (15 findings across critical, high, medium, and low severity across three clouds), the after state (zero findings), and the full remediation changelog between the two scans.
+The dashboard shows the before state (findings across critical, high, medium, and low severity across three clouds), the after state (all target checks remediated), and the full remediation changelog between the two scans.
 
 ---
 
@@ -56,12 +56,12 @@ The dashboard shows the before state (15 findings across critical, high, medium,
 
 ### Security boundary — Cloudflare to Cloud Run
 
-Cloud Run rejects any request missing a Cloudflare-issued `CF-Access-Secret` header, preventing origin bypass — a common misconfiguration in reverse proxy setups. SSL mode is Full (Strict) end-to-end.
+Cloud Run validates a shared secret on every inbound request, preventing origin bypass — a common misconfiguration in reverse proxy setups. SSL mode is Full (Strict) end-to-end.
 
 ```
 User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
                                           ↑
-                             CF-Access-Secret header required
+                             shared secret validated on every request
 ```
 
 ---
@@ -159,7 +159,7 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 - Cloudflare's free WAF provides managed rulesets only. Custom rules and advanced rate limiting require a paid plan.
 - A domain name is required for Cloudflare integration and is not free.
 - GCP Secret Manager free tier covers 6 active secret versions. Azure credentials are consolidated into one JSON secret to stay within this limit.
-- Terraform state is stored locally in `iac/environments/`. If the local machine is lost, resources still exist in the cloud but state must be reconstructed via `terraform import`.
+- Terraform state is stored locally on the WSL2 machine. If the local machine is lost, resources still exist in the cloud but state must be reconstructed via `terraform import`.
 
 ---
 

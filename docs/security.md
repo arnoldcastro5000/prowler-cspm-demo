@@ -37,7 +37,7 @@ Both scans run independently — the local hook catches secrets before they leav
 - **Zizmor** audits GitHub Actions workflow files for supply chain risks on every push and PR (`.github/workflows/zizmor.yml`). Findings upload to the GitHub Security tab via SARIF.
 - All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags.
 - `persist-credentials: false` is set on all checkout actions.
-- **Hardcoded config check** (`.github/workflows/hardcoded-config-check.yml`) scans source files on every push and PR for hardcoded AWS account IDs, Azure subscription UUIDs, AWS resource IDs, regions, and personal email addresses.
+- **Hardcoded config check** (`.github/workflows/hardcoded-config-check.yml`) scans source files on every push and PR for hardcoded cloud account identifiers, resource IDs, regions, and personal identifiers.
 
 ## Code Quality and Safety
 
