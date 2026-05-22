@@ -192,6 +192,10 @@ At the start of every AI session, before doing any work:
 - **Do not** add fields to the findings JSON schema without explicit instruction.
 - **Do not** add IAM users outside of what is defined in the Terraform modules.
 - **Do not** put credentials, keys, or secrets in any file tracked by git.
+- **Do not** hardcode cloud account IDs (AWS 12-digit account IDs, GCP project IDs, Azure subscription or tenant UUIDs) anywhere in code, scripts, or configuration files. All cloud identifiers must be derived at runtime — AWS/Azure credentials from GCP Secret Manager, GCP project ID from `gcloud config get-value project`.
+- **Do not** hardcode cloud regions (e.g. `us-east-1`, `us-central1`, `eastus`) inline in scripts or Terraform. Regions must be defined as named variables at the top of the Makefile (`AWS_REGION`, `REGION`) and passed through.
+- **Do not** hardcode resource IDs (security group IDs, instance IDs, VPC IDs, subnet IDs, AMI IDs) in any file. These change between environments and must never be committed.
+- **Do not** hardcode personal email addresses, GitHub usernames, or LinkedIn URLs in source code. These belong only in the dashboard UI components where explicitly required.
 - **Do not** commit `terraform.tfstate` files — state is local only.
 - **Do not** use a GCS backend for Terraform — state is stored locally in `iac/environments/`.
 - **Do not** create separate before/ and after/ Terraform directories — one environment, one state file.
