@@ -1,6 +1,6 @@
 [
   {
-    "id": "0b3c98fb-0164-44f3-be50-c6ac41b65f24",
+    "id": "fc5ae245-755e-4453-801d-7d62963bcf7b",
     "source": "prowler",
     "check_id": "storage_blob_public_access_level_is_disabled",
     "title": "Storage account has 'Allow blob public access' disabled",
@@ -8,7 +8,7 @@
     "severity": "high",
     "provider": "azure",
     "category": "storage",
-    "resource": "azure:Microsoft.Storage/storageAccounts/prowlercspmsa",
+    "resource": "azure:Microsoft.Storage/storageAccounts",
     "scanned_at": "2026-05-22T00:03:33.975336",
     "raw": {
       "message": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has allow blob public access disabled.",
@@ -293,7 +293,7 @@
     }
   },
   {
-    "id": "57291387-1a21-4857-8fea-ae509681abeb",
+    "id": "cc5aeb19-48bb-4fcb-bb78-c70a4bf5c8de",
     "source": "prowler",
     "check_id": "network_rdp_internet_access_restricted",
     "title": "Network security group does not allow inbound RDP (TCP 3389) from the Internet",
@@ -301,7 +301,7 @@
     "severity": "high",
     "provider": "azure",
     "category": "networking",
-    "resource": "azure:Microsoft.Network/networkSecurityGroups/prowler-cspm-nsg",
+    "resource": "azure:Microsoft.Network/networkSecurityGroups",
     "scanned_at": "2026-05-22T00:03:49.028388",
     "raw": {
       "message": "Security Group prowler-cspm-nsg from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has RDP internet access allowed.",
@@ -493,7 +493,7 @@
     }
   },
   {
-    "id": "770cb999-021d-48ae-8dde-4cf9c01439a0",
+    "id": "723f51fd-4eaa-4f72-9f56-b8aeaefab7ba",
     "source": "prowler",
     "check_id": "monitor_alert_create_update_security_solution",
     "title": "Subscription has Activity Log alert for Security Solution create or update",
@@ -501,7 +501,7 @@
     "severity": "medium",
     "provider": "azure",
     "category": "logging",
-    "resource": "azure:subscription",
+    "resource": "azure:***",
     "scanned_at": "2026-05-22T00:04:19.639658",
     "raw": {
       "message": "There is not an alert for creating/updating Security Solution in subscription Subscription 1 (***REDACTED-AZURE-SUB***).",
@@ -691,7 +691,7 @@
     }
   },
   {
-    "id": "3cbbbdb7-a33e-428e-91b4-34723dec214a",
+    "id": "60a778a7-7a8c-4b67-855e-7957cfdc35c6",
     "source": "prowler",
     "check_id": "storage_secure_transfer_required_is_enabled",
     "title": "Storage account has secure transfer required enabled",
@@ -699,7 +699,7 @@
     "severity": "high",
     "provider": "azure",
     "category": "storage",
-    "resource": "azure:Microsoft.Storage/storageAccounts/prowlercspmsa",
+    "resource": "azure:Microsoft.Storage/storageAccounts",
     "scanned_at": "2026-05-22T00:04:32.246547",
     "raw": {
       "message": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has secure transfer required enabled.",
@@ -920,7 +920,7 @@
     }
   },
   {
-    "id": "301240b6-075a-41b9-872e-cb7fd7eaa957",
+    "id": "7a0ef14c-9c32-499e-9f45-a9215fd8425e",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1131,7 +1131,7 @@
     }
   },
   {
-    "id": "72f8a8b6-6e1e-4a7c-bf77-6bd3ecb9badf",
+    "id": "5fa45287-62a8-465f-b0db-f95102106857",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1353,7 +1353,7 @@
     }
   },
   {
-    "id": "13b3814e-d797-42e1-810a-71a75bd985cf",
+    "id": "fa369c60-0fbe-40c4-a4eb-c92fafb39986",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1609,7 +1609,7 @@
     }
   },
   {
-    "id": "fa26a3a6-285f-416f-ac1b-68934edcf712",
+    "id": "15ef530f-63d9-4b29-a705-c2efbe04ec27",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1831,7 +1831,7 @@
     }
   },
   {
-    "id": "024e1b4b-b097-46a6-b8cf-a40c31a32bff",
+    "id": "77f03faa-7d12-42e7-b738-9d1d70f1b309",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2053,7 +2053,7 @@
     }
   },
   {
-    "id": "4d384910-b2ed-4867-813f-6b8f84960ed4",
+    "id": "4c0f4a1c-4551-4e52-a930-0e10e58474f9",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2302,7 +2302,7 @@
     }
   },
   {
-    "id": "04ad4209-1660-4e78-8935-ec31bc310f6c",
+    "id": "259f965e-087b-4d29-ba8f-7e824aacb5ff",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2524,7 +2524,7 @@
     }
   },
   {
-    "id": "d444b17f-8db4-4348-aae2-17206a2f94e8",
+    "id": "c30a273c-5589-40e9-8574-24467b047797",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2735,7 +2735,7 @@
     }
   },
   {
-    "id": "65b441a8-5ca1-41d8-8a01-6c93571cd405",
+    "id": "3dc30549-b706-45fe-9dc8-0b497a1c7044",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2973,7 +2973,7 @@
     }
   },
   {
-    "id": "acf729db-1dc0-4b95-80b2-79398bb31852",
+    "id": "e3e5c8e6-2be5-43db-aa5c-55f80631ea59",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -3184,7 +3184,7 @@
     }
   },
   {
-    "id": "fa5a6207-c350-4ac4-85f5-2c7b0d205218",
+    "id": "e06b312a-a847-452a-a64b-19bee335f80d",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -3395,7 +3395,7 @@
     }
   },
   {
-    "id": "d1cc2fd1-2cd2-4e11-a7d0-c908689c4cb5",
+    "id": "6cbacaa5-1ddb-42f3-9dec-0ff82464e18f",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -3606,7 +3606,7 @@
     }
   },
   {
-    "id": "e324f8a6-36f3-4090-aa99-ac53288e75cb",
+    "id": "a1ffa2f3-30ea-45cb-9f63-a56927dfc0c0",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -3817,7 +3817,7 @@
     }
   },
   {
-    "id": "f555b4ce-a415-47f6-ac02-cee56fc9a90d",
+    "id": "b8443c11-7266-43d6-9507-01cba082851b",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -4039,7 +4039,7 @@
     }
   },
   {
-    "id": "2ded7b15-50f8-49c9-9bc8-a3ae4d63d8b9",
+    "id": "0c5c7059-a930-4dc7-96f9-da47e284de13",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -4250,7 +4250,7 @@
     }
   },
   {
-    "id": "dad4ae2b-2c67-4617-8520-075aa46d66a4",
+    "id": "b27636a4-46f8-4eaa-ab6d-d51474c75fa7",
     "source": "prowler",
     "check_id": "iam_password_policy_minimum_length_14",
     "title": "IAM password policy requires passwords to be at least 14 characters long",
@@ -4258,7 +4258,7 @@
     "severity": "medium",
     "provider": "aws",
     "category": "iam",
-    "resource": "aws:iam:us-east-1:password-policy",
+    "resource": "aws:iam",
     "scanned_at": "2026-05-22T00:00:17.994509",
     "raw": {
       "message": "IAM password policy requires minimum length of 14 characters.",
@@ -4546,7 +4546,7 @@
     }
   },
   {
-    "id": "90157e38-a654-40ab-8fd0-95ed19a5acf4",
+    "id": "13e529c1-94fd-4ae6-854d-302ce2a22033",
     "source": "prowler",
     "check_id": "ec2_instance_port_ssh_exposed_to_internet",
     "title": "EC2 instance does not allow ingress from the Internet to TCP port 22 (SSH)",
@@ -4554,7 +4554,7 @@
     "severity": "medium",
     "provider": "aws",
     "category": "networking",
-    "resource": "aws:ec2:us-east-1:instance/***REDACTED-INSTANCE***",
+    "resource": "aws:ec2",
     "scanned_at": "2026-05-22T00:00:45.563589",
     "raw": {
       "message": "Instance ***REDACTED-INSTANCE*** has SSH exposed to 0.0.0.0/0 but with no public IP address.",
@@ -4732,7 +4732,7 @@
     }
   },
   {
-    "id": "d86fb9a1-5b57-47ee-bc10-c31debbca5cd",
+    "id": "48346b7b-8ca1-46a7-abb6-5f0813e2be80",
     "source": "prowler",
     "check_id": "cloudtrail_multi_region_enabled",
     "title": "Region has at least one CloudTrail trail logging",
@@ -5151,7 +5151,7 @@
     }
   },
   {
-    "id": "77977201-c1d9-4da2-9d48-c8eae387ace2",
+    "id": "3f0c3edb-31b0-43bc-9c5f-b58670c8fa97",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -5439,7 +5439,7 @@
     }
   },
   {
-    "id": "dab804f2-9f5e-44b0-970a-9dbd40c38230",
+    "id": "8dcf49c7-f811-4023-b11d-0572651b06fd",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -5738,7 +5738,7 @@
     }
   },
   {
-    "id": "b440b420-23b9-4021-aebc-eaa250e9ff2f",
+    "id": "c09df9f1-744d-46be-9c26-50c25c0d543a",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -6071,7 +6071,7 @@
     }
   },
   {
-    "id": "422f3eb6-2d0a-4dfd-afeb-585fa1886328",
+    "id": "23ae4a8e-dc74-47c9-9004-f2543aa21e2d",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -6370,7 +6370,7 @@
     }
   },
   {
-    "id": "a7e307ce-05de-4758-a833-7e6fab9823fa",
+    "id": "e8f44583-fc92-4739-bcf4-42760a54a97e",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -6669,7 +6669,7 @@
     }
   },
   {
-    "id": "09389e48-eb88-415b-b54a-7fef9175749e",
+    "id": "0ed8a6b3-1bdf-4ec6-817b-0411a33bd3dc",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -6995,7 +6995,7 @@
     }
   },
   {
-    "id": "a6fc13f1-3c5a-4416-a34b-08644a422193",
+    "id": "1656f46f-1b27-46ec-b4d4-5449c4a1b032",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -7294,7 +7294,7 @@
     }
   },
   {
-    "id": "97cf4454-f0fe-4f42-b1f8-f432af7802d3",
+    "id": "a0897f10-dcf5-4013-90e7-703a5f0652c8",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -7582,7 +7582,7 @@
     }
   },
   {
-    "id": "06f604f0-6fd8-42d3-991c-05b795a05a1f",
+    "id": "71ff3c98-40b0-4cf6-b42b-11745562c2e6",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -7897,7 +7897,7 @@
     }
   },
   {
-    "id": "e49f7822-a821-41be-b906-65d7919e5987",
+    "id": "86c9ecd0-336f-4814-bda7-6f7f7ffd6f93",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -8185,7 +8185,7 @@
     }
   },
   {
-    "id": "9b5fb4b9-f279-4668-82d4-14d68d8f96f0",
+    "id": "369fd5fb-6225-45de-88e6-440e4f80a4f7",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -8473,7 +8473,7 @@
     }
   },
   {
-    "id": "479c2559-5b7e-45ae-a86d-d6a006ec6fdb",
+    "id": "08d839f4-c0ae-4fde-8eca-6c8df699657a",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -8761,7 +8761,7 @@
     }
   },
   {
-    "id": "030d8880-5e52-45da-b8c4-d592ebcd0d95",
+    "id": "11fa08a9-3db4-42c2-b468-63c95d419bb7",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -9049,7 +9049,7 @@
     }
   },
   {
-    "id": "dcc935a3-cc74-4f56-9f70-0e79494eda23",
+    "id": "c7b7ef6c-3875-4993-91c5-e7b42c8860a7",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -9348,7 +9348,7 @@
     }
   },
   {
-    "id": "5a8cdbcf-39b4-4dd3-b251-80fb6b5e1e12",
+    "id": "71a5df9b-df1a-4464-9abf-9691933ea0a1",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -9636,7 +9636,7 @@
     }
   },
   {
-    "id": "5199899f-d02e-436b-a8a7-aa71d4a3ca6f",
+    "id": "f768330a-9b61-478e-94df-615cf2fe5af4",
     "source": "prowler",
     "check_id": "compute_firewall_ssh_access_from_the_internet_allowed",
     "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
@@ -9867,7 +9867,7 @@
     }
   },
   {
-    "id": "b145cf3a-cd78-4cc2-bbd9-5329d098a257",
+    "id": "9975efd8-24e9-43e4-bc70-60b1b85d73cd",
     "source": "prowler",
     "check_id": "compute_firewall_ssh_access_from_the_internet_allowed",
     "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
@@ -10107,7 +10107,7 @@
     }
   },
   {
-    "id": "08de1dc1-5cf7-44b5-85ad-c28cd5441ba1",
+    "id": "a78a31d7-c19a-4b57-b7de-01ad3af2b112",
     "source": "prowler",
     "check_id": "iam_sa_no_administrative_privileges",
     "title": "Service account has no administrative privileges",
@@ -10115,7 +10115,7 @@
     "severity": "high",
     "provider": "gcp",
     "category": "iam",
-    "resource": "gcp:prowler-cspm-test@***.iam.gserviceaccount.com",
+    "resource": "gcp:***",
     "scanned_at": "2026-05-22T00:03:04.117496",
     "raw": {
       "message": "Account prowler-cspm-test@***REDACTED-GCP-PROJECT***.iam.gserviceaccount.com has no administrative privileges.",
@@ -10377,7 +10377,7 @@
     }
   },
   {
-    "id": "5fcefd91-2297-4406-b8b4-c93c971fc5c0",
+    "id": "792bda97-5091-4187-bf47-03b9eebe7875",
     "source": "prowler",
     "check_id": "iam_sa_no_administrative_privileges",
     "title": "Service account has no administrative privileges",
@@ -10385,7 +10385,7 @@
     "severity": "high",
     "provider": "gcp",
     "category": "iam",
-    "resource": "gcp:***-compute@developer.gserviceaccount.com",
+    "resource": "gcp:***",
     "scanned_at": "2026-05-22T00:03:04.117496",
     "raw": {
       "message": "Account ***REDACTED-GCP-ACCOUNT***-compute@developer.gserviceaccount.com has administrative privileges with roles/editor.",
@@ -10647,7 +10647,7 @@
     }
   },
   {
-    "id": "7770ee63-ee40-4aae-ad63-f559c887dcd0",
+    "id": "2fee3330-c65d-4071-bac3-888010881368",
     "source": "prowler",
     "check_id": "iam_sa_no_administrative_privileges",
     "title": "Service account has no administrative privileges",
@@ -10655,7 +10655,7 @@
     "severity": "high",
     "provider": "gcp",
     "category": "iam",
-    "resource": "gcp:prowler-scanner@***.iam.gserviceaccount.com",
+    "resource": "gcp:***",
     "scanned_at": "2026-05-22T00:03:04.117496",
     "raw": {
       "message": "Account prowler-scanner@***REDACTED-GCP-PROJECT***.iam.gserviceaccount.com has no administrative privileges.",
@@ -10924,7 +10924,7 @@
     }
   },
   {
-    "id": "92d763b3-723b-4639-bf62-8e4b10207944",
+    "id": "531a5d2d-6333-4dd0-8fc5-bfd9fcd266a4",
     "source": "prowler",
     "check_id": "logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled",
     "title": "Log metric filter for audit configuration changes has an associated alert policy",
@@ -11191,7 +11191,7 @@
     }
   },
   {
-    "id": "012db8ca-6f31-434e-948f-7dedd16185bd",
+    "id": "2fed37f8-2a13-4fdf-a9ff-36d94b08ada8",
     "source": "prowler",
     "check_id": "kms_key_rotation_enabled",
     "title": "KMS key is rotated at least annually",
@@ -11199,7 +11199,7 @@
     "severity": "low",
     "provider": "gcp",
     "category": "encryption",
-    "resource": "gcp:locations/us-central1/keyRings/prowler-cspm-keyring/cryptoKeys/prowler-cspm-key",
+    "resource": "gcp:***",
     "scanned_at": "2026-05-22T00:03:23.991109",
     "raw": {
       "message": "Key prowler-cspm-key is rotated every 90 days or less and the next rotation time is in less than 90 days.",

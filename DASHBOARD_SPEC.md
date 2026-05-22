@@ -129,7 +129,7 @@ Remediation Changelog to confirm each check_id moved from fail to pass.
 
 **Grouping:** Findings are grouped by provider (`aws`, then `gcp`, then `azure`). Each provider is a collapsible section header. Within each section, rows are sorted severity descending.
 
-**Expandable rows:** Each row is expandable. Collapsed state shows Provider, Severity, Title, Resource. Expanded state additionally shows Category, Check ID, scanned_at, and a "Show raw" toggle that reveals the raw Prowler JSON blob (collapsed by default).
+**Expandable rows:** Each row is expandable. Collapsed state shows Provider, Severity, Title, Resource. Expanded state additionally shows Category, Check ID, and scanned_at. Raw Prowler JSON is not exposed.
 
 **Columns:**
 

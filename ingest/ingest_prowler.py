@@ -37,31 +37,29 @@ def redact_resource(uid: str, provider: str) -> str:
         # arn:aws:s3:::bucket-name → aws:s3:::*** (bucket names redacted)
         if uid.startswith("arn:aws:s3:::"):
             return "aws:s3:::***"
-        # arn:aws:cloudtrail:...:trail/name → aws:cloudtrail:*** (trail names redacted)
+        # arn:aws:cloudtrail:...:trail/name → aws:cloudtrail:***
         if ":cloudtrail:" in uid:
             return "aws:cloudtrail:***"
-        # arn:aws:ec2:us-east-1:123456789012:instance/i-abc → aws:ec2:instance/i-abc
+        # arn:aws:ec2:...:instance/i-abc → aws:ec2
+        if ":ec2:" in uid:
+            return "aws:ec2"
+        # arn:aws:iam::...:... → aws:iam (strip region and resource path)
+        if ":iam:" in uid:
+            return "aws:iam"
         uid = re.sub(r"^arn:aws:", "aws:", uid)
         uid = re.sub(r":\d{12}:", ":", uid)
         uid = re.sub(r":[a-z0-9-]+:\d{12}", "", uid)
         return uid
     if provider == "azure":
-        # /subscriptions/<uuid>/resourceGroups/rg/providers/Type/name → azure:Type/name
-        uid = re.sub(r"/subscriptions/[^/]+", "", uid)
-        uid = re.sub(r"/resourceGroups/[^/]+", "", uid, flags=re.IGNORECASE)
-        uid = re.sub(r"/providers/", "", uid, count=1)
-        return f"azure:{uid.lstrip('/')}" if uid.strip("/") else "azure:subscription"
+        # Extract Microsoft.Namespace/ResourceType, drop the item name
+        # e.g. /subscriptions/.../providers/Microsoft.Storage/storageAccounts/prowlercspmsa
+        #   → azure:Microsoft.Storage/storageAccounts
+        match = re.search(r"/(Microsoft\.[^/]+/[^/]+)", uid, re.IGNORECASE)
+        if match:
+            return f"azure:{match.group(1)}"
+        return "azure:***"
     if provider == "gcp":
-        # projects/<project-id>/... → gcp:...
-        uid = re.sub(r"projects/[^/]+/", "", uid)
-        # strip project ID from service account emails
-        uid = re.sub(r"@[^.]+\.iam\.gserviceaccount\.com", "@***.iam.gserviceaccount.com", uid)
-        # strip numeric prefix from default compute SA (1234567890-compute@developer...)
-        uid = re.sub(r"^\d+-compute@developer\.gserviceaccount\.com$", "***-compute@developer.gserviceaccount.com", uid)
-        # strip bare project IDs or bare numeric resource IDs (no slashes, not a known safe form)
-        if "/" not in uid and "gserviceaccount.com" not in uid and not uid.startswith("locations/"):
-            uid = "***"
-        return f"gcp:{uid}"
+        return "gcp:***"
     return uid
 
 
