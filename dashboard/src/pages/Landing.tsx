@@ -29,7 +29,7 @@ export default function Landing() {
             live infrastructure.
           </p>
           <p className="text-xl text-gray-300 leading-relaxed">
-            Scan. Remediate. Verify. End-to-end across three clouds.
+            19 failures found. 0 after remediation.
           </p>
         </div>
 
