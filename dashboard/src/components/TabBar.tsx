@@ -27,6 +27,12 @@ export default function TabBar() {
         >
           After
         </NavLink>
+        <NavLink
+          to="/security"
+          className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
+        >
+          Security
+        </NavLink>
         <button
           disabled
           title="Coming soon"

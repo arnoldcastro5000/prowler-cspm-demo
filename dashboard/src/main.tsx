@@ -5,6 +5,7 @@ import './index.css'
 import Landing from './pages/Landing'
 import Before from './pages/Before'
 import After from './pages/After'
+import Security from './pages/Security'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Landing />} />
         <Route path="/before" element={<Before />} />
         <Route path="/after" element={<After />} />
+        <Route path="/security" element={<Security />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

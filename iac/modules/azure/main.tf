@@ -82,7 +82,7 @@ resource "azurerm_monitor_activity_log_alert" "security_solution" {
 
   criteria {
     category       = "Security"
-    operation_name = "Microsoft.Security/policies/write"
+    operation_name = "Microsoft.Security/securitySolutions/write"
   }
 
   action {
