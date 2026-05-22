@@ -2,7 +2,7 @@
 # shellcheck disable=SC2329
 set -uo pipefail
 
-PROJECT_ID="***REDACTED-GCP-PROJECT***"
+PROJECT_ID=$(gcloud config get-value project 2>/dev/null)
 OUTPUT_DIR="/var/tmp/prowler-output"
 PROWLER="prowler"
 STATUS_FILE="/tmp/prowler-scan-status.json"

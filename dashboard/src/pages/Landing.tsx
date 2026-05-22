@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import TabBar from '../components/TabBar'
+import PipelineDiagram from '../components/PipelineDiagram'
 
 export default function Landing() {
   return (
@@ -12,9 +13,21 @@ export default function Landing() {
         {/* Hero */}
         <div>
           <h1 className="text-4xl font-bold text-white mb-4">Prowler CSPM</h1>
-          <p className="text-xl text-gray-300 leading-relaxed">
+          <p className="text-xl text-gray-300 leading-relaxed mb-4">
             Real Prowler scans against live AWS, GCP, and Azure infrastructure — not mocked data.
             15 checks across 5 security categories, with full before/after remediation.
+          </p>
+          <p className="text-gray-400 leading-relaxed">
+            Cloud misconfiguration is the{' '}
+            <a
+              href="https://cloudsecurityalliance.org/blog/2024/08/20/top-threat-1-misconfig-misadventures-taming-the-change-control-chaos"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 underline hover:text-blue-300"
+            >
+              #1 cloud security threat according to the Cloud Security Alliance
+            </a>
+            {' '}— responsible for 68% of cloud security issues.
           </p>
         </div>
 
@@ -28,32 +41,26 @@ export default function Landing() {
             <li className="flex gap-3"><span className="text-blue-400">→</span>Findings baked into the container at build time — no backend, no API, no database</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Hosted on GCP Cloud Run, proxied through Cloudflare (WAF · CDN · DDoS · Full Strict SSL)</li>
           </ul>
+
+          {/* Security boundary callout */}
+          <div className="mt-6 border border-yellow-500/40 bg-yellow-950/30 rounded-lg p-4">
+            <p className="text-xs font-semibold text-yellow-400 uppercase tracking-widest mb-2">Security boundary enforced</p>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              Cloud Run rejects any request missing a Cloudflare-issued <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">CF-Access-Secret</code> header —
+              preventing origin bypass, a common misconfiguration in reverse proxy setups.
+              All public traffic enters through Cloudflare only. SSL mode is Full (Strict) end-to-end.
+            </p>
+            <p className="text-gray-500 text-xs mt-2 font-mono">
+              User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
+            </p>
+          </div>
         </div>
 
         {/* Infrastructure diagram */}
         <div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Pipeline</h2>
-          <div className="bg-gray-900 rounded-lg p-6 font-mono text-xs text-gray-300 overflow-auto">
-            <pre>{`Terraform (WSL2)
-  ├── AWS resources        ─┐
-  ├── GCP resources         ├─ before.tfvars / after.tfvars
-  └── Azure resources      ─┘
-          │
-          ▼
-Prowler scan (WSL2)
-  ├── 5 AWS checks
-  ├── 5 GCP checks
-  └── 5 Azure checks
-          │
-          ▼
-ingest_prowler.py → findings_before.json / findings_after.json
-          │
-          ▼
-Docker build (JSON baked in) → GCP Artifact Registry
-          │
-          ▼
-GCP Cloud Run ← Cloudflare (CDN · WAF · DDoS)
-                prowler.cloudsecuritypractice.com`}</pre>
+          <div className="bg-gray-900 rounded-lg p-6">
+            <PipelineDiagram />
           </div>
         </div>
 
@@ -79,10 +86,54 @@ GCP Cloud Run ← Cloudflare (CDN · WAF · DDoS)
                   ['Edge', 'Cloudflare (free tier)'],
                   ['Secrets', 'GCP Secret Manager'],
                   ['Registry', 'GCP Artifact Registry'],
+                  ['AI Development', 'Claude Code + mattpocock/skills + andrej-karpathy-skills'],
                 ].map(([layer, tech]) => (
                   <tr key={layer} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{layer}</td>
                     <td className="px-4 py-2 text-gray-200">{tech}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* CI status badges */}
+        <div>
+          <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">CI Status</h2>
+          <div className="border border-gray-800 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-900">
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Workflow</th>
+                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800">
+                {[
+                  ['Frontend CI', 'frontend-ci.yml'],
+                  ['Docker Build', 'docker-build.yml'],
+                  ['Terraform Validate', 'terraform-validate.yml'],
+                  ['Python Lint', 'python-lint.yml'],
+                  ['Shellcheck', 'shellcheck.yml'],
+                  ['Secret Scan', 'secret-scan.yml'],
+                  ['Trivy', 'trivy.yml'],
+                  ['Zizmor', 'zizmor.yml'],
+                ].map(([name, file]) => (
+                  <tr key={file} className="bg-gray-950">
+                    <td className="px-4 py-2 text-gray-400">{name}</td>
+                    <td className="px-4 py-2">
+                      <a
+                        href={`https://github.com/arnoldcastro5000/prowler-cspm-demo/actions/workflows/${file}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={`https://github.com/arnoldcastro5000/prowler-cspm-demo/actions/workflows/${file}/badge.svg`}
+                          alt={`${name} status`}
+                        />
+                      </a>
+                    </td>
                   </tr>
                 ))}
               </tbody>

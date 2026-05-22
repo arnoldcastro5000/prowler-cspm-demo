@@ -1,17 +1,17 @@
 [
   {
-    "id": "fa694f49-c0ef-402e-b601-70c74c3b94b2",
+    "id": "73067326-8caa-4c96-82b2-faa07c9603d5",
     "source": "prowler",
     "check_id": "storage_blob_public_access_level_is_disabled",
     "title": "Storage account has 'Allow blob public access' disabled",
-    "status": "pass",
+    "status": "fail",
     "severity": "high",
     "provider": "azure",
     "category": "storage",
     "resource": "azure:Microsoft.Storage/storageAccounts",
-    "scanned_at": "2026-05-22T00:03:33.975336",
+    "scanned_at": "2026-05-22T02:12:05.236105",
     "raw": {
-      "message": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has allow blob public access disabled.",
+      "message": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has allow blob public access enabled.",
       "metadata": {
         "event_code": "storage_blob_public_access_level_is_disabled",
         "product": {
@@ -30,8 +30,8 @@
       "severity_id": 4,
       "severity": "High",
       "status": "New",
-      "status_code": "PASS",
-      "status_detail": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has allow blob public access disabled.",
+      "status_code": "FAIL",
+      "status_detail": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has allow blob public access enabled.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -185,15 +185,15 @@
             "10.3.2.2"
           ]
         },
-        "scan_id": "019e4cfe-97d7-7057-bd08-89b089cf0850",
+        "scan_id": "019e4d74-41f4-7583-9aec-422c93a97213",
         "provider_uid": "***REDACTED-AZURE-SUB***",
         "provider": "azure"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422613,
-        "created_time_dt": "2026-05-22T00:03:33.975336",
+        "created_time": 1779430325,
+        "created_time_dt": "2026-05-22T02:12:05.236105",
         "desc": "**Azure Storage accounts** with **blob public access** disabled prevent containers or blobs from being set to a public access level. Setting `allow blob public access` to `false` enforces no anonymous reads across the account.",
         "title": "Storage account has 'Allow blob public access' disabled",
         "types": [],
@@ -210,9 +210,9 @@
               "name": "prowlercspmsa",
               "location": "eastus",
               "resouce_group_name": "prowler-cspm-rg",
-              "enable_https_traffic_only": true,
+              "enable_https_traffic_only": false,
               "infrastructure_encryption": null,
-              "allow_blob_public_access": false,
+              "allow_blob_public_access": true,
               "network_rule_set": {
                 "bypass": "AzureServices",
                 "default_action": "Allow"
@@ -286,14 +286,14 @@
         ]
       },
       "risk_details": "Allowing public access permits unauthenticated users to read blob data or enumerate container contents when any container is made public, compromising confidentiality.\n\nExposed objects can be scraped at scale, enabling data exfiltration and intelligence gathering without audit attribution.",
-      "time": 1779422613,
-      "time_dt": "2026-05-22T00:03:33.975336",
+      "time": 1779430325,
+      "time_dt": "2026-05-22T02:12:05.236105",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "2c40a671-7d01-4ac3-aed8-369d5438030d",
+    "id": "edd91293-ef04-4421-a5f2-1a9acc64a06b",
     "source": "prowler",
     "check_id": "network_rdp_internet_access_restricted",
     "title": "Network security group does not allow inbound RDP (TCP 3389) from the Internet",
@@ -302,7 +302,7 @@
     "provider": "azure",
     "category": "networking",
     "resource": "azure:Microsoft.Network/networkSecurityGroups",
-    "scanned_at": "2026-05-22T00:03:49.028388",
+    "scanned_at": "2026-05-22T02:12:19.661143",
     "raw": {
       "message": "Security Group prowler-cspm-nsg from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has RDP internet access allowed.",
       "metadata": {
@@ -414,15 +414,15 @@
             "8.1"
           ]
         },
-        "scan_id": "019e4cfe-d2a4-7411-a3f0-dd187e9bebbd",
+        "scan_id": "019e4d74-7a4d-71f1-b040-adcd9f7424e3",
         "provider_uid": "***REDACTED-AZURE-SUB***",
         "provider": "azure"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422629,
-        "created_time_dt": "2026-05-22T00:03:49.028388",
+        "created_time": 1779430339,
+        "created_time_dt": "2026-05-22T02:12:19.661143",
         "desc": "**Azure NSG inbound rules** are evaluated for **public RDP exposure**. The finding flags rules that `Allow` `TCP` traffic to `port 3389` from broad sources like `0.0.0.0/0`, `Internet`, or `*`, including ranges that cover `3389`.",
         "title": "Network security group does not allow inbound RDP (TCP 3389) from the Internet",
         "types": [],
@@ -486,14 +486,200 @@
         ]
       },
       "risk_details": "Exposed **RDP** enables Internet-wide **brute force** and **credential stuffing**, risking unauthorized console access.\n\nCompromise can cause data theft (**confidentiality**), tampering or malware deployment (**integrity**), VM lockout or disruption (**availability**), and **lateral movement** within the VNet.",
-      "time": 1779422629,
-      "time_dt": "2026-05-22T00:03:49.028388",
+      "time": 1779430339,
+      "time_dt": "2026-05-22T02:12:19.661143",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "12c94e70-8757-4b89-b96a-506b7a10ad77",
+    "id": "c3e27359-acc6-4a89-a164-9346765039bd",
+    "source": "prowler",
+    "check_id": "iam_subscription_roles_owner_custom_not_created",
+    "title": "Custom role is not a subscription owner role",
+    "status": "fail",
+    "severity": "high",
+    "provider": "azure",
+    "category": "iam",
+    "resource": "azure:Microsoft.Authorization/roleDefinitions",
+    "scanned_at": "2026-05-22T02:12:36.997439",
+    "raw": {
+      "message": "Role prowler-cspm-custom-owner from subscription Subscription 1 (***REDACTED-AZURE-SUB***) is a custom owner role.",
+      "metadata": {
+        "event_code": "iam_subscription_roles_owner_custom_not_created",
+        "product": {
+          "name": "Prowler",
+          "uid": "prowler",
+          "vendor_name": "Prowler",
+          "version": "5.27.0"
+        },
+        "profiles": [
+          "cloud",
+          "datetime"
+        ],
+        "tenant_uid": "***REDACTED-AZURE-TENANT***",
+        "version": "1.5.0"
+      },
+      "severity_id": 4,
+      "severity": "High",
+      "status": "New",
+      "status_code": "FAIL",
+      "status_detail": "Role prowler-cspm-custom-owner from subscription Subscription 1 (***REDACTED-AZURE-SUB***) is a custom owner role.",
+      "status_id": 1,
+      "unmapped": {
+        "related_url": "",
+        "categories": [
+          "identity-access"
+        ],
+        "depends_on": [],
+        "related_to": [],
+        "additional_urls": [
+          "https://learn.microsoft.com/en-us/azure/role-based-access-control/custom-roles",
+          "https://www.trendmicro.com/cloudoneconformity-staging/knowledge-base/azure/AccessControl/remove-custom-owner-roles.html"
+        ],
+        "notes": "",
+        "compliance": {
+          "FedRAMP-20x-KSI-Low-25.05C": [
+            "ksi-iam"
+          ],
+          "CSA-CCM-4.0": [
+            "IAM-04",
+            "IAM-05",
+            "IAM-09",
+            "IAM-10",
+            "IAM-16"
+          ],
+          "SecNumCloud-3.2": [
+            "9.1",
+            "9.3"
+          ],
+          "C5-2025": [
+            "OIS-02.01B",
+            "OIS-02.02B",
+            "OIS-04.01B",
+            "IAM-01.01B",
+            "IAM-06.02B"
+          ],
+          "ENS-RD2022": [
+            "op.acc.2.az.rbac.1"
+          ],
+          "HIPAA": [
+            "164_308_a_1_ii_b",
+            "164_308_a_3_i",
+            "164_308_a_3_ii_b",
+            "164_308_a_4_i",
+            "164_308_a_4_ii_b",
+            "164_308_a_4_ii_c",
+            "164_312_a_1"
+          ],
+          "CIS-3.0": [
+            "2.23"
+          ],
+          "CIS-5.0": [
+            "5.23"
+          ],
+          "RBI-Cyber-Security-Framework": [
+            "annex_i_7_1"
+          ],
+          "CIS-2.1": [
+            "1.22"
+          ],
+          "CIS-2.0": [
+            "1.23",
+            "1.24"
+          ],
+          "CCC-v2025.10": [
+            "CCC.Core.CN05.AR01",
+            "CCC.Core.CN05.AR02",
+            "CCC.Core.CN05.AR06",
+            "CCC.IAM.CN02.AR01",
+            "CCC.IAM.CN02.AR02"
+          ],
+          "CIS-4.0": [
+            "6.23"
+          ]
+        },
+        "scan_id": "019e4d74-be05-78b1-9af9-96688d3b8aa8",
+        "provider_uid": "***REDACTED-AZURE-SUB***",
+        "provider": "azure"
+      },
+      "activity_name": "Create",
+      "activity_id": 1,
+      "finding_info": {
+        "created_time": 1779430356,
+        "created_time_dt": "2026-05-22T02:12:36.997439",
+        "desc": "**Azure custom roles** are analyzed for wildcard permissions. Roles that allow `*` in `actions` within their assignable scopes are treated as **owner-equivalent**, granting unrestricted control over subscription resources.",
+        "title": "Custom role is not a subscription owner role",
+        "types": [],
+        "uid": "prowler-azure-iam_subscription_roles_owner_custom_not_created-***REDACTED-AZURE-SUB***-global-prowler-cspm-custom-owner"
+      },
+      "resources": [
+        {
+          "cloud_partition": "AzureCloud",
+          "region": "global",
+          "data": {
+            "details": "",
+            "metadata": {
+              "id": "/subscriptions/***REDACTED-AZURE-SUB***/providers/Microsoft.Authorization/roleDefinitions/16c59147-3fa3-4b8a-a463-14b530b45e9e",
+              "name": "prowler-cspm-custom-owner",
+              "type": "CustomRole",
+              "assignable_scopes": [
+                "/subscriptions/***REDACTED-AZURE-SUB***"
+              ],
+              "permissions": [
+                {
+                  "actions": [
+                    "*"
+                  ],
+                  "condition": "",
+                  "condition_version": ""
+                }
+              ]
+            }
+          },
+          "group": {
+            "name": "iam"
+          },
+          "labels": [],
+          "name": "prowler-cspm-custom-owner",
+          "type": "microsoft.authorization/roledefinitions",
+          "uid": "/subscriptions/***REDACTED-AZURE-SUB***/providers/Microsoft.Authorization/roleDefinitions/16c59147-3fa3-4b8a-a463-14b530b45e9e"
+        }
+      ],
+      "category_name": "Findings",
+      "category_uid": 2,
+      "class_name": "Detection Finding",
+      "class_uid": 2004,
+      "cloud": {
+        "account": {
+          "name": "Subscription 1",
+          "type": "Azure AD Account",
+          "type_id": 6,
+          "uid": "***REDACTED-AZURE-SUB***",
+          "labels": []
+        },
+        "org": {
+          "name": "Unknown tenant domain (missing AAD permissions)",
+          "uid": "***REDACTED-AZURE-TENANT***"
+        },
+        "provider": "azure",
+        "region": "global"
+      },
+      "remediation": {
+        "desc": "Avoid owner-equivalent custom roles. Apply **least privilege**: prefer built-in roles, define explicit allowed `actions` (avoid `*`), and limit assignment scope to the minimum needed. Enforce **separation of duties**, require just-in-time elevation, and perform periodic access reviews to prevent privilege creep.",
+        "references": [
+          "https://hub.prowler.com/check/iam_subscription_roles_owner_custom_not_created"
+        ]
+      },
+      "risk_details": "Wildcard access grants full administrative control at subscription scope. If abused or compromised, an actor can exfiltrate data, alter configurations, deploy malware, delete resources, and disable logging, impacting confidentiality, integrity, and availability across the subscription.",
+      "time": 1779430356,
+      "time_dt": "2026-05-22T02:12:36.997439",
+      "type_uid": 200401,
+      "type_name": "Detection Finding: Create"
+    }
+  },
+  {
+    "id": "20b70dd4-a267-4461-92bd-7a287964b689",
     "source": "prowler",
     "check_id": "monitor_alert_create_update_security_solution",
     "title": "Subscription has Activity Log alert for Security Solution create or update",
@@ -502,7 +688,7 @@
     "provider": "azure",
     "category": "logging",
     "resource": "azure:***",
-    "scanned_at": "2026-05-22T00:04:19.639658",
+    "scanned_at": "2026-05-22T02:12:51.012772",
     "raw": {
       "message": "There is not an alert for creating/updating Security Solution in subscription Subscription 1 (***REDACTED-AZURE-SUB***).",
       "metadata": {
@@ -627,15 +813,15 @@
             "7.1.2.5"
           ]
         },
-        "scan_id": "019e4cff-4a37-7d98-8d92-b04c5794c151",
+        "scan_id": "019e4d74-f4c4-7a1d-ac7d-9234caddd13a",
         "provider_uid": "***REDACTED-AZURE-SUB***",
         "provider": "azure"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422659,
-        "created_time_dt": "2026-05-22T00:04:19.639658",
+        "created_time": 1779430371,
+        "created_time_dt": "2026-05-22T02:12:51.012772",
         "desc": "**Azure Monitor activity log alert** is configured to capture **Security Solutions** create/update operations (`Microsoft.Security/securitySolutions/write`) at subscription scope.",
         "title": "Subscription has Activity Log alert for Security Solution create or update",
         "types": [],
@@ -684,25 +870,25 @@
         ]
       },
       "risk_details": "Without this alert, **unauthorized or mistaken changes** to security tooling can go undetected. Attackers could disable defenses, alter integrations, or weaken policies, eroding the **integrity** of controls, creating blind spots that threaten **confidentiality**, and delaying incident response.",
-      "time": 1779422659,
-      "time_dt": "2026-05-22T00:04:19.639658",
+      "time": 1779430371,
+      "time_dt": "2026-05-22T02:12:51.012772",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "d8623adf-8498-4d9f-923f-e976a48f0a91",
+    "id": "9591ec6f-d38c-49ae-9284-aeb2aca002b4",
     "source": "prowler",
     "check_id": "storage_secure_transfer_required_is_enabled",
     "title": "Storage account has secure transfer required enabled",
-    "status": "pass",
+    "status": "fail",
     "severity": "high",
     "provider": "azure",
     "category": "storage",
     "resource": "azure:Microsoft.Storage/storageAccounts",
-    "scanned_at": "2026-05-22T00:04:32.246547",
+    "scanned_at": "2026-05-22T02:13:06.768874",
     "raw": {
-      "message": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has secure transfer required enabled.",
+      "message": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has secure transfer required disabled.",
       "metadata": {
         "event_code": "storage_secure_transfer_required_is_enabled",
         "product": {
@@ -721,8 +907,8 @@
       "severity_id": 4,
       "severity": "High",
       "status": "New",
-      "status_code": "PASS",
-      "status_detail": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has secure transfer required enabled.",
+      "status_code": "FAIL",
+      "status_detail": "Storage account prowlercspmsa from subscription Subscription 1 (***REDACTED-AZURE-SUB***) has secure transfer required disabled.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -812,15 +998,15 @@
             "10.3.4"
           ]
         },
-        "scan_id": "019e4cff-7b76-7138-8ad3-f2615dccb17f",
+        "scan_id": "019e4d75-3250-7c72-aa49-0def5a085180",
         "provider_uid": "***REDACTED-AZURE-SUB***",
         "provider": "azure"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422672,
-        "created_time_dt": "2026-05-22T00:04:32.246547",
+        "created_time": 1779430386,
+        "created_time_dt": "2026-05-22T02:13:06.768874",
         "desc": "**Azure Storage accounts** are evaluated for **secure transfer enforcement**, requiring all client requests to use `HTTPS` only (`enableHttpsTrafficOnly`) and blocking `HTTP`.",
         "title": "Storage account has secure transfer required enabled",
         "types": [],
@@ -837,9 +1023,9 @@
               "name": "prowlercspmsa",
               "location": "eastus",
               "resouce_group_name": "prowler-cspm-rg",
-              "enable_https_traffic_only": true,
+              "enable_https_traffic_only": false,
               "infrastructure_encryption": null,
-              "allow_blob_public_access": false,
+              "allow_blob_public_access": true,
               "network_rule_set": {
                 "bypass": "AzureServices",
                 "default_action": "Allow"
@@ -913,14 +1099,14 @@
         ]
       },
       "risk_details": "Allowing `HTTP` to storage endpoints enables **man-in-the-middle** and **TLS-stripping** attacks.\nIntercepted traffic can expose credentials, SAS tokens, or data (**confidentiality**) and allow request tampering (**integrity**), leading to unauthorized access and **data exfiltration**.",
-      "time": 1779422672,
-      "time_dt": "2026-05-22T00:04:32.246547",
+      "time": 1779430386,
+      "time_dt": "2026-05-22T02:13:06.768874",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "817f1e12-820c-44c2-8a51-86ae2dcb936d",
+    "id": "27d5db18-519c-4c84-90ab-a7881caaa4ba",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -929,7 +1115,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is configured for the S3 Bucket cheap-dashboard-1755280821-1c11aa28.",
       "metadata": {
@@ -1027,15 +1213,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -1124,14 +1310,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "332e68b6-d13a-410d-9c8c-4f5309fb62de",
+    "id": "b625312c-7f1f-4cfd-8862-abc41861c134",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1140,7 +1326,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is not configured for the S3 Bucket cheap-dashboard-1755280849-d9053d86.",
       "metadata": {
@@ -1238,15 +1424,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -1346,14 +1532,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "b35bbda2-2c19-41cb-8dec-56f2b464480e",
+    "id": "a67d9c04-32ac-4e79-8268-0720278f995c",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1362,7 +1548,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is not configured for the S3 Bucket grc-compliance-access-logs-20250731.",
       "metadata": {
@@ -1460,15 +1646,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -1541,8 +1727,8 @@
                     "Resource": "arn:aws:s3:::grc-compliance-access-logs-20250731/cloudtrail-logs/*",
                     "Condition": {
                       "StringEquals": {
-                        "s3:x-amz-acl": "bucket-owner-full-control",
-                        "AWS:SourceArn": "arn:aws:cloudtrail:us-east-1:***REDACTED-AWS-ACCOUNT***:trail/grc-compliance-api-trail"
+                        "AWS:SourceArn": "arn:aws:cloudtrail:us-east-1:***REDACTED-AWS-ACCOUNT***:trail/grc-compliance-api-trail",
+                        "s3:x-amz-acl": "bucket-owner-full-control"
                       }
                     }
                   }
@@ -1602,14 +1788,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "74f36b25-f348-4e07-849c-1b09f0d365c8",
+    "id": "37f251f3-3cad-47a1-891d-9d291a127940",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1618,7 +1804,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is configured for the S3 Bucket grc-compliance-content.",
       "metadata": {
@@ -1716,15 +1902,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -1824,14 +2010,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "5147fe89-bd11-46ff-a01e-49d838c19b6a",
+    "id": "783e290d-571b-4246-a3ba-4662e077e5ce",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -1840,7 +2026,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is not configured for the S3 Bucket grc-compliance-dashboard-frontend.",
       "metadata": {
@@ -1938,15 +2124,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -2046,14 +2232,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "ed68bce4-81a2-4294-a4d3-697670ba6f06",
+    "id": "035bc400-f059-493c-b21d-10aaeb764299",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2062,7 +2248,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is not configured for the S3 Bucket grc-compliance-prod-frontend-***REDACTED-AWS-ACCOUNT***-us-east-1.",
       "metadata": {
@@ -2160,15 +2346,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -2295,14 +2481,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "c68ddb17-4f6a-49dc-a0e1-ee4bc181bb89",
+    "id": "96486f57-a719-4904-9954-e874d57eaf0b",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2311,7 +2497,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is not configured for the S3 Bucket grc-requirements-data.",
       "metadata": {
@@ -2409,15 +2595,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -2517,14 +2703,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "d80d342e-607b-4855-9873-95b722b521ac",
+    "id": "b51474df-da62-437b-a2d9-3a84176846d9",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2533,7 +2719,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is configured for the S3 Bucket my-super-secret-q-usage-bucket.",
       "metadata": {
@@ -2631,15 +2817,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -2728,14 +2914,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "8c6465ff-847a-4171-81cd-6508e62a86f1",
+    "id": "99fbbf33-bdc6-49f0-8518-0aaee0f7e62b",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -2744,245 +2930,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
-    "raw": {
-      "message": "Block Public Access is configured for the S3 Bucket prowler-cspm-cloudtrail.",
-      "metadata": {
-        "event_code": "s3_bucket_level_public_access_block",
-        "product": {
-          "name": "Prowler",
-          "uid": "prowler",
-          "vendor_name": "Prowler",
-          "version": "5.27.0"
-        },
-        "profiles": [
-          "cloud",
-          "datetime"
-        ],
-        "tenant_uid": "arn:aws:organizations::***REDACTED-AWS-ACCOUNT***:organization/o-kp6lq2m89c",
-        "version": "1.5.0"
-      },
-      "severity_id": 4,
-      "severity": "High",
-      "status": "New",
-      "status_code": "PASS",
-      "status_detail": "Block Public Access is configured for the S3 Bucket prowler-cspm-cloudtrail.",
-      "status_id": 1,
-      "unmapped": {
-        "related_url": "",
-        "categories": [
-          "internet-exposed"
-        ],
-        "depends_on": [],
-        "related_to": [],
-        "additional_urls": [
-          "https://www.trendmicro.com/trendaivisiononecloudriskmanagement/knowledge-base/aws/S3/bucket-public-access-block.html",
-          "https://docs.aws.amazon.com/AmazonS3/latest/userguide/access-control-block-public-access.html"
-        ],
-        "notes": "",
-        "compliance": {
-          "AWS-Foundational-Security-Best-Practices": [
-            "S3.8"
-          ],
-          "CIS-4.0.1": [
-            "2.1.4"
-          ],
-          "SecNumCloud-3.2": [
-            "9.7"
-          ],
-          "CIS-3.0": [
-            "2.1.4"
-          ],
-          "AWS-Foundational-Technical-Review": [
-            "S3-001"
-          ],
-          "CCC-v2025.10": [
-            "CCC.Logging.CN05.AR01"
-          ],
-          "CIS-6.0": [
-            "3.1.4"
-          ],
-          "CIS-1.4": [
-            "2.1.5"
-          ],
-          "CIS-2.0": [
-            "2.1.4"
-          ],
-          "NIST-CSF-2.0": [
-            "ac_3"
-          ],
-          "CIS-5.0": [
-            "2.1.4"
-          ],
-          "KISA-ISMS-P-2023-korean": [
-            "2.6.1",
-            "2.6.2",
-            "2.10.2"
-          ],
-          "CSA-CCM-4.0": [
-            "DSP-07"
-          ],
-          "CIS-1.5": [
-            "2.1.5"
-          ],
-          "AWS-Account-Security-Onboarding": [
-            "S3 Block Public Access"
-          ],
-          "C5-2025": [
-            "PS-03.02B",
-            "IAM-10.01B",
-            "COS-02.01B"
-          ],
-          "KISA-ISMS-P-2023": [
-            "2.6.1",
-            "2.6.2",
-            "2.10.2"
-          ],
-          "MITRE-ATTACK": [
-            "T1530"
-          ]
-        },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
-        "provider_uid": "***REDACTED-AWS-ACCOUNT***",
-        "provider": "aws"
-      },
-      "activity_name": "Create",
-      "activity_id": 1,
-      "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
-        "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
-        "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
-        "types": [
-          "Software and Configuration Checks/AWS Security Best Practices/Network Reachability",
-          "Software and Configuration Checks/Industry and Regulatory Standards/AWS Foundational Security Best Practices",
-          "Software and Configuration Checks/Industry and Regulatory Standards/CIS AWS Foundations Benchmark",
-          "Effects/Data Exposure"
-        ],
-        "uid": "prowler-aws-s3_bucket_level_public_access_block-***REDACTED-AWS-ACCOUNT***-us-east-1-prowler-cspm-cloudtrail"
-      },
-      "resources": [
-        {
-          "cloud_partition": "aws",
-          "region": "us-east-1",
-          "data": {
-            "details": "",
-            "metadata": {
-              "arn": "arn:aws:s3:::prowler-cspm-cloudtrail",
-              "name": "prowler-cspm-cloudtrail",
-              "owner_id": "d198e25c947c91674f2f1ad53569daebf6626e95114349ee0f0f44278b358757",
-              "owner": null,
-              "versioning": false,
-              "logging": false,
-              "public_access_block": {
-                "block_public_acls": true,
-                "ignore_public_acls": true,
-                "block_public_policy": true,
-                "restrict_public_buckets": true
-              },
-              "acl_grantees": [
-                {
-                  "display_name": null,
-                  "ID": "d198e25c947c91674f2f1ad53569daebf6626e95114349ee0f0f44278b358757",
-                  "type": "CanonicalUser",
-                  "URI": null,
-                  "permission": "FULL_CONTROL"
-                }
-              ],
-              "policy": {
-                "Version": "2012-10-17",
-                "Statement": [
-                  {
-                    "Sid": "AWSCloudTrailAclCheck",
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": "cloudtrail.amazonaws.com"
-                    },
-                    "Action": "s3:GetBucketAcl",
-                    "Resource": "arn:aws:s3:::prowler-cspm-cloudtrail"
-                  },
-                  {
-                    "Sid": "AWSCloudTrailWrite",
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": "cloudtrail.amazonaws.com"
-                    },
-                    "Action": "s3:PutObject",
-                    "Resource": "arn:aws:s3:::prowler-cspm-cloudtrail/AWSLogs/***REDACTED-AWS-ACCOUNT***/*",
-                    "Condition": {
-                      "StringEquals": {
-                        "s3:x-amz-acl": "bucket-owner-full-control"
-                      }
-                    }
-                  }
-                ]
-              },
-              "encryption": "AES256",
-              "region": "us-east-1",
-              "logging_target_bucket": null,
-              "ownership": "BucketOwnerEnforced",
-              "object_lock": false,
-              "mfa_delete": false,
-              "tags": [],
-              "lifecycle": [],
-              "replication_rules": [],
-              "notification_config": {}
-            }
-          },
-          "group": {
-            "name": "s3"
-          },
-          "labels": [],
-          "name": "prowler-cspm-cloudtrail",
-          "type": "AwsS3Bucket",
-          "uid": "arn:aws:s3:::prowler-cspm-cloudtrail"
-        }
-      ],
-      "category_name": "Findings",
-      "category_uid": 2,
-      "class_name": "Detection Finding",
-      "class_uid": 2004,
-      "cloud": {
-        "account": {
-          "name": "theboss",
-          "type": "AWS Account",
-          "type_id": 10,
-          "uid": "***REDACTED-AWS-ACCOUNT***",
-          "labels": []
-        },
-        "org": {
-          "name": "o-kp6lq2m89c",
-          "ou_uid": "",
-          "ou_name": "",
-          "uid": "arn:aws:organizations::***REDACTED-AWS-ACCOUNT***:organization/o-kp6lq2m89c"
-        },
-        "provider": "aws",
-        "region": "us-east-1"
-      },
-      "remediation": {
-        "desc": "Enable **Block Public Access** at account and bucket levels with `block_public_acls`, `ignore_public_acls`, `block_public_policy`, and `restrict_public_buckets` set to `true`. Apply **least privilege** and **defense in depth**. *If public access is required*, narrowly scope policies to fixed principals and conditions.",
-        "references": [
-          "https://hub.prowler.com/check/s3_bucket_level_public_access_block"
-        ]
-      },
-      "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
-      "type_uid": 200401,
-      "type_name": "Detection Finding: Create"
-    }
-  },
-  {
-    "id": "46583131-da5f-43de-b052-f91759bfe06a",
-    "source": "prowler",
-    "check_id": "s3_bucket_level_public_access_block",
-    "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
-    "status": "pass",
-    "severity": "high",
-    "provider": "aws",
-    "category": "storage",
-    "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is configured for the S3 Bucket prowler-cspm-encryption-test.",
       "metadata": {
@@ -3080,15 +3028,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -3177,25 +3125,25 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "d852e5ba-5d85-4aea-8c61-61598adb37fc",
+    "id": "4ff35e8c-3c0c-473b-8684-85d1a223cb23",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
-    "status": "pass",
+    "status": "fail",
     "severity": "high",
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
-      "message": "Block Public Access is configured for the S3 Bucket prowler-cspm-public-test.",
+      "message": "Block Public Access is not configured for the S3 Bucket prowler-cspm-public-test.",
       "metadata": {
         "event_code": "s3_bucket_level_public_access_block",
         "product": {
@@ -3214,8 +3162,8 @@
       "severity_id": 4,
       "severity": "High",
       "status": "New",
-      "status_code": "PASS",
-      "status_detail": "Block Public Access is configured for the S3 Bucket prowler-cspm-public-test.",
+      "status_code": "FAIL",
+      "status_detail": "Block Public Access is not configured for the S3 Bucket prowler-cspm-public-test.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -3291,15 +3239,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -3324,10 +3272,10 @@
               "versioning": false,
               "logging": false,
               "public_access_block": {
-                "block_public_acls": true,
-                "ignore_public_acls": true,
-                "block_public_policy": true,
-                "restrict_public_buckets": true
+                "block_public_acls": false,
+                "ignore_public_acls": false,
+                "block_public_policy": false,
+                "restrict_public_buckets": false
               },
               "acl_grantees": [
                 {
@@ -3388,14 +3336,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "1e964017-ef55-4fb2-8c4b-51e4efccebf1",
+    "id": "1f4e8b83-7eb8-4d49-b2e0-f762badb4099",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -3404,7 +3352,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is configured for the S3 Bucket security-demo-frontend-1753934068.",
       "metadata": {
@@ -3502,15 +3450,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -3599,14 +3547,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "6a461d86-5d66-425a-9b77-250c9a68ba75",
+    "id": "396c63d1-149d-4788-a457-00f68fb225cf",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -3615,7 +3563,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is configured for the S3 Bucket security-demo-logs-1753934068.",
       "metadata": {
@@ -3713,15 +3661,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -3810,14 +3758,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "b593d2c1-f33e-4979-8c74-e3d457024523",
+    "id": "c1928346-fb41-4916-bb36-e4a84bd7453a",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -3826,7 +3774,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is not configured for the S3 Bucket soc-ultra-dashboard-***REDACTED-AWS-ACCOUNT***.",
       "metadata": {
@@ -3924,15 +3872,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -4032,14 +3980,14 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "71a74bc7-d74a-4a88-8bce-fc5ad403de9b",
+    "id": "d0d503f5-ffdd-42ba-ba86-2d63718e0db7",
     "source": "prowler",
     "check_id": "s3_bucket_level_public_access_block",
     "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
@@ -4048,7 +3996,7 @@
     "provider": "aws",
     "category": "storage",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-21T23:59:57.292102",
+    "scanned_at": "2026-05-22T02:08:14.725971",
     "raw": {
       "message": "Block Public Access is configured for the S3 Bucket soc-ultra-security-data-***REDACTED-AWS-ACCOUNT***.",
       "metadata": {
@@ -4146,15 +4094,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfb-496c-7610-b733-10233b66bca8",
+        "scan_id": "019e4d70-bd85-7f8d-b895-8efe1ece78d1",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422397,
-        "created_time_dt": "2026-05-21T23:59:57.292102",
+        "created_time": 1779430094,
+        "created_time_dt": "2026-05-22T02:08:14.725971",
         "desc": "**Amazon S3 buckets** are evaluated for **Block Public Access** settings, ensuring `ignore_public_acls` and `restrict_public_buckets` are enabled at the bucket or account scope.\n\n*Account-wide protections, when present, are treated as effective for the bucket.*",
         "title": "S3 bucket has Block Public Access with IgnorePublicAcls and RestrictPublicBuckets enabled at bucket or account level",
         "types": [
@@ -4243,25 +4191,25 @@
         ]
       },
       "risk_details": "Absent **S3 Block Public Access**, public ACLs or broad policies can grant Internet or cross-account access.\n- Data disclosure (confidentiality)\n- Object overwrite or uploads (integrity)\n- Deletion or outages from misuse (availability)",
-      "time": 1779422397,
-      "time_dt": "2026-05-21T23:59:57.292102",
+      "time": 1779430094,
+      "time_dt": "2026-05-22T02:08:14.725971",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "cafb7ef1-cccb-4fa8-b43f-4eaceaf1b8f9",
+    "id": "f235e0c4-65a7-41d3-ad06-5033a7542a1a",
     "source": "prowler",
     "check_id": "iam_password_policy_minimum_length_14",
     "title": "IAM password policy requires passwords to be at least 14 characters long",
-    "status": "pass",
+    "status": "fail",
     "severity": "medium",
     "provider": "aws",
     "category": "iam",
     "resource": "aws:iam",
-    "scanned_at": "2026-05-22T00:00:17.994509",
+    "scanned_at": "2026-05-22T02:08:35.838551",
     "raw": {
-      "message": "IAM password policy requires minimum length of 14 characters.",
+      "message": "IAM password policy does not require minimum length of 14 characters.",
       "metadata": {
         "event_code": "iam_password_policy_minimum_length_14",
         "product": {
@@ -4280,8 +4228,8 @@
       "severity_id": 3,
       "severity": "Medium",
       "status": "New",
-      "status_code": "PASS",
-      "status_detail": "IAM password policy requires minimum length of 14 characters.",
+      "status_code": "FAIL",
+      "status_detail": "IAM password policy does not require minimum length of 14 characters.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -4466,15 +4414,15 @@
             "T1110"
           ]
         },
-        "scan_id": "019e4cfb-9a4a-764b-a4af-147e01b79cfd",
+        "scan_id": "019e4d71-0ffe-7667-8c10-38c9a7005300",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422417,
-        "created_time_dt": "2026-05-22T00:00:17.994509",
+        "created_time": 1779430115,
+        "created_time_dt": "2026-05-22T02:08:35.838551",
         "desc": "**IAM password policy** is assessed for the **minimum password length** setting, confirming it meets `>= 14` characters for IAM console users.",
         "title": "IAM password policy requires passwords to be at least 14 characters long",
         "types": [
@@ -4490,7 +4438,7 @@
           "data": {
             "details": "",
             "metadata": {
-              "length": 14,
+              "length": 8,
               "symbols": true,
               "numbers": true,
               "uppercase": true,
@@ -4539,25 +4487,25 @@
         ]
       },
       "risk_details": "Low minimum length reduces entropy, easing **brute force** and **credential stuffing**. Compromised IAM users enable console access, unauthorized changes, and lateral movement, leading to data exposure (confidentiality) and tampering (integrity).",
-      "time": 1779422417,
-      "time_dt": "2026-05-22T00:00:17.994509",
+      "time": 1779430115,
+      "time_dt": "2026-05-22T02:08:35.838551",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "6a11c02c-34cb-48ce-a98e-2333dd6e0949",
+    "id": "0199f8e9-c706-4266-b969-cbff10f736ad",
     "source": "prowler",
     "check_id": "ec2_instance_port_ssh_exposed_to_internet",
     "title": "EC2 instance does not allow ingress from the Internet to TCP port 22 (SSH)",
     "status": "fail",
-    "severity": "medium",
+    "severity": "critical",
     "provider": "aws",
     "category": "networking",
     "resource": "aws:ec2",
-    "scanned_at": "2026-05-22T00:00:45.563589",
+    "scanned_at": "2026-05-22T02:09:03.563972",
     "raw": {
-      "message": "Instance ***REDACTED-INSTANCE*** has SSH exposed to 0.0.0.0/0 but with no public IP address.",
+      "message": "Instance ***REDACTED-INSTANCE*** has SSH exposed to 0.0.0.0/0 on public IP address 98.92.183.238 in public subnet subnet-0e947607dfe0b1629.",
       "metadata": {
         "event_code": "ec2_instance_port_ssh_exposed_to_internet",
         "product": {
@@ -4573,11 +4521,11 @@
         "tenant_uid": "arn:aws:organizations::***REDACTED-AWS-ACCOUNT***:organization/o-kp6lq2m89c",
         "version": "1.5.0"
       },
-      "severity_id": 3,
-      "severity": "Medium",
+      "severity_id": 5,
+      "severity": "Critical",
       "status": "New",
       "status_code": "FAIL",
-      "status_detail": "Instance ***REDACTED-INSTANCE*** has SSH exposed to 0.0.0.0/0 but with no public IP address.",
+      "status_detail": "Instance ***REDACTED-INSTANCE*** has SSH exposed to 0.0.0.0/0 on public IP address 98.92.183.238 in public subnet subnet-0e947607dfe0b1629.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -4628,15 +4576,15 @@
             "2.10.2"
           ]
         },
-        "scan_id": "019e4cfc-05fb-7221-a554-2dc45f762b00",
+        "scan_id": "019e4d71-7c4b-7370-a17c-25367cff8487",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422445,
-        "created_time_dt": "2026-05-22T00:00:45.563589",
+        "created_time": 1779430143,
+        "created_time_dt": "2026-05-22T02:09:03.563972",
         "desc": "**EC2 instances** with **SSH (TCP 22)** exposed to the Internet via security group inbound rules allowing `0.0.0.0/0` or `::/0`.\n\nExposure is qualified using the instance's public IP status and subnet reachability.",
         "title": "EC2 instance does not allow ingress from the Internet to TCP port 22 (SSH)",
         "types": [
@@ -4656,15 +4604,15 @@
             "metadata": {
               "id": "***REDACTED-INSTANCE***",
               "arn": "arn:aws:ec2:us-east-1:***REDACTED-AWS-ACCOUNT***:instance/***REDACTED-INSTANCE***",
-              "state": "stopped",
+              "state": "running",
               "region": "us-east-1",
               "type": "t3.micro",
               "image_id": "ami-0c0717dff8dafd4ca",
-              "launch_time": "2026-05-22 02:12:38+00:00",
+              "launch_time": "2026-05-22 05:40:42+00:00",
               "private_dns": "ip-172-31-2-178.ec2.internal",
               "private_ip": "172.31.2.178",
-              "public_dns": "",
-              "public_ip": null,
+              "public_dns": "ec2-98-92-183-238.compute-1.amazonaws.com",
+              "public_ip": "98.92.183.238",
               "user_data": null,
               "http_tokens": "required",
               "http_endpoint": "enabled",
@@ -4725,14 +4673,14 @@
         ]
       },
       "risk_details": "**Internet-exposed SSH** invites **brute force** and **credential stuffing**. A successful sign-in grants **remote shell**, enabling data exfiltration, tampering of workloads, and **lateral movement** within the VPC, degrading confidentiality, integrity, and availability.",
-      "time": 1779422445,
-      "time_dt": "2026-05-22T00:00:45.563589",
+      "time": 1779430143,
+      "time_dt": "2026-05-22T02:09:03.563972",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "5ec42d66-cbc8-4ea2-86c7-49da0275d7c9",
+    "id": "649f241f-49dc-4fd6-9ee4-7c307d3bf3f3",
     "source": "prowler",
     "check_id": "cloudtrail_multi_region_enabled",
     "title": "Region has at least one CloudTrail trail logging",
@@ -4741,7 +4689,7 @@
     "provider": "aws",
     "category": "logging",
     "resource": "aws:cloudtrail:***",
-    "scanned_at": "2026-05-22T00:01:18.526532",
+    "scanned_at": "2026-05-22T02:09:47.245213",
     "raw": {
       "message": "Trail grc-compliance-api-trail is multiregion and it is logging.",
       "metadata": {
@@ -5056,15 +5004,15 @@
             "2.10.2"
           ]
         },
-        "scan_id": "019e4cfc-86be-7902-9f90-cb913254dac1",
+        "scan_id": "019e4d72-26ed-7be8-9aa4-e589d56a369c",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422478,
-        "created_time_dt": "2026-05-22T00:01:18.526532",
+        "created_time": 1779430187,
+        "created_time_dt": "2026-05-22T02:09:47.245213",
         "desc": "**AWS CloudTrail** has at least one trail with `logging` enabled in every region. A **multi-region trail** or a regional trail counts for coverage in that region.",
         "title": "Region has at least one CloudTrail trail logging",
         "types": [
@@ -5144,14 +5092,14 @@
         ]
       },
       "risk_details": "Missing coverage in any region creates **visibility gaps**.\n\nAttackers can use lesser-monitored regions to run API actions, hide **unauthorized changes**, and exfiltrate data without audit trails, weakening **detective controls**, hindering **forensics**, and delaying response (confidentiality and integrity).",
-      "time": 1779422478,
-      "time_dt": "2026-05-22T00:01:18.526532",
+      "time": 1779430187,
+      "time_dt": "2026-05-22T02:09:47.245213",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "58c0678e-30e5-4386-a1ad-f146b8e3903a",
+    "id": "353651f5-623e-4b99-bf71-cad550789c61",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -5160,7 +5108,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket cheap-dashboard-1755280821-1c11aa28 has Server Side Encryption with AES256.",
       "metadata": {
@@ -5335,15 +5283,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -5432,14 +5380,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "132b0760-2448-4a13-93f6-bd78c1aa113c",
+    "id": "20f91e12-ff32-456c-b36b-4fec73c40de4",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -5448,7 +5396,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket cheap-dashboard-1755280849-d9053d86 has Server Side Encryption with AES256.",
       "metadata": {
@@ -5623,15 +5571,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -5731,14 +5679,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "345db712-d390-4e51-8e51-ebb5d7c45533",
+    "id": "7d3bc92f-1ad2-4d22-8adb-32f015dd731a",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -5747,7 +5695,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket grc-compliance-access-logs-20250731 has Server Side Encryption with AES256.",
       "metadata": {
@@ -5922,15 +5870,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -6064,14 +6012,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "a7787e48-b703-4ddf-85d5-afaf36e060db",
+    "id": "af24c229-a8f6-4aae-9956-0bf5de763353",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -6080,7 +6028,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket grc-compliance-content has Server Side Encryption with AES256.",
       "metadata": {
@@ -6255,15 +6203,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -6363,14 +6311,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "9cfcbbf9-c10c-4bd1-bcfd-4a5033080e9d",
+    "id": "9705b437-792b-42e3-b4cd-3184e5b188b4",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -6379,7 +6327,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket grc-compliance-dashboard-frontend has Server Side Encryption with AES256.",
       "metadata": {
@@ -6554,15 +6502,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -6662,14 +6610,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "75e07694-a9be-40e3-b7a1-8f230792132b",
+    "id": "a496abbb-a305-481d-a610-24eb411da589",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -6678,7 +6626,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket grc-compliance-prod-frontend-***REDACTED-AWS-ACCOUNT***-us-east-1 has Server Side Encryption with AES256.",
       "metadata": {
@@ -6853,15 +6801,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -6988,14 +6936,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "18d84217-64b2-4850-8d2a-4179fe0759b9",
+    "id": "899bb1ea-4fe3-4475-944f-ad9521e6c384",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -7004,7 +6952,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket grc-requirements-data has Server Side Encryption with AES256.",
       "metadata": {
@@ -7179,15 +7127,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -7287,14 +7235,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "fca71999-c23b-4fda-9079-4af4719fb99f",
+    "id": "94e4c9ed-303b-4835-9bd0-fb941ed3e0b6",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -7303,7 +7251,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket my-super-secret-q-usage-bucket has Server Side Encryption with AES256.",
       "metadata": {
@@ -7478,15 +7426,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -7575,14 +7523,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "d3e726c0-428d-4b2c-b797-10bf0e251464",
+    "id": "20ae33d6-36b3-4f0e-ae76-4351fe33e0c0",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -7591,322 +7539,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
-    "raw": {
-      "message": "S3 Bucket prowler-cspm-cloudtrail has Server Side Encryption with AES256.",
-      "metadata": {
-        "event_code": "s3_bucket_default_encryption",
-        "product": {
-          "name": "Prowler",
-          "uid": "prowler",
-          "vendor_name": "Prowler",
-          "version": "5.27.0"
-        },
-        "profiles": [
-          "cloud",
-          "datetime"
-        ],
-        "tenant_uid": "arn:aws:organizations::***REDACTED-AWS-ACCOUNT***:organization/o-kp6lq2m89c",
-        "version": "1.5.0"
-      },
-      "severity_id": 3,
-      "severity": "Medium",
-      "status": "New",
-      "status_code": "PASS",
-      "status_detail": "S3 Bucket prowler-cspm-cloudtrail has Server Side Encryption with AES256.",
-      "status_id": 1,
-      "unmapped": {
-        "related_url": "",
-        "categories": [
-          "encryption"
-        ],
-        "depends_on": [],
-        "related_to": [],
-        "additional_urls": [
-          "https://docs.amazonaws.cn/en_us/AmazonS3/latest/userguide/bucket-encryption.html",
-          "https://aws.amazon.com/blogs/security/how-to-prevent-uploads-of-unencrypted-objects-to-amazon-s3/",
-          "https://docs.aws.amazon.com/us_en/AmazonS3/latest/userguide/default-encryption-faq.html"
-        ],
-        "notes": "",
-        "compliance": {
-          "CISA": [
-            "your-systems-3",
-            "your-data-1",
-            "your-data-2"
-          ],
-          "SecNumCloud-3.2": [
-            "10.1"
-          ],
-          "FedRAMP-20x-KSI-Low-25.05C": [
-            "ksi-svc"
-          ],
-          "AWS-Foundational-Technical-Review": [
-            "S3-001"
-          ],
-          "NIST-800-53-Revision-4": [
-            "sc_28"
-          ],
-          "ISO27001-2022": [
-            "A.8.11",
-            "A.8.24"
-          ],
-          "FedRAMP-Low-Revision-4": [
-            "sc-13"
-          ],
-          "CCC-v2025.10": [
-            "CCC.Core.CN02.AR01"
-          ],
-          "GxP-EU-Annex-11": [
-            "7.1-data-storage-damage-protection"
-          ],
-          "CIS-1.4": [
-            "2.1.1"
-          ],
-          "GxP-21-CFR-Part-11": [
-            "11.10-c",
-            "11.30"
-          ],
-          "NIST-CSF-2.0": [
-            "ds_1",
-            "ds_3"
-          ],
-          "KISA-ISMS-P-2023-korean": [
-            "2.7.1",
-            "2.10.2"
-          ],
-          "ENS-RD2022": [
-            "mp.si.2.aws.s3.1"
-          ],
-          "NIST-800-171-Revision-2": [
-            "3_3_8",
-            "3_5_10",
-            "3_13_11",
-            "3_13_16"
-          ],
-          "CSA-CCM-4.0": [
-            "CEK-03",
-            "DSP-17"
-          ],
-          "GDPR": [
-            "article_32"
-          ],
-          "CIS-1.5": [
-            "2.1.1"
-          ],
-          "PCI-3.2.1": [
-            "3.4",
-            "3.4.1",
-            "3.4.1.a",
-            "3.4.1.c",
-            "3.4.a",
-            "3.4.b",
-            "3.4.d",
-            "8.2",
-            "8.2.1",
-            "8.2.1.a"
-          ],
-          "PCI-4.0": [
-            "3.5.1.30",
-            "8.3.2.48"
-          ],
-          "FFIEC": [
-            "d3-pc-am-b-12"
-          ],
-          "NIST-CSF-1.1": [
-            "ds_1"
-          ],
-          "HIPAA": [
-            "164_308_a_1_ii_b",
-            "164_308_a_4_ii_a",
-            "164_312_a_2_iv",
-            "164_312_c_1",
-            "164_312_c_2",
-            "164_312_e_2_ii"
-          ],
-          "SOC2": [
-            "pi_1_4"
-          ],
-          "FedRamp-Moderate-Revision-4": [
-            "sc-13",
-            "sc-28"
-          ],
-          "NIST-800-53-Revision-5": [
-            "au_9_3",
-            "cm_6_a",
-            "cm_9_b",
-            "cp_9_d",
-            "cp_9_8",
-            "pm_11_b",
-            "sc_8_3",
-            "sc_8_4",
-            "sc_13_a",
-            "sc_16_1",
-            "sc_28_1",
-            "si_19_4"
-          ],
-          "AWS-Well-Architected-Framework-Security-Pillar": [
-            "SEC08-BP03"
-          ],
-          "C5-2025": [
-            "OPS-31.01B",
-            "IAM-07.03B",
-            "CRY-01.02AC",
-            "CRY-05.01AC",
-            "PSS-12.02B"
-          ],
-          "RBI-Cyber-Security-Framework": [
-            "annex_i_1_3"
-          ],
-          "KISA-ISMS-P-2023": [
-            "2.7.1",
-            "2.10.2"
-          ],
-          "MITRE-ATTACK": [
-            "T1119",
-            "T1530"
-          ]
-        },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
-        "provider_uid": "***REDACTED-AWS-ACCOUNT***",
-        "provider": "aws"
-      },
-      "activity_name": "Create",
-      "activity_id": 1,
-      "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
-        "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
-        "title": "S3 bucket has default server-side encryption (SSE) enabled",
-        "types": [
-          "Software and Configuration Checks/AWS Security Best Practices",
-          "Software and Configuration Checks/Industry and Regulatory Standards/AWS Foundational Security Best Practices",
-          "Software and Configuration Checks/Industry and Regulatory Standards/CIS AWS Foundations Benchmark",
-          "Effects/Data Exposure"
-        ],
-        "uid": "prowler-aws-s3_bucket_default_encryption-***REDACTED-AWS-ACCOUNT***-us-east-1-prowler-cspm-cloudtrail"
-      },
-      "resources": [
-        {
-          "cloud_partition": "aws",
-          "region": "us-east-1",
-          "data": {
-            "details": "",
-            "metadata": {
-              "arn": "arn:aws:s3:::prowler-cspm-cloudtrail",
-              "name": "prowler-cspm-cloudtrail",
-              "owner_id": "d198e25c947c91674f2f1ad53569daebf6626e95114349ee0f0f44278b358757",
-              "owner": null,
-              "versioning": false,
-              "logging": false,
-              "public_access_block": {
-                "block_public_acls": true,
-                "ignore_public_acls": true,
-                "block_public_policy": true,
-                "restrict_public_buckets": true
-              },
-              "acl_grantees": [
-                {
-                  "display_name": null,
-                  "ID": "d198e25c947c91674f2f1ad53569daebf6626e95114349ee0f0f44278b358757",
-                  "type": "CanonicalUser",
-                  "URI": null,
-                  "permission": "FULL_CONTROL"
-                }
-              ],
-              "policy": {
-                "Version": "2012-10-17",
-                "Statement": [
-                  {
-                    "Sid": "AWSCloudTrailAclCheck",
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": "cloudtrail.amazonaws.com"
-                    },
-                    "Action": "s3:GetBucketAcl",
-                    "Resource": "arn:aws:s3:::prowler-cspm-cloudtrail"
-                  },
-                  {
-                    "Sid": "AWSCloudTrailWrite",
-                    "Effect": "Allow",
-                    "Principal": {
-                      "Service": "cloudtrail.amazonaws.com"
-                    },
-                    "Action": "s3:PutObject",
-                    "Resource": "arn:aws:s3:::prowler-cspm-cloudtrail/AWSLogs/***REDACTED-AWS-ACCOUNT***/*",
-                    "Condition": {
-                      "StringEquals": {
-                        "s3:x-amz-acl": "bucket-owner-full-control"
-                      }
-                    }
-                  }
-                ]
-              },
-              "encryption": "AES256",
-              "region": "us-east-1",
-              "logging_target_bucket": null,
-              "ownership": "BucketOwnerEnforced",
-              "object_lock": false,
-              "mfa_delete": false,
-              "tags": [],
-              "lifecycle": [],
-              "replication_rules": [],
-              "notification_config": {}
-            }
-          },
-          "group": {
-            "name": "s3"
-          },
-          "labels": [],
-          "name": "prowler-cspm-cloudtrail",
-          "type": "AwsS3Bucket",
-          "uid": "arn:aws:s3:::prowler-cspm-cloudtrail"
-        }
-      ],
-      "category_name": "Findings",
-      "category_uid": 2,
-      "class_name": "Detection Finding",
-      "class_uid": 2004,
-      "cloud": {
-        "account": {
-          "name": "theboss",
-          "type": "AWS Account",
-          "type_id": 10,
-          "uid": "***REDACTED-AWS-ACCOUNT***",
-          "labels": []
-        },
-        "org": {
-          "name": "o-kp6lq2m89c",
-          "ou_uid": "",
-          "ou_name": "",
-          "uid": "arn:aws:organizations::***REDACTED-AWS-ACCOUNT***:organization/o-kp6lq2m89c"
-        },
-        "provider": "aws",
-        "region": "us-east-1"
-      },
-      "remediation": {
-        "desc": "Enable default encryption on all buckets, preferring `SSE-KMS` for sensitive data to retain key control and auditing. Enforce encryption with restrictive bucket policies, apply **least privilege** to KMS keys with rotation, and re-encrypt existing objects. Use **defense in depth** monitoring to detect drift and noncompliant uploads.",
-        "references": [
-          "https://hub.prowler.com/check/s3_bucket_default_encryption"
-        ]
-      },
-      "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
-      "type_uid": 200401,
-      "type_name": "Detection Finding: Create"
-    }
-  },
-  {
-    "id": "ab8ae86d-f464-4573-af45-813791cafc24",
-    "source": "prowler",
-    "check_id": "s3_bucket_default_encryption",
-    "title": "S3 bucket has default server-side encryption (SSE) enabled",
-    "status": "pass",
-    "severity": "medium",
-    "provider": "aws",
-    "category": "encryption",
-    "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket prowler-cspm-encryption-test has Server Side Encryption with AES256.",
       "metadata": {
@@ -8081,15 +7714,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -8178,14 +7811,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "bee8feb0-8b9f-4bf5-ab30-9a5a4b1d694f",
+    "id": "0fbae926-fc06-4b4e-8f2c-05fe7566b813",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -8194,7 +7827,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket prowler-cspm-public-test has Server Side Encryption with AES256.",
       "metadata": {
@@ -8369,15 +8002,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -8402,10 +8035,10 @@
               "versioning": false,
               "logging": false,
               "public_access_block": {
-                "block_public_acls": true,
-                "ignore_public_acls": true,
-                "block_public_policy": true,
-                "restrict_public_buckets": true
+                "block_public_acls": false,
+                "ignore_public_acls": false,
+                "block_public_policy": false,
+                "restrict_public_buckets": false
               },
               "acl_grantees": [
                 {
@@ -8466,14 +8099,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "b8af62bc-1d98-435c-9e4a-8ed6ef09fa1a",
+    "id": "295f3515-f07a-45d7-a64f-d9b94ffcbde1",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -8482,7 +8115,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket security-demo-frontend-1753934068 has Server Side Encryption with AES256.",
       "metadata": {
@@ -8657,15 +8290,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -8754,14 +8387,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "eabb3426-960c-433a-9a19-e5d1651cc520",
+    "id": "d99c353d-a9d0-4414-8e72-2d4d9be9b93a",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -8770,7 +8403,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket security-demo-logs-1753934068 has Server Side Encryption with AES256.",
       "metadata": {
@@ -8945,15 +8578,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -9042,14 +8675,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "73ad13f3-80d6-49b8-ac07-2e84bacada33",
+    "id": "936230e1-7cdd-4f22-bc45-545d1de0746a",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -9058,7 +8691,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket soc-ultra-dashboard-***REDACTED-AWS-ACCOUNT*** has Server Side Encryption with AES256.",
       "metadata": {
@@ -9233,15 +8866,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -9341,14 +8974,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "84b22db5-1fdd-4b48-a39b-4e3ee9ab7a60",
+    "id": "c5baac35-ad6d-45b3-a9fa-4a1ddfa34cda",
     "source": "prowler",
     "check_id": "s3_bucket_default_encryption",
     "title": "S3 bucket has default server-side encryption (SSE) enabled",
@@ -9357,7 +8990,7 @@
     "provider": "aws",
     "category": "encryption",
     "resource": "aws:s3:::***",
-    "scanned_at": "2026-05-22T00:01:29.870932",
+    "scanned_at": "2026-05-22T02:09:59.553290",
     "raw": {
       "message": "S3 Bucket soc-ultra-security-data-***REDACTED-AWS-ACCOUNT*** has Server Side Encryption with AES256.",
       "metadata": {
@@ -9532,15 +9165,15 @@
             "T1530"
           ]
         },
-        "scan_id": "019e4cfc-b30e-766e-85fa-3dac81a4fb10",
+        "scan_id": "019e4d72-5701-75c5-8a3c-26cb5333920f",
         "provider_uid": "***REDACTED-AWS-ACCOUNT***",
         "provider": "aws"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422489,
-        "created_time_dt": "2026-05-22T00:01:29.870932",
+        "created_time": 1779430199,
+        "created_time_dt": "2026-05-22T02:09:59.553290",
         "desc": "**Amazon S3 buckets** have a default **server-side encryption** setting that automatically encrypts new objects using `SSE-S3` or `SSE-KMS`. This evaluates whether a bucket has a default encryption configuration defined.",
         "title": "S3 bucket has default server-side encryption (SSE) enabled",
         "types": [
@@ -9629,14 +9262,14 @@
         ]
       },
       "risk_details": "Without default encryption, older objects may remain unencrypted and new uploads won't be forced to use `SSE-KMS`. This reduces confidentiality and governance by limiting key audit logs, rotation, and cross-account controls, and increases exposure if data is copied, replicated, or accessed outside intended paths.",
-      "time": 1779422489,
-      "time_dt": "2026-05-22T00:01:29.870932",
+      "time": 1779430199,
+      "time_dt": "2026-05-22T02:09:59.553290",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "6082d281-4fe4-426f-928f-c97c5a8d5d1e",
+    "id": "84ef5d06-46c3-4746-b866-0dc0c3981619",
     "source": "prowler",
     "check_id": "compute_firewall_ssh_access_from_the_internet_allowed",
     "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
@@ -9645,7 +9278,7 @@
     "provider": "gcp",
     "category": "networking",
     "resource": "gcp:***",
-    "scanned_at": "2026-05-22T00:01:56.786182",
+    "scanned_at": "2026-05-22T02:10:25.636680",
     "raw": {
       "message": "Firewall allow-ssh-iap does not expose port 22 (SSH) to the internet.",
       "metadata": {
@@ -9791,15 +9424,15 @@
             "3.6"
           ]
         },
-        "scan_id": "019e4cfd-1c32-7695-af05-56246e50679e",
+        "scan_id": "019e4d72-bce4-7a5d-9fa2-4ac59dd04f80",
         "provider_uid": "***REDACTED-GCP-PROJECT***",
         "provider": "gcp"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422516,
-        "created_time_dt": "2026-05-22T00:01:56.786182",
+        "created_time": 1779430225,
+        "created_time_dt": "2026-05-22T02:10:25.636680",
         "desc": "**VPC firewall rules** allowing Internet-sourced **ingress** (`0.0.0.0/0`) to `TCP port 22 (SSH)` are identified, including rules using protocol `all` or `tcp` whose ports or ranges include `22`.",
         "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
         "types": [],
@@ -9860,14 +9493,14 @@
         ]
       },
       "risk_details": "Exposed **SSH (22)** enables Internet-wide scanning, **brute force** and **credential stuffing**. Compromise can yield shell access for **data exfiltration**, command execution, and **lateral movement**, undermining **confidentiality** and **integrity**, and risking **availability** through abuse or lockouts.",
-      "time": 1779422516,
-      "time_dt": "2026-05-22T00:01:56.786182",
+      "time": 1779430225,
+      "time_dt": "2026-05-22T02:10:25.636680",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "c1288766-fd20-4ed7-b10e-9f4e5f917d33",
+    "id": "a6620b0d-2dd8-41df-9006-f7d4ba867377",
     "source": "prowler",
     "check_id": "compute_firewall_ssh_access_from_the_internet_allowed",
     "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
@@ -9876,7 +9509,7 @@
     "provider": "gcp",
     "category": "networking",
     "resource": "gcp:***",
-    "scanned_at": "2026-05-22T00:01:56.786182",
+    "scanned_at": "2026-05-22T02:10:25.636680",
     "raw": {
       "message": "Firewall default-allow-internal does not expose port 22 (SSH) to the internet.",
       "metadata": {
@@ -10022,15 +9655,15 @@
             "3.6"
           ]
         },
-        "scan_id": "019e4cfd-1c32-7695-af05-56246e50679e",
+        "scan_id": "019e4d72-bce4-7a5d-9fa2-4ac59dd04f80",
         "provider_uid": "***REDACTED-GCP-PROJECT***",
         "provider": "gcp"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422516,
-        "created_time_dt": "2026-05-22T00:01:56.786182",
+        "created_time": 1779430225,
+        "created_time_dt": "2026-05-22T02:10:25.636680",
         "desc": "**VPC firewall rules** allowing Internet-sourced **ingress** (`0.0.0.0/0`) to `TCP port 22 (SSH)` are identified, including rules using protocol `all` or `tcp` whose ports or ranges include `22`.",
         "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
         "types": [],
@@ -10100,25 +9733,256 @@
         ]
       },
       "risk_details": "Exposed **SSH (22)** enables Internet-wide scanning, **brute force** and **credential stuffing**. Compromise can yield shell access for **data exfiltration**, command execution, and **lateral movement**, undermining **confidentiality** and **integrity**, and risking **availability** through abuse or lockouts.",
-      "time": 1779422516,
-      "time_dt": "2026-05-22T00:01:56.786182",
+      "time": 1779430225,
+      "time_dt": "2026-05-22T02:10:25.636680",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "85b9cf01-310e-4662-9f2c-aa8c9ea45369",
+    "id": "d19be76a-c5d4-470d-bdbc-f639d0724c2f",
+    "source": "prowler",
+    "check_id": "compute_firewall_ssh_access_from_the_internet_allowed",
+    "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
+    "status": "fail",
+    "severity": "critical",
+    "provider": "gcp",
+    "category": "networking",
+    "resource": "gcp:***",
+    "scanned_at": "2026-05-22T02:10:25.636680",
+    "raw": {
+      "message": "Firewall prowler-cspm-allow-ssh does exposes port 22 (SSH) to the internet.",
+      "metadata": {
+        "event_code": "compute_firewall_ssh_access_from_the_internet_allowed",
+        "product": {
+          "name": "Prowler",
+          "uid": "prowler",
+          "vendor_name": "Prowler",
+          "version": "5.27.0"
+        },
+        "profiles": [
+          "cloud",
+          "datetime"
+        ],
+        "version": "1.5.0"
+      },
+      "severity_id": 5,
+      "severity": "Critical",
+      "status": "New",
+      "status_code": "FAIL",
+      "status_detail": "Firewall prowler-cspm-allow-ssh does exposes port 22 (SSH) to the internet.",
+      "status_id": 1,
+      "unmapped": {
+        "related_url": "",
+        "categories": [
+          "internet-exposed"
+        ],
+        "depends_on": [],
+        "related_to": [],
+        "additional_urls": [
+          "https://cloud.google.com/vpc/docs/using-firewalls",
+          "https://www.trendmicro.com/trendaivisiononecloudriskmanagement/knowledge-base/gcp/CloudVPC/unrestricted-ssh-access.html"
+        ],
+        "notes": "",
+        "compliance": {
+          "FedRAMP-20x-KSI-Low-25.05C": [
+            "ksi-cna"
+          ],
+          "MITRE-ATTACK": [
+            "T1190",
+            "T1199",
+            "T1048",
+            "T1498",
+            "T1046"
+          ],
+          "CIS-2.0": [
+            "3.6"
+          ],
+          "CIS-4.0": [
+            "3.6"
+          ],
+          "CCC-v2025.10": [
+            "CCC.Core.CN01.AR02"
+          ],
+          "ISO27001-2022": [
+            "A.8.20"
+          ],
+          "ENS-RD2022": [
+            "mp.com.1.gcp.fw.2"
+          ],
+          "SecNumCloud-3.2": [
+            "9.6",
+            "13.2"
+          ],
+          "C5-2025": [
+            "OIS-05.03B",
+            "OIS-08.02B",
+            "AM-12.01AC",
+            "PS-03.02B",
+            "IAM-10.01B",
+            "IAM-10.02B",
+            "CRY-04.01B",
+            "CRY-04.01AS",
+            "COS-04.01B",
+            "PI-01.01AC"
+          ],
+          "ProwlerThreatScore-1.0": [
+            "2.1.4"
+          ],
+          "CSA-CCM-4.0": [
+            "IVS-03",
+            "IVS-09"
+          ],
+          "RBI-Cyber-Security-Framework": [
+            "annex_i_5_1",
+            "annex_i_7_3"
+          ],
+          "PCI-4.0": [
+            "1.2.5.17",
+            "1.2.8.16",
+            "1.2.8.17",
+            "1.2.8.21",
+            "1.2.8.25",
+            "1.2.8.40",
+            "1.2.8.41",
+            "1.3.1.18",
+            "1.3.1.19",
+            "1.3.1.24",
+            "1.3.2.15",
+            "1.3.2.18",
+            "1.3.2.19",
+            "1.3.2.24",
+            "1.3.2.45",
+            "1.4.2.17",
+            "1.4.2.18",
+            "1.4.2.19",
+            "1.4.2.22",
+            "1.4.2.24",
+            "1.5.1.16",
+            "1.5.1.17",
+            "1.5.1.21",
+            "1.5.1.40",
+            "10.3.2.12",
+            "2.2.5.17",
+            "3.5.1.3.14",
+            "A1.1.2.8",
+            "A1.1.3.16",
+            "A1.1.3.17",
+            "A1.1.3.21",
+            "A1.1.3.23",
+            "A1.1.3.40",
+            "A3.4.1.8"
+          ],
+          "SOC2": [
+            "cc_6_6",
+            "cc_6_7"
+          ],
+          "NIS2": [
+            "1.1.1.c",
+            "1.2.1",
+            "2.1.2.e",
+            "2.1.2.g",
+            "2.2.1",
+            "2.3.1",
+            "6.7.2.b",
+            "6.7.2.i",
+            "11.1.1",
+            "11.6.2.a",
+            "11.7.2",
+            "12.2.2.c"
+          ],
+          "CIS-3.0": [
+            "3.6"
+          ]
+        },
+        "scan_id": "019e4d72-bce4-7a5d-9fa2-4ac59dd04f80",
+        "provider_uid": "***REDACTED-GCP-PROJECT***",
+        "provider": "gcp"
+      },
+      "activity_name": "Create",
+      "activity_id": 1,
+      "finding_info": {
+        "created_time": 1779430225,
+        "created_time_dt": "2026-05-22T02:10:25.636680",
+        "desc": "**VPC firewall rules** allowing Internet-sourced **ingress** (`0.0.0.0/0`) to `TCP port 22 (SSH)` are identified, including rules using protocol `all` or `tcp` whose ports or ranges include `22`.",
+        "title": "Firewall does not expose TCP port 22 (SSH) to the Internet",
+        "types": [],
+        "uid": "prowler-gcp-compute_firewall_ssh_access_from_the_internet_allowed-***REDACTED-GCP-PROJECT***-global-prowler-cspm-allow-ssh"
+      },
+      "resources": [
+        {
+          "region": "global",
+          "data": {
+            "details": "",
+            "metadata": {
+              "name": "prowler-cspm-allow-ssh",
+              "id": "3760395032052519509",
+              "source_ranges": [
+                "0.0.0.0/0"
+              ],
+              "direction": "INGRESS",
+              "allowed_rules": [
+                {
+                  "IPProtocol": "tcp",
+                  "ports": [
+                    "22"
+                  ]
+                }
+              ],
+              "project_id": "***REDACTED-GCP-PROJECT***"
+            }
+          },
+          "group": {
+            "name": "compute"
+          },
+          "labels": [],
+          "name": "prowler-cspm-allow-ssh",
+          "type": "compute.googleapis.com/Firewall",
+          "uid": "3760395032052519509"
+        }
+      ],
+      "category_name": "Findings",
+      "category_uid": 2,
+      "class_name": "Detection Finding",
+      "class_uid": 2004,
+      "cloud": {
+        "account": {
+          "name": "My First Project",
+          "type": "GCP Account",
+          "type_id": 5,
+          "uid": "***REDACTED-GCP-PROJECT***",
+          "labels": []
+        },
+        "org": {},
+        "provider": "gcp",
+        "region": "global"
+      },
+      "remediation": {
+        "desc": "Restrict **SSH** to trusted sources; avoid `0.0.0.0/0`. Prefer **bastion hosts** or **IAP TCP forwarding**, or use **VPN/peering**. Enforce **least privilege** and **defense in depth**: limit to required CIDRs, use **key-based auth**, disable `PasswordAuthentication`, and monitor/alert on access attempts.",
+        "references": [
+          "https://hub.prowler.com/check/compute_firewall_ssh_access_from_the_internet_allowed"
+        ]
+      },
+      "risk_details": "Exposed **SSH (22)** enables Internet-wide scanning, **brute force** and **credential stuffing**. Compromise can yield shell access for **data exfiltration**, command execution, and **lateral movement**, undermining **confidentiality** and **integrity**, and risking **availability** through abuse or lockouts.",
+      "time": 1779430225,
+      "time_dt": "2026-05-22T02:10:25.636680",
+      "type_uid": 200401,
+      "type_name": "Detection Finding: Create"
+    }
+  },
+  {
+    "id": "8ff1e741-61e8-4f13-ab03-93aad5592e5a",
     "source": "prowler",
     "check_id": "iam_sa_no_administrative_privileges",
     "title": "Service account has no administrative privileges",
-    "status": "pass",
+    "status": "fail",
     "severity": "high",
     "provider": "gcp",
     "category": "iam",
     "resource": "gcp:***",
-    "scanned_at": "2026-05-22T00:03:04.117496",
+    "scanned_at": "2026-05-22T02:11:33.164045",
     "raw": {
-      "message": "Account prowler-cspm-test@***REDACTED-GCP-PROJECT***.iam.gserviceaccount.com has no administrative privileges.",
+      "message": "Account prowler-cspm-test@***REDACTED-GCP-PROJECT***.iam.gserviceaccount.com has administrative privileges with roles/editor.",
       "metadata": {
         "event_code": "iam_sa_no_administrative_privileges",
         "product": {
@@ -10136,8 +10000,8 @@
       "severity_id": 4,
       "severity": "High",
       "status": "New",
-      "status_code": "PASS",
-      "status_detail": "Account prowler-cspm-test@***REDACTED-GCP-PROJECT***.iam.gserviceaccount.com has no administrative privileges.",
+      "status_code": "FAIL",
+      "status_detail": "Account prowler-cspm-test@***REDACTED-GCP-PROJECT***.iam.gserviceaccount.com has administrative privileges with roles/editor.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -10302,15 +10166,15 @@
             "1.5"
           ]
         },
-        "scan_id": "019e4cfe-2335-7bd9-9dbb-06c0579510c7",
+        "scan_id": "019e4d73-c4ac-7f8d-9ff4-3ef72702a3d1",
         "provider_uid": "***REDACTED-GCP-PROJECT***",
         "provider": "gcp"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422584,
-        "created_time_dt": "2026-05-22T00:03:04.117496",
+        "created_time": 1779430293,
+        "created_time_dt": "2026-05-22T02:11:33.164045",
         "desc": "Google Cloud service accounts with **high-privilege IAM roles** are identified, including `roles/owner`, `roles/editor`, or any role containing `admin`. The evaluation looks for service accounts bound to these roles in IAM policies across the project hierarchy.",
         "title": "Service account has no administrative privileges",
         "types": [],
@@ -10370,14 +10234,14 @@
         ]
       },
       "risk_details": "Over-privileged service accounts jeopardize the CIA triad:\n- Confidentiality: data can be read and exfiltrated\n- Integrity: configs, IAM, and code can be altered\n- Availability: resources can be deleted or halted\n\nCompromise via key theft or impersonation enables lateral movement and persistence.",
-      "time": 1779422584,
-      "time_dt": "2026-05-22T00:03:04.117496",
+      "time": 1779430293,
+      "time_dt": "2026-05-22T02:11:33.164045",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "5b673fd9-50f2-40fd-9188-f559ac12c9fc",
+    "id": "84067151-f25c-455c-aab2-f8728e06abfc",
     "source": "prowler",
     "check_id": "iam_sa_no_administrative_privileges",
     "title": "Service account has no administrative privileges",
@@ -10386,7 +10250,7 @@
     "provider": "gcp",
     "category": "iam",
     "resource": "gcp:***",
-    "scanned_at": "2026-05-22T00:03:04.117496",
+    "scanned_at": "2026-05-22T02:11:33.164045",
     "raw": {
       "message": "Account ***REDACTED-GCP-ACCOUNT***-compute@developer.gserviceaccount.com has administrative privileges with roles/editor.",
       "metadata": {
@@ -10572,15 +10436,15 @@
             "1.5"
           ]
         },
-        "scan_id": "019e4cfe-2335-7bd9-9dbb-06c0579510c7",
+        "scan_id": "019e4d73-c4ac-7f8d-9ff4-3ef72702a3d1",
         "provider_uid": "***REDACTED-GCP-PROJECT***",
         "provider": "gcp"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422584,
-        "created_time_dt": "2026-05-22T00:03:04.117496",
+        "created_time": 1779430293,
+        "created_time_dt": "2026-05-22T02:11:33.164045",
         "desc": "Google Cloud service accounts with **high-privilege IAM roles** are identified, including `roles/owner`, `roles/editor`, or any role containing `admin`. The evaluation looks for service accounts bound to these roles in IAM policies across the project hierarchy.",
         "title": "Service account has no administrative privileges",
         "types": [],
@@ -10640,14 +10504,14 @@
         ]
       },
       "risk_details": "Over-privileged service accounts jeopardize the CIA triad:\n- Confidentiality: data can be read and exfiltrated\n- Integrity: configs, IAM, and code can be altered\n- Availability: resources can be deleted or halted\n\nCompromise via key theft or impersonation enables lateral movement and persistence.",
-      "time": 1779422584,
-      "time_dt": "2026-05-22T00:03:04.117496",
+      "time": 1779430293,
+      "time_dt": "2026-05-22T02:11:33.164045",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "b2cb7888-aa41-4c0c-9d1a-6ee035832245",
+    "id": "47440550-04ec-4623-b7c9-bf819f41257d",
     "source": "prowler",
     "check_id": "iam_sa_no_administrative_privileges",
     "title": "Service account has no administrative privileges",
@@ -10656,7 +10520,7 @@
     "provider": "gcp",
     "category": "iam",
     "resource": "gcp:***",
-    "scanned_at": "2026-05-22T00:03:04.117496",
+    "scanned_at": "2026-05-22T02:11:33.164045",
     "raw": {
       "message": "Account prowler-scanner@***REDACTED-GCP-PROJECT***.iam.gserviceaccount.com has no administrative privileges.",
       "metadata": {
@@ -10842,15 +10706,15 @@
             "1.5"
           ]
         },
-        "scan_id": "019e4cfe-2335-7bd9-9dbb-06c0579510c7",
+        "scan_id": "019e4d73-c4ac-7f8d-9ff4-3ef72702a3d1",
         "provider_uid": "***REDACTED-GCP-PROJECT***",
         "provider": "gcp"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422584,
-        "created_time_dt": "2026-05-22T00:03:04.117496",
+        "created_time": 1779430293,
+        "created_time_dt": "2026-05-22T02:11:33.164045",
         "desc": "Google Cloud service accounts with **high-privilege IAM roles** are identified, including `roles/owner`, `roles/editor`, or any role containing `admin`. The evaluation looks for service accounts bound to these roles in IAM policies across the project hierarchy.",
         "title": "Service account has no administrative privileges",
         "types": [],
@@ -10917,25 +10781,25 @@
         ]
       },
       "risk_details": "Over-privileged service accounts jeopardize the CIA triad:\n- Confidentiality: data can be read and exfiltrated\n- Integrity: configs, IAM, and code can be altered\n- Availability: resources can be deleted or halted\n\nCompromise via key theft or impersonation enables lateral movement and persistence.",
-      "time": 1779422584,
-      "time_dt": "2026-05-22T00:03:04.117496",
+      "time": 1779430293,
+      "time_dt": "2026-05-22T02:11:33.164045",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "db2853ce-43a7-4d3d-b3d2-03f2f7e41d6f",
+    "id": "c320e3b4-bd13-4105-b133-4996e4bbe139",
     "source": "prowler",
     "check_id": "logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled",
     "title": "Log metric filter for audit configuration changes has an associated alert policy",
-    "status": "pass",
+    "status": "fail",
     "severity": "medium",
     "provider": "gcp",
     "category": "logging",
     "resource": "gcp:***",
-    "scanned_at": "2026-05-22T00:03:13.758754",
+    "scanned_at": "2026-05-22T02:11:41.856087",
     "raw": {
-      "message": "Log metric filter prowler-cspm-audit-config-changes found with alert policy prowler-cspm-audit-config-alert associated in project ***REDACTED-GCP-PROJECT***.",
+      "message": "There are no log metric filters or alerts associated in project ***REDACTED-GCP-PROJECT***.",
       "metadata": {
         "event_code": "logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled",
         "product": {
@@ -10953,8 +10817,8 @@
       "severity_id": 3,
       "severity": "Medium",
       "status": "New",
-      "status_code": "PASS",
-      "status_detail": "Log metric filter prowler-cspm-audit-config-changes found with alert policy prowler-cspm-audit-config-alert associated in project ***REDACTED-GCP-PROJECT***.",
+      "status_code": "FAIL",
+      "status_detail": "There are no log metric filters or alerts associated in project ***REDACTED-GCP-PROJECT***.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -11126,19 +10990,19 @@
             "2.5"
           ]
         },
-        "scan_id": "019e4cfe-48de-7e51-b2b5-36cf64f5d627",
+        "scan_id": "019e4d73-e6a0-750d-b918-badf115fa5ed",
         "provider_uid": "***REDACTED-GCP-PROJECT***",
         "provider": "gcp"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422593,
-        "created_time_dt": "2026-05-22T00:03:13.758754",
+        "created_time": 1779430301,
+        "created_time_dt": "2026-05-22T02:11:41.856087",
         "desc": "**Cloud Logging** log-based metrics capture **audit configuration changes** (e.g., `SetIamPolicy` with `auditConfigDeltas`), and an associated **Cloud Monitoring alert policy** notifies when such log entries occur.",
         "title": "Log metric filter for audit configuration changes has an associated alert policy",
         "types": [],
-        "uid": "prowler-gcp-logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled-***REDACTED-GCP-PROJECT***-global-prowler-cspm-audit-config-changes"
+        "uid": "prowler-gcp-logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled-***REDACTED-GCP-PROJECT***-global-My First Project"
       },
       "resources": [
         {
@@ -11146,19 +11010,21 @@
           "data": {
             "details": "",
             "metadata": {
-              "name": "prowler-cspm-audit-config-changes",
-              "type": "logging.googleapis.com/user/prowler-cspm-audit-config-changes",
-              "filter": "protoPayload.methodName=\"SetIamPolicy\" AND protoPayload.serviceData.policyDelta.auditConfigDeltas:*",
-              "project_id": "***REDACTED-GCP-PROJECT***"
+              "number": ***REDACTED-GCP-ACCOUNT***,
+              "id": "***REDACTED-GCP-PROJECT***",
+              "name": "My First Project",
+              "organization": null,
+              "labels": {},
+              "lifecycle_state": "ACTIVE"
             }
           },
           "group": {
             "name": "logging"
           },
           "labels": [],
-          "name": "prowler-cspm-audit-config-changes",
+          "name": "My First Project",
           "type": "logging.googleapis.com/LogMetric",
-          "uid": "prowler-cspm-audit-config-changes"
+          "uid": "***REDACTED-GCP-PROJECT***"
         }
       ],
       "category_name": "Findings",
@@ -11184,25 +11050,25 @@
         ]
       },
       "risk_details": "Unmonitored **Audit Config** changes can reduce or disable **Admin Activity/Data Access** logging, creating blind spots. Adversaries could suppress evidence, evade detection, and alter permissions unnoticed, degrading **confidentiality**, **integrity**, and the **availability** of forensic telemetry.",
-      "time": 1779422593,
-      "time_dt": "2026-05-22T00:03:13.758754",
+      "time": 1779430301,
+      "time_dt": "2026-05-22T02:11:41.856087",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
   },
   {
-    "id": "9f69d491-66b4-4f16-8e45-9fc31e6062ce",
+    "id": "1c38bd08-2fbf-4da7-a5d1-1e0ac7290b48",
     "source": "prowler",
     "check_id": "kms_key_rotation_enabled",
     "title": "KMS key is rotated at least annually",
-    "status": "pass",
+    "status": "fail",
     "severity": "low",
     "provider": "gcp",
     "category": "encryption",
     "resource": "gcp:***",
-    "scanned_at": "2026-05-22T00:03:23.991109",
+    "scanned_at": "2026-05-22T02:11:53.122206",
     "raw": {
-      "message": "Key prowler-cspm-key is rotated every 90 days or less and the next rotation time is in less than 90 days.",
+      "message": "Key prowler-cspm-key is not rotated every 90 days or less and the next rotation time is in more than 90 days.",
       "metadata": {
         "event_code": "kms_key_rotation_enabled",
         "product": {
@@ -11220,8 +11086,8 @@
       "severity_id": 2,
       "severity": "Low",
       "status": "New",
-      "status_code": "PASS",
-      "status_detail": "Key prowler-cspm-key is rotated every 90 days or less and the next rotation time is in less than 90 days.",
+      "status_code": "FAIL",
+      "status_detail": "Key prowler-cspm-key is not rotated every 90 days or less and the next rotation time is in more than 90 days.",
       "status_id": 1,
       "unmapped": {
         "related_url": "",
@@ -11372,15 +11238,15 @@
             "1.10"
           ]
         },
-        "scan_id": "019e4cfe-70d7-7f6d-acf9-dbe9ff4d959f",
+        "scan_id": "019e4d74-12a2-7950-a3a0-8d4de2bf63f9",
         "provider_uid": "***REDACTED-GCP-PROJECT***",
         "provider": "gcp"
       },
       "activity_name": "Create",
       "activity_id": 1,
       "finding_info": {
-        "created_time": 1779422603,
-        "created_time_dt": "2026-05-22T00:03:23.991109",
+        "created_time": 1779430313,
+        "created_time_dt": "2026-05-22T02:11:53.122206",
         "desc": "Google Cloud KMS customer-managed keys have **automatic rotation** enabled or a rotation interval  `365` days.\n\nThe evaluation reviews each key's rotation settings to confirm periodic creation of new key versions.",
         "title": "KMS key is rotated at least annually",
         "types": [],
@@ -11395,8 +11261,8 @@
               "id": "projects/***REDACTED-GCP-PROJECT***/locations/us-central1/keyRings/prowler-cspm-keyring/cryptoKeys/prowler-cspm-key",
               "name": "prowler-cspm-key",
               "location": "us-central1",
-              "rotation_period": "7776000s",
-              "next_rotation_time": "2026-08-20T02:30:26.772144Z",
+              "rotation_period": null,
+              "next_rotation_time": null,
               "key_ring": "projects/***REDACTED-GCP-PROJECT***/locations/us-central1/keyRings/prowler-cspm-keyring",
               "members": [],
               "project_id": "***REDACTED-GCP-PROJECT***"
@@ -11434,8 +11300,8 @@
         ]
       },
       "risk_details": "Without timely rotation, a stolen key can decrypt an expanding volume of data, eroding **confidentiality**. Prolonged key lifetimes widen windows for misuse, impact **integrity** of protected workloads, and make emergency rollover harder, risking **availability** disruptions.",
-      "time": 1779422603,
-      "time_dt": "2026-05-22T00:03:23.991109",
+      "time": 1779430313,
+      "time_dt": "2026-05-22T02:11:53.122206",
       "type_uid": 200401,
       "type_name": "Detection Finding: Create"
     }
