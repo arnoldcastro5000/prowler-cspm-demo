@@ -69,6 +69,18 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 
 `Content-Security-Policy` is not yet enforced — it will be added after tuning in report-only mode.
 
+## AI Development Sandbox
+
+Claude Code was used throughout this project with sandboxed execution enabled. The sandbox enforces:
+
+- **Filesystem restrictions** — write access is limited to the project directory and designated temporary paths. System directories, shell configuration files, and Claude Code settings are read-only.
+- **Network restrictions** — outbound network access is restricted to an explicit allowlist of permitted hosts. Arbitrary external requests are blocked.
+- **Command restrictions** — destructive shell operations are subject to permission prompts requiring explicit user approval before execution.
+
+This ensures that AI-assisted development cannot inadvertently write to sensitive system paths, exfiltrate data to arbitrary endpoints, or execute destructive operations without human confirmation — maintaining the same security posture as a principle of least privilege applied to the development toolchain itself.
+
+---
+
 ## Hard Rules (enforced in CLAUDE.md)
 
 - No hardcoded cloud account IDs, project IDs, subscription IDs, or tenant IDs anywhere in code or configuration.
