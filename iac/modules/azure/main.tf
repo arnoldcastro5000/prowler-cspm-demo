@@ -32,20 +32,21 @@ resource "azurerm_network_security_group" "prowler_test" {
   location            = azurerm_resource_group.prowler.location
   resource_group_name = azurerm_resource_group.prowler.name
 
-  dynamic "security_rule" {
-    for_each = var.nsg_rdp_open ? [1] : []
-    content {
-      name                       = "rdp-open"
-      priority                   = 100
-      direction                  = "Inbound"
-      access                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = "3389"
-      source_address_prefix      = "*"
-      destination_address_prefix = "*"
-    }
-  }
+}
+
+resource "azurerm_network_security_rule" "rdp_open" {
+  count                       = var.nsg_rdp_open ? 1 : 0
+  name                        = "rdp-open"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "Tcp"
+  source_port_range           = "*"
+  destination_port_range      = "3389"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.prowler.name
+  network_security_group_name = azurerm_network_security_group.prowler_test.name
 }
 
 # ─── Custom owner role ───────────────────────────────────────────────────────

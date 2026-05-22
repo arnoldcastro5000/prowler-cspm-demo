@@ -40,22 +40,22 @@ resource "aws_security_group" "ssh_test" {
   description = "Prowler SSH exposure check"
   vpc_id      = data.aws_vpc.default.id
 
-  dynamic "ingress" {
-    for_each = var.security_group_open_ssh ? [1] : []
-    content {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_security_group_rule" "ssh_open" {
+  count             = var.security_group_open_ssh ? 1 : 0
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.ssh_test.id
 }
 
 data "aws_ami" "amazon_linux" {
