@@ -76,6 +76,8 @@ after:
 	$(TF_APPLY) -target=module.aws -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
 	echo "=== [2/3] Hardening GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
+	echo "=== Waiting 10 minutes for GCP logging metric to propagate ===" && \
+	for i in $$(seq 600 -10 10); do printf "\r    %3ds remaining..." $$i; sleep 10; done && echo "" && \
 	echo "=== [3/3] Hardening Azure resources ===" && \
 	$(TF_APPLY) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve
 
