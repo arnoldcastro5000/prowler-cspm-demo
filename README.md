@@ -125,8 +125,8 @@ All workflows are gated by GitHub Actions — verify all checks are green on mai
 Infrastructure is created once during setup. `make before` and `make after` toggle the same resources between misconfigured and hardened states — no destroy/recreate between scans.
 
 ```bash
-# One-time setup (from iac/environments/)
-terraform init && terraform apply -var-file=after.tfvars
+# One-time setup — initialises Terraform and creates all resources in the hardened state
+make setup
 
 # Scan cycle
 make before     # misconfigs all 15 checks, starts EC2
