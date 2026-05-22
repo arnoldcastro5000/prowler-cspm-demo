@@ -147,12 +147,14 @@ Both files are JSON arrays. Every document shares this shape:
   "provider": "aws | gcp | azure",
   "severity": "critical | high | medium | low",
   "title": "string",
-  "resource": "arn",
+  "resource": "string (provider-specific resource identifier)",
   "check_id": "prowler check ID",
   "status": "fail | pass",
   "scanned_at": "ISO 8601 timestamp"
 }
 ```
+
+**Do not add fields to this schema without explicit instruction.**
 
 ---
 
