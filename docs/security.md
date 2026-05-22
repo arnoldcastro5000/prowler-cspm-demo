@@ -66,6 +66,22 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 
 `Content-Security-Policy` is implemented in report-only mode during tuning.
 
+## DAST — Dynamic Application Security Testing
+
+OWASP ZAP baseline scan was run against the deployed dashboard using the official ZAP Docker image. The scan covered passive checks across all discovered URLs — no active attacks.
+
+**Result:** 0 failures, 62 passes.
+
+The scan validates:
+- No vulnerable JavaScript libraries
+- No sensitive information disclosure
+- No clickjacking exposure
+- No cookie security issues
+- No cross-domain misconfigurations
+- Security headers correctly applied
+
+---
+
 ## AI Development Sandbox
 
 Claude Code was used throughout this project with sandboxed execution enabled. The sandbox enforces:
