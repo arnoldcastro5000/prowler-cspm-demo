@@ -84,7 +84,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 
 ## Prowler Checks
 
-15 checks across 3 providers and 6 categories, each mapped 1:1 to a Terraform variable that toggles the misconfiguration on or off.
+15 checks across 3 providers and 5 categories, each mapped 1:1 to a Terraform variable that toggles the misconfiguration on or off.
 
 ### AWS
 | Check ID | Severity | Category |

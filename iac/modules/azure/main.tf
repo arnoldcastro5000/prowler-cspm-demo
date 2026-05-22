@@ -75,7 +75,7 @@ resource "azurerm_monitor_activity_log_alert" "security_solution" {
   count               = var.activity_log_alerts ? 0 : 1
   name                = "${var.project_prefix}-security-solution-alert"
   resource_group_name = azurerm_resource_group.prowler.name
-  location            = azurerm_resource_group.prowler.location
+  location            = "global"
   scopes              = ["/subscriptions/${var.subscription_id}"]
   description         = "Alert on security solution changes"
 

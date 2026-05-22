@@ -1,6 +1,3 @@
-project_prefix        = "prowler-cspm"
-gcp_project_id        = "***REDACTED-GCP-PROJECT***"
-azure_subscription_id = "<your-azure-subscription-id>"
 
 # EC2 stopped after hardening
 instance_running = false

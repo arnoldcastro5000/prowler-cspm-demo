@@ -380,7 +380,7 @@ All items above checked off, plus:
 - [ ] `findings_before.json` contains 15 documents matching the schema in `CLAUDE.md`
 - [ ] Dashboard `/before` shows 15 findings (3 critical, 7 high, 4 medium, 1 low)
 - [ ] `make after` runs without errors
-- [ ] `make rescan` produces `dashboard/public/findings_after.json` with 0 documents
+- [ ] `make rescan` produces `dashboard/public/findings_after.json` with 15 documents, all with `status === "pass"`
 - [ ] Dashboard `/after` shows findings after remediation, Provider Status shows all 3 providers and findings status, and Remediation Changelog shows status of all findings from `/before`
 - [ ] Cloud Run origin is not directly accessible — Cloudflare header required
 - [ ] No credentials committed to the repository

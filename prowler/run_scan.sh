@@ -198,6 +198,8 @@ if [ "$AZURE_READY" = true ]; then
         echo "--- Azure check: $CHECK ---"
         run_check "$PROWLER" azure \
             --check "$CHECK" \
+            --sp-env-auth \
+            --subscription-ids "$AZURE_SUBSCRIPTION_ID" \
             --output-formats json-ocsf \
             --output-directory "$OUTPUT_DIR" || {
             echo "WARNING: Azure check $CHECK failed — continuing."

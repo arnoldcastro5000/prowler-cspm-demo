@@ -66,7 +66,7 @@ resource "google_monitoring_alert_policy" "audit_config_changes" {
   conditions {
     display_name = "audit config changes"
     condition_threshold {
-      filter          = "metric.type=\"logging.googleapis.com/user/${var.project_prefix}-audit-config-changes\""
+      filter          = "metric.type=\"logging.googleapis.com/user/${var.project_prefix}-audit-config-changes\" AND resource.type=\"global\""
       duration        = "0s"
       comparison      = "COMPARISON_GT"
       threshold_value = 0
@@ -78,6 +78,8 @@ resource "google_monitoring_alert_policy" "audit_config_changes" {
   }
 
   notification_channels = []
+
+  depends_on = [google_logging_metric.audit_config_changes]
 }
 
 # ─── KMS key rotation ────────────────────────────────────────────────────────
