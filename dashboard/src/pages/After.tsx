@@ -46,7 +46,7 @@ export default function After() {
 
         {loading && (
           <div className="animate-pulse space-y-3">
-            {[...Array(5)].map((_, i) => (
+            {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="h-10 bg-gray-200 rounded" />
             ))}
           </div>
