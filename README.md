@@ -79,6 +79,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 | Edge security | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS |
 | Secrets | GCP Secret Manager | Credential storage for all cloud provider keys |
 | Registry | GCP Artifact Registry | Docker image storage |
+| AI development | Claude Code + [mattpocock/skills](https://github.com/mattpocock/skills) + [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | Structured agentic workflows (TDD, domain grilling, issue breakdown) and LLM coding guardrails (simplicity, surgical edits, goal-driven execution) |
 
 ---
 
