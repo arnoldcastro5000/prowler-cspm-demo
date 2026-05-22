@@ -40,18 +40,17 @@ for attempt in $(seq 1 $MAX_RETRIES); do
 
         if [ -n "$RESOURCE_ID" ] && [ -n "$RESOURCE_ADDR" ]; then
             echo "=== Auto-importing $RESOURCE_ADDR ==="
-            # Build import args: keep -chdir and -var/-var-file flags, drop apply/-target/-auto-approve
-            IMPORT_ARGS=()
-            skip_next=false
+            # -chdir is a global option (before subcommand); -var/-var-file are import flags
+            CHDIR_ARG=""
+            IMPORT_FLAGS=()
             for arg in "${ARGS[@]}"; do
-                if $skip_next; then skip_next=false; continue; fi
                 case "$arg" in
-                    apply|-auto-approve) ;;
-                    -target=*) ;;
-                    *) IMPORT_ARGS+=("$arg") ;;
+                    -chdir=*) CHDIR_ARG="$arg" ;;
+                    apply|-auto-approve|-target=*) ;;
+                    *) IMPORT_FLAGS+=("$arg") ;;
                 esac
             done
-            terraform import "${IMPORT_ARGS[@]}" "$RESOURCE_ADDR" "$RESOURCE_ID" 2>&1 || true
+            terraform $CHDIR_ARG import "${IMPORT_FLAGS[@]}" "$RESOURCE_ADDR" "$RESOURCE_ID" 2>&1 || true
             echo "=== Retrying apply (attempt $((attempt + 1))/$MAX_RETRIES) ==="
             continue
         fi
