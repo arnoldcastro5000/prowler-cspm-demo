@@ -5,25 +5,23 @@ set -uo pipefail
 
 MAX_RETRIES=3
 ARGS=("$@")
+TMPLOG=$(mktemp)
 
-run_apply() {
-    TF_OUT=$(terraform "${ARGS[@]}" 2>&1)
-    TF_EXIT=$?
-    echo "$TF_OUT"
-    echo "$TF_OUT"  # keep a copy for parsing
-    printf '%s' "$TF_OUT"
-}
+cleanup() { rm -f "$TMPLOG"; }
+trap cleanup EXIT
 
 for attempt in $(seq 1 $MAX_RETRIES); do
-    TF_OUT=$(terraform "${ARGS[@]}" 2>&1)
-    TF_EXIT=$?
-    echo "$TF_OUT"
+    # Show output in real time AND capture it for error detection
+    terraform "${ARGS[@]}" 2>&1 | tee "$TMPLOG"
+    TF_EXIT=${PIPESTATUS[0]}
 
     if [ $TF_EXIT -eq 0 ]; then
         exit 0
     fi
 
-    # AWS duplicate security group rule — can't auto-import, just warn and continue
+    TF_OUT=$(cat "$TMPLOG")
+
+    # AWS duplicate security group rule
     if echo "$TF_OUT" | grep -q "InvalidPermission.Duplicate"; then
         echo "WARNING: Duplicate AWS security group rule — already exists in cloud, continuing."
         exit 0
@@ -35,11 +33,9 @@ for attempt in $(seq 1 $MAX_RETRIES); do
         exit 0
     fi
 
-    # Azure / generic "already exists - to be managed via Terraform" — auto-import and retry
+    # Azure / generic "already exists" — auto-import and retry
     if echo "$TF_OUT" | grep -q "already exists"; then
-        # Extract resource ID from: a resource with the ID "XXXX" already exists
         RESOURCE_ID=$(echo "$TF_OUT" | grep -oP 'with the ID "\K[^"]+')
-        # Extract resource address from: with module.xxx.yyy[0],
         RESOURCE_ADDR=$(echo "$TF_OUT" | grep -oP 'with \Kmodule\.[^\s,]+')
 
         if [ -n "$RESOURCE_ID" ] && [ -n "$RESOURCE_ADDR" ]; then
@@ -49,7 +45,6 @@ for attempt in $(seq 1 $MAX_RETRIES); do
             continue
         fi
 
-        # Couldn't parse — warn and continue
         echo "WARNING: Duplicate resource skipped — already exists in cloud, continuing."
         exit 0
     fi
