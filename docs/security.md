@@ -68,24 +68,7 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 
 ## DAST — Dynamic Application Security Testing
 
-OWASP ZAP baseline scan was run against the deployed dashboard using the official ZAP Docker image. The scan covered passive checks across all discovered URLs — no active attacks.
-
-**Result:** 0 High | 1 Medium | 3 Low | 4 Informational | 0 False Positives
-
-| Risk | Alert | Decision |
-|---|---|---|
-| Medium | Content Security Policy (CSP) Header Not Set | Planned — to be added after tuning in report-only mode |
-| Low | Cross-Origin-Embedder/Opener/Resource-Policy Headers Missing | Skipped — would break GitHub CI badge images on Landing page |
-| Informational | Modern Web Application | Expected — React SPA detected |
-| Informational | Cache-control / Storable Content | Expected — immutable caching applied correctly to JS/CSS assets |
-
-The scan validates:
-- No vulnerable JavaScript libraries
-- No sensitive information disclosure
-- No clickjacking exposure
-- No cookie security issues
-- No cross-domain misconfigurations
-- Security headers correctly applied (X-Content-Type-Options, X-Frame-Options, HSTS, Referrer-Policy, Permissions-Policy)
+OWASP ZAP baseline scan is run against the deployed dashboard using the official ZAP Docker image. The scan covers passive checks across all discovered URLs — no active attacks against live infrastructure.
 
 ---
 
