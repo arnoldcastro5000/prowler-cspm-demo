@@ -78,7 +78,7 @@ export default function Landing() {
               <tbody className="divide-y divide-gray-800">
                 {[
                   ['CI/CD', 'GitHub Actions + Dependabot'],
-                  ['Scanner', 'Prowler (open source)'],
+                  ['Scanner', 'Prowler 5.27.0'],
                   ['IaC', 'Terraform ≥ 1.6'],
                   ['Ingest', 'Python 3.11'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod'],

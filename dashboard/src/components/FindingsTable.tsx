@@ -31,7 +31,7 @@ export default function FindingsTable({ findings }: Props) {
         return (
           <div key={provider}>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">
-              {provider.toUpperCase()} — {group.length} finding{group.length !== 1 ? 's' : ''}
+              {provider.toUpperCase()} - {group.length} check{group.length !== 1 ? 's' : ''}
             </h3>
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <table className="w-full text-sm">
