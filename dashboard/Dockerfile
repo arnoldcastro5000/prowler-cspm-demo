@@ -6,6 +6,10 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
+# Pre-compress JS, CSS, and HTML at build time (level 6 — balanced speed/size)
+RUN find /app/dist -type f \( -name "*.js" -o -name "*.css" -o -name "*.html" \) \
+    -exec gzip -6 -k {} \;
+
 # Stage 2: serve with nginx on port 8080
 FROM nginx:1.27-alpine@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10
 COPY nginx.conf /etc/nginx/conf.d/default.conf
