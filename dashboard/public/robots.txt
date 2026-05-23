@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /findings_before.json
+Disallow: /findings_after.json
+Disallow: /assets/
+Disallow: /security
+
+Sitemap: https://prowler.cloudsecuritypractice.com/sitemap.xml
