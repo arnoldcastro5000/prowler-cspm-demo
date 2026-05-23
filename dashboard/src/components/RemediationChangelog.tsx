@@ -21,12 +21,12 @@ const providerBadge: Record<string, string> = {
 }
 
 export default function RemediationChangelog({ before, after }: Props) {
-  const afterPassByCheckId = new Map(
-    after.filter(f => f.status === 'pass').map(f => [f.check_id, f])
+  const afterFailIds = new Set(
+    after.filter(f => f.status === 'fail').map(f => f.check_id)
   )
 
   const resolved = before
-    .filter(f => f.status === 'fail' && afterPassByCheckId.has(f.check_id))
+    .filter(f => f.status === 'fail' && !afterFailIds.has(f.check_id))
     .sort((a, b) => {
       const si = severityOrder.indexOf(a.severity) - severityOrder.indexOf(b.severity)
       return si !== 0 ? si : a.provider.localeCompare(b.provider)

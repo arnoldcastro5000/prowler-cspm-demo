@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import TabBar from '../components/TabBar'
 import PipelineDiagram from '../components/PipelineDiagram'
 
@@ -29,7 +28,7 @@ export default function Landing() {
             live infrastructure.
           </p>
           <p className="text-xl text-gray-300 leading-relaxed">
-            19 failures found. 0 after remediation.
+            19 failures found. 19 fixed after remediation.
           </p>
         </div>
 
@@ -40,22 +39,10 @@ export default function Landing() {
             <li className="flex gap-3"><span className="text-blue-400">→</span>Terraform-provisioned infrastructure toggled between misconfigured and hardened states via <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">before.tfvars</code> / <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">after.tfvars</code></li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>All cloud credentials stored in GCP Secret Manager — fetched at runtime, never on disk</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Prowler runs locally on WSL2, output ingested and normalised to a typed JSON schema</li>
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Findings baked into the container at build time — no backend, no API, no database</li>
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Hosted on GCP Cloud Run, proxied through Cloudflare (WAF · CDN · DDoS · Full Strict SSL)</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Findings baked into the container at build time</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Hosted on GCP Cloud Run, proxied through Cloudflare (edge security &amp; delivery)</li>
           </ul>
 
-          {/* Security boundary callout */}
-          <div className="mt-6 border border-gray-600/50 bg-gray-800/40 rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Defence in depth</p>
-            <p className="text-gray-300 text-sm leading-relaxed">
-              Cloud Run rejects any request missing a Cloudflare-issued <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">CF-Access-Secret</code> header —
-              preventing origin bypass, a common misconfiguration in reverse proxy setups.
-              All public traffic enters through Cloudflare only. SSL mode is Full (Strict) end-to-end.
-            </p>
-            <p className="text-gray-500 text-xs mt-2 font-mono">
-              User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
-            </p>
-          </div>
         </div>
 
         {/* Infrastructure diagram */}
@@ -63,6 +50,17 @@ export default function Landing() {
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Pipeline</h2>
           <div className="bg-gray-900 rounded-lg p-6">
             <PipelineDiagram />
+          </div>
+
+          {/* Security boundary callout */}
+          <div className="mt-6 border border-gray-600/50 bg-gray-800/40 rounded-lg p-4">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Defence in depth</p>
+            <p className="text-gray-300 text-sm leading-relaxed">
+              All traffic route through Cloudflare only. Cloud Run rejects requests without a Cloudflare-issued header.
+            </p>
+            <p className="text-gray-500 text-xs mt-2 font-mono">
+              User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
+            </p>
           </div>
         </div>
 
@@ -85,7 +83,7 @@ export default function Landing() {
                   ['Ingest', 'Python 3.11'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod'],
                   ['Hosting', 'GCP Cloud Run'],
-                  ['Edge', 'Cloudflare (free tier)'],
+                  ['Edge', 'Cloudflare'],
                   ['Secrets', 'GCP Secret Manager'],
                   ['Registry', 'GCP Artifact Registry'],
                   ['AI Development', 'Claude Code (sandboxed) + andrej-karpathy-skills + mattpocock/skills'],
@@ -142,30 +140,6 @@ export default function Landing() {
               </tbody>
             </table>
           </div>
-        </div>
-
-        {/* CTAs */}
-        <div className="flex gap-4 flex-wrap">
-          <Link
-            to="/before"
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-          >
-            View Before Scan →
-          </Link>
-          <Link
-            to="/after"
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-          >
-            View After Scan →
-          </Link>
-          <a
-            href="https://github.com/arnoldcastro5000/prowler-cspm-demo"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-6 py-3 bg-gray-800 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors"
-          >
-            GitHub →
-          </a>
         </div>
 
       </div>

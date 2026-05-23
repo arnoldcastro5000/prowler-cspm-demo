@@ -1,17 +1,17 @@
 export default function PipelineDiagram() {
-  const box = 'flex flex-col items-center justify-center rounded-lg border px-4 py-3 text-center min-w-[120px]'
+  const box = 'flex flex-col items-center justify-center rounded-lg border px-3 py-3 text-center'
   const primary = `${box} bg-blue-950 border-blue-500 text-blue-100`
   const cloud = `${box} bg-gray-800 border-gray-500 text-gray-200`
   const infra = `${box} bg-indigo-950 border-indigo-500 text-indigo-100`
   const edge = `${box} bg-orange-950 border-orange-500 text-orange-100`
   const label = 'text-sm font-semibold'
   const sublabel = 'text-xs text-gray-400 mt-0.5'
-  const arrow = 'text-gray-500 text-xl font-bold mx-1 self-center'
-  const group = 'flex flex-col gap-2 rounded-xl border border-dashed p-3'
+  const arrow = 'text-gray-500 text-xl font-bold self-center'
+  const group = 'flex flex-col gap-2 rounded-xl border border-dashed p-2'
 
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="flex items-start gap-2 min-w-max text-sm">
+    <div className="w-full">
+      <div className="flex items-center gap-1 text-sm">
 
         {/* WSL2 group — only Terraform, Prowler, ingest, Docker */}
         <div className={`${group} border-gray-600`}>

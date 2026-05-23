@@ -40,6 +40,14 @@ export default function TabBar() {
         >
           Frameworks
         </button>
+        <a
+          href="https://github.com/arnoldcastro5000/prowler-cspm-demo"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${base} border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300`}
+        >
+          GitHub
+        </a>
 
         <div className="ml-auto flex items-center gap-2">
           <a
