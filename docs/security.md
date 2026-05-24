@@ -22,7 +22,20 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ## Infrastructure Security
 
-- **Cloudflare origin protection** — A Cloudflare Worker injects a shared secret header (`X-CF-Secret`) on every proxied request. nginx on Cloud Run validates that header and rejects requests without it with 403, preventing direct origin bypass. SSL mode is Full (Strict) end-to-end.
+### Cloudflare Edge
+
+| Feature | Status | What it does |
+|---|---|---|
+| **DDoS Protection** | Always on | Blocks volumetric and application-layer attacks automatically |
+| **WAF (Managed Rules)** | Always on | Blocks common attacks — SQLi, XSS, etc. |
+| **Bot Fight Mode** | Enabled | Challenges automated bots and scrapers |
+| **Browser Integrity Check** | Enabled (default) | Blocks requests with suspicious or spoofed browser headers |
+| **SSL Full (Strict)** | Enabled | End-to-end encrypted, validates origin certificate |
+| **Cloudflare Worker** | Enabled | Injects `X-CF-Secret` header — direct Cloud Run access returns 403 |
+
+### Cloud Run Origin
+
+- **Cloudflare origin protection** — A Cloudflare Worker injects a shared secret header (`X-CF-Secret`) on every proxied request. nginx on Cloud Run validates that header and rejects requests without it with 403, preventing direct origin bypass.
 - **Backend access blocked** — Direct access to the Cloud Run backend URL is blocked — requests without the secret header are rejected with 403. All browser traffic reaches the app through `prowler.cloudsecuritypractice.com` only.
 - **Static findings JSON** — no backend API, no database, no authentication surface. Findings are baked into the Docker image at build time. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
 

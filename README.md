@@ -62,10 +62,10 @@ The dashboard shows the before state (findings across critical, high, medium, an
 
 ### Security boundary — Cloudflare to Cloud Run
 
-Cloud Run validates a shared secret on every inbound request, preventing origin bypass — a common misconfiguration in reverse proxy setups. SSL mode is Full (Strict) end-to-end.
+A Cloudflare Worker adds a secret to every request before it reaches Cloud Run. Cloud Run rejects any request missing that secret. SSL mode is Full (Strict) end-to-end.
 
 ```
-User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-CF-Secret) → Cloud Run (origin, not public)
+User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-CF-Secret) → Cloud Run (direct access blocked)
                                                                                                   ↑
                                                                              shared secret validated on every request
 ```
