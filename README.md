@@ -47,7 +47,13 @@ The dashboard shows the before state (findings across critical, high, medium, an
                               └────────────┬───────────────────────┘
                                            │ origin — proxied through
                               ┌────────────▼───────────────────────┐
+                              │  Cloudflare Worker                 │
+                              │  Injects X-CF-Secret header        │
+                              └────────────┬───────────────────────┘
+                                           │
+                              ┌────────────▼───────────────────────┐
                               │  Cloudflare (CDN · WAF · DDoS · DNS│
+                              │  · Workers)                        │
                               │  All public traffic enters here.   │
                               │  Direct Cloud Run access blocked.  │
                               └────────────────────────────────────┘
@@ -59,9 +65,9 @@ The dashboard shows the before state (findings across critical, high, medium, an
 Cloud Run validates a shared secret on every inbound request, preventing origin bypass — a common misconfiguration in reverse proxy setups. SSL mode is Full (Strict) end-to-end.
 
 ```
-User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
-                                          ↑
-                             shared secret validated on every request
+User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-CF-Secret) → Cloud Run (origin, not public)
+                                                                                                  ↑
+                                                                             shared secret validated on every request
 ```
 
 ---
@@ -77,7 +83,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
 | Backend | GCP Cloud Run | Serverless containers, always-free tier, GCP-native |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind + shadcn/ui | Static bundle, modern UI components, containerises cleanly |
 | Validation | zod | Runtime schema validation for fetched JSON |
-| Edge security | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS |
+| Edge security | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS, Workers (origin secret injection) |
 | Secrets | GCP Secret Manager | Credential storage for all cloud provider keys |
 | Registry | GCP Artifact Registry | Docker image storage |
 | AI development | Claude Code (sandboxed) + [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) + [mattpocock/skills](https://github.com/mattpocock/skills) | Structured agentic workflows (TDD, domain grilling, issue breakdown) and LLM coding guardrails (simplicity, surgical edits, goal-driven execution) |
@@ -148,7 +154,7 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 | Cloud Run (dashboard hosting) | GCP | Always free up to 2M requests/month |
 | Artifact Registry (image storage) | GCP | Free up to 0.5 GB |
 | Secret Manager (credentials) | GCP | Free up to 6 secret versions / 10K access ops per month |
-| Cloudflare (CDN, WAF, DDoS, DNS) | Cloudflare | Always free |
+| Cloudflare (CDN, WAF, DDoS, DNS, Workers) | Cloudflare | Always free (Workers: 100k requests/day) |
 | Prowler | Open source | Free |
 
 ---
@@ -160,6 +166,7 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 - A domain name is required for Cloudflare integration and is not free.
 - GCP Secret Manager free tier covers 6 active secret versions. Azure credentials are consolidated into one JSON secret to stay within this limit.
 - Terraform state is stored locally on the WSL2 machine. If the local machine is lost, resources still exist in the cloud but state must be reconstructed via `terraform import`.
+- The Cloudflare Worker is in the critical path — if the Worker errors, the site goes down.
 
 ---
 

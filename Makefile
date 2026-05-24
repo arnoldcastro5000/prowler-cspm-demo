@@ -6,7 +6,7 @@ AWS_REGION     := us-east-1
 AR_REPO        := prowler-cspm
 IMAGE          := $(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(AR_REPO)/dashboard
 SERVICE        := prowler-cspm-dashboard
-CF_SECRET_NAME := prowler-cf-access-secret
+CF_SECRET_NAME        := prowler-cf-access-secret
 
 ENV_DIR    := iac/environments
 OUTPUT_DIR := /var/tmp/prowler-output
