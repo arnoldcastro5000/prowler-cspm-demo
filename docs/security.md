@@ -22,8 +22,8 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ## Infrastructure Security
 
-- **Cloudflare origin protection** — Cloud Run validates a shared secret on every inbound request, preventing direct origin bypass. All public traffic enters through Cloudflare only. SSL mode is Full (Strict) end-to-end.
-- **No public Cloud Run URL** — the service is not directly accessible; all traffic routes through `prowler.cloudsecuritypractice.com`.
+- **Cloudflare origin protection** — A Cloudflare Worker injects a shared secret header (`X-CF-Secret`) on every proxied request. nginx on Cloud Run validates that header and rejects requests without it with 403, preventing direct origin bypass. SSL mode is Full (Strict) end-to-end.
+- **Backend access blocked** — Direct access to the Cloud Run backend URL is blocked — requests without the secret header are rejected with 403. All browser traffic reaches the app through `prowler.cloudsecuritypractice.com` only.
 - **Static findings JSON** — no backend API, no database, no authentication surface. Findings are baked into the Docker image at build time. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
 
 ## IaC Security
