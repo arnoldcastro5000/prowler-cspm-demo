@@ -56,10 +56,10 @@ export default function Landing() {
           <div className="mt-6 border border-gray-600/50 bg-gray-800/40 rounded-lg p-4">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Defence in depth</p>
             <p className="text-gray-300 text-sm leading-relaxed">
-              All traffic route through Cloudflare only. Cloud Run rejects requests without a Cloudflare-issued header.
+              All traffic routes through Cloudflare only. Direct backend access is blocked by a shared secret.
             </p>
             <p className="text-gray-500 text-xs mt-2 font-mono">
-              User → Cloudflare edge (WAF · CDN · DDoS) → Cloud Run (origin, not public)
+              User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-CF-Secret) → Cloud Run (direct access blocked)
             </p>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function Landing() {
                   ['Ingest', 'Python 3.11'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod'],
                   ['Hosting', 'GCP Cloud Run'],
-                  ['Edge', 'Cloudflare'],
+                  ['Edge', 'Cloudflare | CDN, WAF, DDoS protection, DNS'],
                   ['Secrets', 'GCP Secret Manager'],
                   ['Registry', 'GCP Artifact Registry'],
                   ['AI Development', 'Claude Code (sandboxed) + andrej-karpathy-skills + mattpocock/skills'],
@@ -120,6 +120,7 @@ export default function Landing() {
                   ['Trivy', 'trivy.yml'],
                   ['Zizmor', 'zizmor.yml'],
                   ['Hardcoded Config Check', 'hardcoded-config-check.yml'],
+                  ['Dependency Review', 'dependency-review.yml'],
                 ].map(([name, file]) => (
                   <tr key={file} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{name}</td>

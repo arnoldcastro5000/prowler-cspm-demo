@@ -78,7 +78,6 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Limits referrer leakage on external navigation |
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | Enforces HTTPS for 1 year |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Disables unused browser features |
-
 | `Content-Security-Policy` | `default-src 'self'; script-src 'self' 'nonce-<per-request>'; img-src 'self' github.com; connect-src 'self' raw.githubusercontent.com; style-src 'self'; font-src 'self'` | Restricts resource loading to same-origin plus explicitly allowed external domains. Per-request nonce allows Cloudflare Bot Fight Mode scripts without `unsafe-inline`. |
 
 ## DAST — Dynamic Application Security Testing
