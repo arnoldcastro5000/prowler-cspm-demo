@@ -76,17 +76,17 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 
 | Layer | Technology | Rationale |
 |---|---|---|
+| Cloud environments tested | AWS, GCP, Azure | Demonstrates multi-cloud coverage in a single pipeline |
+| Scanner | Prowler 5.27.0 | Native multi-cloud CSPM with structured JSON output |
+| IaC | Terraform ≥ 1.6 | Reproducible before/after infrastructure states via tfvars toggle |
+| Dashboard hosting | GCP Cloud Run | Serverless containers with scale-to-zero |
+| Edge | Cloudflare \| CDN, WAF, DDoS protection, DNS | Full edge security layer; origin access blocked without shared secret |
+| Secrets | GCP Secret Manager | All cloud credentials fetched at runtime, never stored on disk |
+| Registry | GCP Artifact Registry | Docker image storage, GCP-native |
+| AI Development | Claude Code (sandboxed) + [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) + [mattpocock/skills](https://github.com/mattpocock/skills) | Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails |
 | CI/CD | GitHub Actions + Dependabot | Quality gate (tsc, eslint, docker build, shellcheck, trivy, zizmor) + automated dependency updates |
-| Scanner | Prowler (open source) | Native multi-cloud CSPM, structured JSON output |
-| IaC | Terraform | Reproducible before/after infrastructure states |
-| Ingest | Python 3.11 (ingest_prowler.py) | Normalises Prowler output → findings JSON baked into image |
-| Backend | GCP Cloud Run | Serverless containers, GCP-native |
-| Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS | Static bundle, modern UI components, containerises cleanly |
-| Validation | zod | Runtime schema validation for fetched JSON |
-| Edge security | Cloudflare | CDN, WAF, DDoS protection, DNS, Workers (origin secret injection) |
-| Secrets | GCP Secret Manager | Credential storage for all cloud provider keys |
-| Registry | GCP Artifact Registry | Docker image storage |
-| AI development | Claude Code (sandboxed) + [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) + [mattpocock/skills](https://github.com/mattpocock/skills) | Structured agentic workflows (TDD, domain grilling, issue breakdown) and LLM coding guardrails (simplicity, surgical edits, goal-driven execution) |
+| Frontend | React 18 + Vite + TypeScript (strict) + Tailwind + zod | Static bundle with runtime schema validation, containerises cleanly |
+| Development environment | WSL2 (Windows Subsystem for Linux) | Local Linux environment for Terraform, Prowler, and Docker |
 
 ---
 
