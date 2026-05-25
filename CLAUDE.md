@@ -64,7 +64,7 @@ continuous monitoring — all findings are point-in-time scan snapshots.
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS + shadcn/ui | No other UI frameworks |
 | Validation | zod | Runtime schema validation for fetched JSON; `Finding` type inferred from zod schema |
 | Linting | ESLint + @typescript-eslint/parser + @typescript-eslint/eslint-plugin | `recommended-type-checked` ruleset; type-aware linting combined with tsc and vite build in CI |
-| Edge | Cloudflare (free tier) | DNS, WAF, CDN, DDoS |
+| Edge | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS, Workers (origin secret injection) |
 | Secrets | GCP Secret Manager | All cloud provider credentials — fetched at runtime by WSL2 |
 | Registry | GCP Artifact Registry | Docker image storage |
 

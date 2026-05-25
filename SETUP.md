@@ -90,9 +90,11 @@ Same GCP account hosts the dashboard, image registry, and credentials.
 - [ ] Add site to Cloudflare and point domain nameservers to Cloudflare → [Cloudflare DNS setup](https://developers.cloudflare.com/dns/zone-setups/full-setup/)
 - [ ] Create a DNS CNAME record for `prowler.cloudsecuritypractice.com` pointing to your Cloud Run service URL
 - [ ] Set SSL/TLS mode to **Full (Strict)** — not Flexible
-- [ ] Create a Cloudflare Worker that injects the `X-CF-Secret` header on every proxied request, with the secret value stored as a Worker secret (`CF_SECRET`)
+- [ ] Create a Cloudflare Worker that injects the `X-CF-Secret` header on every proxied request
+  - Set `CF_SECRET` as a Worker secret (the same value stored in `prowler-cf-access-secret`)
+  - Set `CLOUD_RUN_HOST` as a plain text variable (your `*.run.app` hostname without `https://`)
+  - Add a route `prowler.cloudsecuritypractice.com/*` mapped to the Worker
 - [ ] Enable Bot Fight Mode under Security → Bots
-- [ ] Confirm SSL/TLS mode is Full (Strict)
 
 ---
 

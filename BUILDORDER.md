@@ -383,6 +383,6 @@ All items above checked off, plus:
 - [ ] `make after` runs without errors
 - [ ] `make rescan` produces `dashboard/public/findings_after.json` with 15 documents, all with `status === "pass"`
 - [ ] Dashboard `/after` shows findings after remediation, Provider Status shows all 3 providers and findings status, and Remediation Changelog shows status of all findings from `/before`
-- [ ] Cloud Run origin is not directly accessible — Cloudflare header required
+- [ ] Cloud Run origin rejects direct access — requests without `X-CF-Secret` header return 403
 - [ ] No credentials committed to the repository
 - [ ] `terraform.tfstate` files are not committed to the repository
