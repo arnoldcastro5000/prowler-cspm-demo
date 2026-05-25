@@ -1,6 +1,6 @@
 # Prowler CSPM
 
-A DevSecOps reference project that scans real cloud infrastructure across AWS, GCP, and Azure for misconfigurations, then displays a before/after remediation dashboard. Built entirely on free-tier services.
+A cloud security reference project that scans real cloud infrastructure across AWS, GCP, and Azure for misconfigurations, then displays a before/after remediation dashboard. Documented for reproducibility.
 
 Live demo → `prowler.cloudsecuritypractice.com/before` and `prowler.cloudsecuritypractice.com/after`
 
@@ -80,10 +80,10 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 | Scanner | Prowler (open source) | Native multi-cloud CSPM, structured JSON output |
 | IaC | Terraform | Reproducible before/after infrastructure states |
 | Ingest | Python 3.11 (ingest_prowler.py) | Normalises Prowler output → findings JSON baked into image |
-| Backend | GCP Cloud Run | Serverless containers, always-free tier, GCP-native |
+| Backend | GCP Cloud Run | Serverless containers, GCP-native |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS | Static bundle, modern UI components, containerises cleanly |
 | Validation | zod | Runtime schema validation for fetched JSON |
-| Edge security | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS, Workers (origin secret injection) |
+| Edge security | Cloudflare | CDN, WAF, DDoS protection, DNS, Workers (origin secret injection) |
 | Secrets | GCP Secret Manager | Credential storage for all cloud provider keys |
 | Registry | GCP Artifact Registry | Docker image storage |
 | AI development | Claude Code (sandboxed) + [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) + [mattpocock/skills](https://github.com/mattpocock/skills) | Structured agentic workflows (TDD, domain grilling, issue breakdown) and LLM coding guardrails (simplicity, surgical edits, goal-driven execution) |
@@ -147,14 +147,14 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 
 ---
 
-## Free Tier Summary
+## Cost Summary
 
 | Service | Provider | Cost |
 |---|---|---|
-| Cloud Run (dashboard hosting) | GCP | Always free up to 2M requests/month |
-| Artifact Registry (image storage) | GCP | Free up to 0.5 GB |
-| Secret Manager (credentials) | GCP | Free up to 6 secret versions / 10K access ops per month |
-| Cloudflare (CDN, WAF, DDoS, DNS, Workers) | Cloudflare | Always free (Workers: 100k requests/day) |
+| Cloud Run (dashboard hosting) | GCP | Up to 2M requests/month |
+| Artifact Registry (image storage) | GCP | Up to 0.5 GB |
+| Secret Manager (credentials) | GCP | Up to 6 secret versions / 10K access ops per month |
+| Cloudflare (CDN, WAF, DDoS, DNS, Workers) | Cloudflare | 100k Workers requests/day |
 | Prowler | Open source | Free |
 
 ---
@@ -164,7 +164,7 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 - Prowler is a point-in-time scanner, not continuous monitoring. The dashboard reflects scan snapshots, not live state.
 - Cloudflare's free WAF provides managed rulesets only. Custom rules and advanced rate limiting require a paid plan.
 - A domain name is required for Cloudflare integration and is not free.
-- GCP Secret Manager free tier covers 6 active secret versions. Azure credentials are consolidated into one JSON secret to stay within this limit.
+- GCP Secret Manager covers 6 active secret versions. Azure credentials are consolidated into one JSON secret to stay within this limit.
 - Terraform state is stored locally on the WSL2 machine. If the local machine is lost, resources still exist in the cloud but state must be reconstructed via `terraform import`.
 - The Cloudflare Worker is in the critical path — if the Worker errors, the site goes down.
 
