@@ -23,7 +23,7 @@ export default function Landing() {
               #1 cloud security threat
             </a>
             {' '}— the average breach costs <span className="text-white font-semibold">$4.3 million</span> and
-            takes over 180 days to detect. This project demonstrates end-to-end detection
+            takes over 180 days to detect. This project demonstrates end-to-end misconfiguration detection
             and remediation across AWS, GCP, and Azure using real Prowler scans against
             live infrastructure.
           </p>
@@ -78,16 +78,17 @@ export default function Landing() {
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {[
-                  ['CI/CD', 'GitHub Actions + Dependabot'],
+                  ['Cloud environments tested', 'AWS, GCP, Azure'],
                   ['Scanner', 'Prowler 5.27.0'],
                   ['IaC', 'Terraform ≥ 1.6'],
-                  ['Ingest', 'Python 3.11'],
-                  ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod'],
-                  ['Hosting', 'GCP Cloud Run'],
+                  ['Dashboard hosting', 'GCP Cloud Run'],
                   ['Edge', 'Cloudflare | CDN, WAF, DDoS protection, DNS'],
                   ['Secrets', 'GCP Secret Manager'],
                   ['Registry', 'GCP Artifact Registry'],
                   ['AI Development', 'Claude Code (sandboxed) + andrej-karpathy-skills + mattpocock/skills'],
+                  ['CI/CD', 'GitHub Actions + Dependabot'],
+                  ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod'],
+                  ['Development environment', 'WSL2 (Windows Subsystem for Linux)'],
                 ].map(([layer, tech]) => (
                   <tr key={layer} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{layer}</td>
