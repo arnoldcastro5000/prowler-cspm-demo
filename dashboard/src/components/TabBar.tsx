@@ -33,6 +33,12 @@ export default function TabBar() {
         >
           Security
         </NavLink>
+        <NavLink
+          to="/architecture"
+          className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
+        >
+          Architecture
+        </NavLink>
         <button
           disabled
           title="Coming soon"
