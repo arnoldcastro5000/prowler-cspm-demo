@@ -37,6 +37,10 @@ prowler-key.json
 # Prowler output
 prowler/output/
 
+# Claude Code
+.claude/
+.mcp.json
+
 # OS
 .DS_Store
 Thumbs.db
