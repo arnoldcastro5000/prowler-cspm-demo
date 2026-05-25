@@ -39,8 +39,9 @@ export default function Landing() {
             <li className="flex gap-3"><span className="text-blue-400">→</span>Terraform-provisioned infrastructure toggled between misconfigured and hardened states via <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">before.tfvars</code> / <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">after.tfvars</code></li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>All cloud credentials stored in GCP Secret Manager — fetched at runtime, never on disk</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Prowler runs locally on WSL2, output ingested and normalised to a typed JSON schema</li>
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Findings baked into the container at build time</li>
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Hosted on GCP Cloud Run, proxied through Cloudflare (edge security &amp; delivery)</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Every code change is automatically checked for security issues before it ships</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Security headers applied on every response — mitigating common web vulnerabilities</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Dashboard hosted on GCP Cloud Run, secured through Cloudflare</li>
           </ul>
 
         </div>
@@ -54,7 +55,7 @@ export default function Landing() {
 
           {/* Security boundary callout */}
           <div className="mt-6 border border-gray-600/50 bg-gray-800/40 rounded-lg p-4">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">Defence in depth</p>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">How traffic is secured</p>
             <p className="text-gray-300 text-sm leading-relaxed">
               All traffic routes through Cloudflare only. Direct backend access is blocked by a shared secret.
             </p>
@@ -120,7 +121,6 @@ export default function Landing() {
                   ['Trivy', 'trivy.yml'],
                   ['Zizmor', 'zizmor.yml'],
                   ['Hardcoded Config Check', 'hardcoded-config-check.yml'],
-                  ['Dependency Review', 'dependency-review.yml'],
                 ].map(([name, file]) => (
                   <tr key={file} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{name}</td>
