@@ -38,9 +38,9 @@ export default function Landing() {
           <ul className="space-y-3 text-gray-300">
             <li className="flex gap-3"><span className="text-blue-400">→</span>Terraform-provisioned infrastructure toggled between misconfigured and hardened states via <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">before.tfvars</code> / <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">after.tfvars</code></li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>All cloud credentials stored in GCP Secret Manager — fetched at runtime, never on disk</li>
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Prowler runs locally on WSL2, output ingested and normalised to a typed JSON schema</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Prowler scans run in an isolated local environment — findings are normalised to a strict typed schema before publishing</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Every code change is automatically checked for security issues before it ships</li>
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Security headers applied on every response — mitigating common web vulnerabilities</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Security headers hardening on the frontend — mitigating common web vulnerabilities</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Dashboard hosted on GCP Cloud Run, secured through Cloudflare</li>
           </ul>
 
