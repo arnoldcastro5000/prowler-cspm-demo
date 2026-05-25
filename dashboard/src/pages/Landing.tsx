@@ -41,7 +41,7 @@ export default function Landing() {
             <li className="flex gap-3"><span className="text-blue-400">→</span>Prowler scans run in an isolated local environment — findings are normalised to a strict typed schema before publishing</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Every code change is automatically checked for security issues before it ships</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Security headers hardening on the frontend — mitigating common web vulnerabilities</li>
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Dashboard hosted on GCP Cloud Run, secured through Cloudflare</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>This dashboard is hosted on GCP Cloud Run, secured through Cloudflare</li>
           </ul>
 
         </div>
@@ -74,25 +74,28 @@ export default function Landing() {
                 <tr>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Layer</th>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Technology</th>
+                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Rationale</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {[
-                  ['Cloud environments tested', 'AWS, GCP, Azure'],
-                  ['Scanner', 'Prowler 5.27.0'],
-                  ['IaC', 'Terraform ≥ 1.6'],
-                  ['Dashboard hosting', 'GCP Cloud Run'],
-                  ['Edge', 'Cloudflare | CDN, WAF, DDoS protection, DNS'],
-                  ['Secrets', 'GCP Secret Manager'],
-                  ['Registry', 'GCP Artifact Registry'],
-                  ['AI Development', 'Claude Code (sandboxed) + andrej-karpathy-skills + mattpocock/skills'],
-                  ['CI/CD', 'GitHub Actions + Dependabot'],
-                  ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod'],
-                  ['Development environment', 'WSL2 (Windows Subsystem for Linux)'],
-                ].map(([layer, tech]) => (
+                  ['Cloud environments tested', 'AWS, GCP, Azure', 'Demonstrates multi-cloud coverage in a single pipeline'],
+                  ['Scanner', 'Prowler 5.27.0', 'Native multi-cloud CSPM with structured JSON output'],
+                  ['IaC', 'Terraform ≥ 1.6', 'Reproducible before/after infrastructure states via tfvars toggle'],
+                  ['Dashboard hosting', 'GCP Cloud Run', 'Serverless containers with scale-to-zero'],
+                  ['Edge', 'Cloudflare | CDN, WAF, DDoS protection, DNS', 'Full edge security layer; origin access blocked without shared secret'],
+                  ['Secrets', 'GCP Secret Manager', 'All cloud credentials fetched at runtime, never stored on disk'],
+                  ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
+                  ['AI Development', 'Claude Code (sandboxed) + andrej-karpathy-skills + mattpocock/skills', 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
+                  ['CI/CD', 'GitHub Actions + Dependabot', 'Quality gate (tsc, eslint, docker build, shellcheck, trivy, zizmor) + automated dependency updates'],
+                  ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
+                  ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
+                  ['Architecture diagrams', '/aws-architecture-diagram skill', 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
+                ].map(([layer, tech, rationale]) => (
                   <tr key={layer} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{layer}</td>
                     <td className="px-4 py-2 text-gray-200">{tech}</td>
+                    <td className="px-4 py-2 text-gray-400">{rationale}</td>
                   </tr>
                 ))}
               </tbody>

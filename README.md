@@ -87,6 +87,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 | CI/CD | GitHub Actions + Dependabot | Quality gate (tsc, eslint, docker build, shellcheck, trivy, zizmor) + automated dependency updates |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind + zod | Static bundle with runtime schema validation, containerises cleanly |
 | Development environment | WSL2 (Windows Subsystem for Linux) | Local Linux environment for Terraform, Prowler, and Docker |
+| Architecture diagrams | /aws-architecture-diagram skill | Generates validated draw.io architecture diagrams using official AWS4 icon libraries |
 
 ---
 
