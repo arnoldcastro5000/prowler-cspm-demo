@@ -184,7 +184,7 @@ Do not build this until the Secret Manager prerequisites are complete.
   Bash script that runs locally on WSL2.
 
   Sequence:
-  1. Fetch AWS, GCP, and Azure secrets from GCP Secret Manager using `gcloud secrets versions access` — do not fetch the CF-Access-Secret
+  1. Fetch AWS, GCP, and Azure secrets from GCP Secret Manager using `gcloud secrets versions access` — do not fetch the Cloudflare secret
   2. Export AWS credentials as environment variables for boto3
   3. Write GCP service account key to a temp file, set `GOOGLE_APPLICATION_CREDENTIALS`
   4. Parse Azure credentials JSON, export as environment variables
@@ -341,7 +341,7 @@ behaviour, states, or fields not listed there.
   Copies `dashboard/public/findings_before.json` and
   `dashboard/public/findings_after.json` into the nginx public directory.
   Exposes port 8080 (Cloud Run default).
-  No credentials, no environment variables required at runtime.
+  Requires `CF_ACCESS_SECRET` env var at runtime — set by `make deploy` from Secret Manager. The entrypoint script substitutes it into the nginx config before nginx starts.
 
   Do not use `nginx:latest` or `node:latest` — pin to exact versions with SHA digest.
 
@@ -367,7 +367,7 @@ Depends on: all previous phases complete and tested end-to-end at least once man
     writes `dashboard/public/findings_after.json`
   - `make deploy` — runs `docker build` (both JSON files must already exist in
     `dashboard/public/`), pushes image to Artifact Registry, deploys to Cloud Run.
-    Fetches CF-Access-Secret from Secret Manager and sets it as a Cloud Run env var.
+    Fetches `prowler-cf-access-secret` from Secret Manager and sets it as `CF_ACCESS_SECRET` on Cloud Run. nginx validates the `X-CF-Secret` header injected by the Cloudflare Worker on every request.
     Only run after the GitHub Actions quality gate is green on main.
 
 ---

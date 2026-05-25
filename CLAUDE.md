@@ -170,7 +170,7 @@ Never recreate resources between scans — always apply against the existing sta
 | AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
 | GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
 | Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler (fetched by WSL2 during `make scan`) |
-| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | `make deploy` on WSL2 — sets Cloud Run env var at deploy time |
+| `X-CF-Secret` | Secret Manager: `prowler-cf-access-secret` + Cloud Run env var (`CF_ACCESS_SECRET`) | `make deploy` on WSL2 — sets Cloud Run env var at deploy time; Cloudflare Worker injects header on every request |
 
 
 ---

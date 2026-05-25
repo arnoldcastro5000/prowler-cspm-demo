@@ -64,7 +64,7 @@ Same GCP account hosts the dashboard, image registry, and credentials.
 - [ ] Enable Secret Manager API → [Secret Manager setup](https://cloud.google.com/secret-manager/docs/quickstart)
 - [ ] Enable Artifact Registry API → [Artifact Registry setup](https://cloud.google.com/artifact-registry/docs/docker/quickstart)
 - [ ] Create a Docker repository in Artifact Registry
-- [ ] Set Cloud Run to require `CF-Access-Secret` header — reject all requests that omit it
+- [ ] Set Cloud Run to require `X-CF-Secret` header — nginx rejects all requests that omit it with 403
 
 ### 4. Credentials (stored in GCP Secret Manager)
 - [ ] AWS: create an IAM user → attach `PowerUserAccess` + `IAMFullAccess` managed policies
@@ -81,7 +81,7 @@ Same GCP account hosts the dashboard, image registry, and credentials.
       → consolidate all four values into one JSON secret (`<azure-credentials-secret>`):
       `{"client_id":"...","client_secret":"...","tenant_id":"...","subscription_id":"..."}`
       → [Azure service principal](https://learn.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli)
-- [ ] Cloudflare: store CF-Access-Secret value as `<cloudflare-cf-access-secret>` in Secret Manager
+- [ ] Cloudflare: generate a random secret (`openssl rand -hex 32`), store it in Secret Manager as `prowler-cf-access-secret`, and set the same value as `CF_SECRET` in your Cloudflare Worker
 - [ ] Grant your local user account `Secret Manager Secret Accessor` role on all five secrets
 - [ ] Do NOT store any credentials in `/etc/environment` or any file on disk
 
@@ -90,8 +90,9 @@ Same GCP account hosts the dashboard, image registry, and credentials.
 - [ ] Add site to Cloudflare and point domain nameservers to Cloudflare → [Cloudflare DNS setup](https://developers.cloudflare.com/dns/zone-setups/full-setup/)
 - [ ] Create a DNS CNAME record for `prowler.cloudsecuritypractice.com` pointing to your Cloud Run service URL
 - [ ] Set SSL/TLS mode to **Full (Strict)** — not Flexible
-- [ ] Add a WAF custom rule to block requests not originating from Cloudflare IPs
-- [ ] Generate a `CF-Access-Secret` header value and configure it in both Cloudflare (send on all requests) and Cloud Run (reject if missing)
+- [ ] Create a Cloudflare Worker that injects the `X-CF-Secret` header on every proxied request, with the secret value stored as a Worker secret (`CF_SECRET`)
+- [ ] Enable Bot Fight Mode under Security → Bots
+- [ ] Confirm SSL/TLS mode is Full (Strict)
 
 ---
 
@@ -166,7 +167,7 @@ Both files are JSON arrays. Every document shares this shape:
 | AWS secret access key | Secret Manager: `<aws-secret-access-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
 | GCP service account key | Secret Manager: `<gcp-service-account-key-secret>` | Prowler (fetched by WSL2 during `make scan`) |
 | Azure credentials (JSON) | Secret Manager: `<azure-credentials-secret>` | Prowler (fetched by WSL2 during `make scan`) |
-| `CF-Access-Secret` | Secret Manager: `<cloudflare-cf-access-secret>` + Cloud Run env var | `make deploy` on WSL2 — sets Cloud Run env var at deploy time |
+| `X-CF-Secret` (header) | Secret Manager: `prowler-cf-access-secret` + Cloud Run env var (`CF_ACCESS_SECRET`) | `make deploy` on WSL2 — sets Cloud Run env var; Cloudflare Worker injects header on every request |
 
 All secrets are fetched at runtime from Secret Manager by WSL2 using `gcloud auth` ADC.
 No credentials are stored on disk.
