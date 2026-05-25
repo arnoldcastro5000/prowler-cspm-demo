@@ -61,7 +61,7 @@ continuous monitoring — all findings are point-in-time scan snapshots.
 | Scanner | Prowler (latest stable) | CLI, not SDK. Runs locally on WSL2 |
 | Ingest | Python 3.11 | ingest_prowler.py only — writes findings JSON directly to dashboard/public/ |
 | Backend | GCP Cloud Run | Serves the React app as a container |
-| Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS + shadcn/ui | No other UI frameworks |
+| Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS | No other UI frameworks |
 | Validation | zod | Runtime schema validation for fetched JSON; `Finding` type inferred from zod schema |
 | Linting | ESLint + @typescript-eslint/parser + @typescript-eslint/eslint-plugin | `recommended-type-checked` ruleset; type-aware linting combined with tsc and vite build in CI |
 | Edge | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS, Workers (origin secret injection) |

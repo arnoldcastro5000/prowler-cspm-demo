@@ -81,7 +81,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 | IaC | Terraform | Reproducible before/after infrastructure states |
 | Ingest | Python 3.11 (ingest_prowler.py) | Normalises Prowler output → findings JSON baked into image |
 | Backend | GCP Cloud Run | Serverless containers, always-free tier, GCP-native |
-| Frontend | React 18 + Vite + TypeScript (strict) + Tailwind + shadcn/ui | Static bundle, modern UI components, containerises cleanly |
+| Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS | Static bundle, modern UI components, containerises cleanly |
 | Validation | zod | Runtime schema validation for fetched JSON |
 | Edge security | Cloudflare (free tier) | CDN, WAF, DDoS protection, DNS, Workers (origin secret injection) |
 | Secrets | GCP Secret Manager | Credential storage for all cloud provider keys |
