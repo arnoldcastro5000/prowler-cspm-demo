@@ -42,6 +42,7 @@ Both scans run independently — the local hook catches secrets before they leav
 ## IaC Security
 
 - **Trivy** scans Terraform modules for misconfigurations on every push and PR (`.github/workflows/trivy.yml`). Findings upload to the GitHub Security tab via SARIF.
+- **Terraform validate** runs `terraform fmt --check` and `terraform validate` on every push and PR (`.github/workflows/terraform-validate.yml`). Catches syntax errors and formatting issues.
 - **Terraform state** is stored locally on the WSL2 machine and excluded from git via `.gitignore`. No remote backend.
 - The intentional misconfigurations in `iac/modules/` are expected Trivy findings — they represent the before-state infrastructure this project is designed to demonstrate.
 
@@ -59,6 +60,7 @@ Both scans run independently — the local hook catches secrets before they leav
 - **Frontend CI** runs `tsc --noEmit`, `eslint`, and `vite build` on every push and PR (`.github/workflows/frontend-ci.yml`).
 - **Docker build** validates the container compiles on every push and PR (`.github/workflows/docker-build.yml`).
 - **Dependabot** opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
+- **Dependency Review** scans PRs that change dependency files for known vulnerabilities using GitHub's Advisory Database (`.github/workflows/dependency-review.yml`).
 
 ## Data Redaction
 
@@ -77,11 +79,11 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | Enforces HTTPS for 1 year |
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Disables unused browser features |
 
-`Content-Security-Policy` is implemented in report-only mode during tuning.
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self' static.cloudflareinsights.com; img-src 'self' github.com; connect-src 'self' raw.githubusercontent.com; style-src 'self'; font-src 'self'` | Restricts resource loading to same-origin plus explicitly allowed external domains |
 
 ## DAST — Dynamic Application Security Testing
 
-OWASP ZAP baseline scan is run against the deployed dashboard using the official ZAP Docker image. The scan covers passive checks across all discovered URLs — no active attacks against live infrastructure.
+OWASP ZAP baseline scan is run manually against the local development server (`http://localhost:5173/`). The scan covers passive checks across all discovered URLs.
 
 ---
 
