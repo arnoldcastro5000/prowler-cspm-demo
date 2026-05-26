@@ -150,6 +150,8 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 
 ## Cost Summary
 
+### Hosting and operations
+
 | Service | Provider | Cost |
 |---|---|---|
 | Cloud Run (dashboard hosting) | GCP | Up to 2M requests/month |
@@ -157,6 +159,43 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 | Secret Manager (credentials) | GCP | Up to 6 secret versions / 10K access ops per month |
 | Cloudflare (CDN, WAF, DDoS, DNS, Workers) | Cloudflare | 100k Workers requests/day |
 | Prowler | Open source | Free |
+
+### AWS resources (scanned by Prowler)
+
+| Service | Cost |
+|---|---|
+| S3 bucket | Free tier — 5 GB storage, 20K GET, 2K PUT/month |
+| EC2 instance (t2.micro) | Free tier — 750 hrs/month (stopped in after state) |
+| CloudTrail | First trail free |
+| IAM | Free |
+
+### GCP resources (scanned by Prowler)
+
+| Service | Cost |
+|---|---|
+| Cloud Storage bucket | Free tier — 5 GB, 50K read ops/month |
+| Compute Engine firewall rules | Free |
+| IAM service account | Free |
+| KMS key | ~$0.06/month per active key version |
+| Logging metric + alert policy | Free tier |
+
+### Azure resources (scanned by Prowler)
+
+| Service | Cost |
+|---|---|
+| Storage account | Free tier — 5 GB LRS |
+| Network security group | Free |
+| Custom role definition | Free |
+| Activity log alert | Free |
+
+### Other
+
+| Service | Cost |
+|---|---|
+| Domain name (required for Cloudflare) | ~$14–21 CAD/year |
+| Claude Pro subscription (Canada) | ~$27 CAD/month |
+
+> **Disclaimer:** All costs are approximate and subject to change. Free tier eligibility depends on account age and usage — exceeding limits will incur charges. Canadian dollar amounts vary with exchange rates.
 
 ---
 
