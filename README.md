@@ -2,7 +2,7 @@
 
 A cloud security reference project that scans real cloud infrastructure across AWS, GCP, and Azure for misconfigurations, then displays a before/after remediation dashboard. Documented for reproducibility.
 
-Live demo → `prowler.cloudsecuritypractice.com/before` and `prowler.cloudsecuritypractice.com/after`
+Live demo → `prowler.cloudsecuritypractice.com`
 
 ---
 
@@ -77,7 +77,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 | Layer | Technology | Rationale |
 |---|---|---|
 | Cloud environments tested | AWS, GCP, Azure | Demonstrates multi-cloud coverage in a single pipeline |
-| Scanner | Prowler 5.27.0 | Native multi-cloud CSPM with structured JSON output |
+| Scanner | [Prowler](https://github.com/prowler-cloud/prowler) 5.27.0 | Native multi-cloud CSPM with structured JSON output |
 | IaC | Terraform ≥ 1.6 | Reproducible before/after infrastructure states via tfvars toggle |
 | Dashboard hosting | GCP Cloud Run | Serverless containers with scale-to-zero |
 | Edge | Cloudflare \| CDN, WAF, DDoS protection, DNS | Full edge security layer; origin access blocked without shared secret |
@@ -87,7 +87,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 | CI/CD | GitHub Actions + Dependabot | Quality gate (tsc, eslint, docker build, shellcheck, trivy, zizmor) + automated dependency updates |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind + zod | Static bundle with runtime schema validation, containerises cleanly |
 | Development environment | WSL2 (Windows Subsystem for Linux) | Local Linux environment for Terraform, Prowler, and Docker |
-| Architecture diagrams | /aws-architecture-diagram skill | Generates validated draw.io architecture diagrams using official AWS4 icon libraries |
+| Architecture diagrams | [/aws-architecture-diagram](https://github.com/vidanov/aws-architecture-diagram-skill) skill | Generates validated draw.io architecture diagrams using official AWS4 icon libraries |
 
 ---
 
