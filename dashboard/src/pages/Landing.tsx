@@ -78,20 +78,20 @@ export default function Landing() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
-                {[
+                {([
                   ['Cloud environments tested', 'AWS, GCP, Azure', 'Demonstrates multi-cloud coverage in a single pipeline'],
-                  ['Scanner', 'Prowler 5.27.0', 'Native multi-cloud CSPM with structured JSON output'],
+                  ['Scanner', <><a href="https://github.com/prowler-cloud/prowler" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Prowler</a> 5.27.0</>, 'Native multi-cloud CSPM with structured JSON output'],
                   ['IaC', 'Terraform ≥ 1.6', 'Reproducible before/after infrastructure states via tfvars toggle'],
                   ['Dashboard hosting', 'GCP Cloud Run', 'Serverless containers with scale-to-zero'],
                   ['Edge', 'Cloudflare | CDN, WAF, DDoS protection, DNS', 'Full edge security layer; origin access blocked without shared secret'],
                   ['Secrets', 'GCP Secret Manager', 'All cloud credentials fetched at runtime, never stored on disk'],
                   ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
-                  ['AI Development', 'Claude Code (sandboxed) + andrej-karpathy-skills + mattpocock/skills', 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
+                  ['AI Development', <>Claude Code (sandboxed) + <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
                   ['CI/CD', 'GitHub Actions + Dependabot', 'Quality gate (tsc, eslint, docker build, shellcheck, trivy, zizmor) + automated dependency updates'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
                   ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
-                  ['Architecture diagrams', '/aws-architecture-diagram skill', 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
-                ].map(([layer, tech, rationale]) => (
+                  ['Architecture diagrams', <><a href="https://github.com/vidanov/aws-architecture-diagram-skill" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">/aws-architecture-diagram</a> skill</>, 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
+                ] as [string, React.ReactNode, string][]).map(([layer, tech, rationale]) => (
                   <tr key={layer} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{layer}</td>
                     <td className="px-4 py-2 text-gray-200">{tech}</td>
