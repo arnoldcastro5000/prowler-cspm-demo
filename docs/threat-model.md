@@ -61,6 +61,17 @@ Visitor → Cloudflare (firewall, DDoS protection) → Cloudflare Worker (adds s
 | A third-party code dependency is compromised | Malicious code enters through a software library update | Automated dependency scanning flags known vulnerabilities; all CI action versions are pinned to exact releases |
 | The local development machine is compromised | Infrastructure configuration files contain resource identifiers | Single-user machine with restricted file permissions; configuration files are never uploaded to the code repository |
 
+### What the Cloudflare security features protect against
+
+| Cloudflare feature | Realistic threat |
+|---|---|
+| WAF (Web Application Firewall) | Automated scanners and bots probing for common vulnerabilities (SQL injection, path traversal). The dashboard is static HTML with no backend API, so most attack payloads would fail anyway — WAF blocks them before they reach Cloud Run. |
+| CDN (Content Delivery Network) | Not a security feature per se, but reduces load on Cloud Run by caching static assets at the edge. Indirectly protects against cost-based attacks — an attacker sending millions of requests hits Cloudflare's cache, not your container. |
+| DDoS protection | Volumetric attacks that flood the dashboard with traffic to take it offline. Cloudflare absorbs this at the edge. Without it, Cloud Run would scale up (incurring cost) or hit its concurrency limit and go down. |
+| Bot Fight Mode | Automated scraping and credential-stuffing bots. Detects traffic matching known bot patterns and issues computationally expensive challenges that increase the cost for bots to send requests. Included on the free plan but cannot be customized. |
+| Browser Integrity Check | Requests from fake or non-standard browsers — bots, crawlers, and spammers that send malformed HTTP headers or no user agent. Cloudflare evaluates client behavior across multiple requests and blocks clients that do not behave like a real browser session. |
+| Workers (origin secret injection) | Direct access to Cloud Run bypassing all other protections. The Worker adds `X-CF-Secret` to every request; Cloud Run rejects anything without it. This is the enforcement mechanism that makes all other Cloudflare features mandatory — you can't skip them. |
+
 ### What the HTTP security headers protect against
 
 The dashboard is a static site with no login, no forms, and no user input. These headers protect against threats that exist even for a read-only public site:

@@ -34,6 +34,12 @@ export default function TabBar() {
           Security
         </NavLink>
         <NavLink
+          to="/threat-model"
+          className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
+        >
+          Threat Model
+        </NavLink>
+        <NavLink
           to="/architecture"
           className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
         >
