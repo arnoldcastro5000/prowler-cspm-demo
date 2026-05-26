@@ -98,29 +98,29 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 ### AWS
 | Check ID | Severity | Category |
 |---|---|---|
-| `s3_bucket_level_public_access_block` | High | Storage |
-| `iam_password_policy_minimum_length_14` | Medium | IAM |
-| `ec2_instance_port_ssh_exposed_to_internet` | Critical | Networking |
-| `cloudtrail_multi_region_enabled` | High | Logging |
-| `s3_bucket_default_encryption` | Medium | Encryption |
+| `s3_bucket_level_public_access_block` | high | storage |
+| `iam_password_policy_minimum_length_14` | medium | iam |
+| `ec2_instance_port_ssh_exposed_to_internet` | critical | networking |
+| `cloudtrail_multi_region_enabled` | high | logging |
+| `s3_bucket_default_encryption` | medium | encryption |
 
 ### GCP
 | Check ID | Severity | Category |
 |---|---|---|
-| `cloudstorage_bucket_public_access` | Critical | Storage |
-| `compute_firewall_ssh_access_from_the_internet_allowed` | Critical | Networking |
-| `iam_sa_no_administrative_privileges` | High | IAM |
-| `logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled` | Medium | Logging |
-| `kms_key_rotation_enabled` | Low | Encryption |
+| `cloudstorage_bucket_public_access` | critical | storage |
+| `compute_firewall_ssh_access_from_the_internet_allowed` | critical | networking |
+| `iam_sa_no_administrative_privileges` | high | iam |
+| `logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled` | medium | logging |
+| `kms_key_rotation_enabled` | low | encryption |
 
 ### Azure
 | Check ID | Severity | Category |
 |---|---|---|
-| `storage_blob_public_access_level_is_disabled` | High | Storage |
-| `network_rdp_internet_access_restricted` | High | Networking |
-| `iam_subscription_roles_owner_custom_not_created` | High | IAM |
-| `monitor_alert_create_update_security_solution` | Medium | Logging |
-| `storage_secure_transfer_required_is_enabled` | High | Storage |
+| `storage_blob_public_access_level_is_disabled` | high | storage |
+| `network_rdp_internet_access_restricted` | high | networking |
+| `iam_subscription_roles_owner_custom_not_created` | high | iam |
+| `monitor_alert_create_update_security_solution` | medium | logging |
+| `storage_secure_transfer_required_is_enabled` | high | storage |
 
 Full check-to-Terraform variable mapping in [SETUP.md](SETUP.md).
 
