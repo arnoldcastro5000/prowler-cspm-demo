@@ -155,37 +155,6 @@ else
     echo "SKIPPED: AWS scan."
 fi
 
-# ─── GCP scan ─────────────────────────────────────────────────────────────────
-if [ "$GCP_READY" = true ]; then
-    echo "=== Running Prowler GCP scan ==="
-    GCP_ERRORS=0
-    for CHECK in \
-        cloudstorage_bucket_public_access \
-        compute_firewall_ssh_access_from_the_internet_allowed \
-        iam_sa_no_administrative_privileges \
-        logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled \
-        kms_key_rotation_enabled; do
-        echo "--- GCP check: $CHECK ---"
-        run_check "$PROWLER" gcp \
-            --check "$CHECK" \
-            --project-id "$PROJECT_ID" \
-            --output-formats json-ocsf \
-            --output-directory "$OUTPUT_DIR" || {
-            echo "WARNING: GCP check $CHECK failed — continuing."
-            GCP_ERRORS=$((GCP_ERRORS + 1))
-        }
-    done
-    if [ $GCP_ERRORS -eq 0 ]; then
-        GCP_STATUS="success"
-        GCP_DETAIL="all 5 checks completed"
-    else
-        GCP_STATUS="partial"
-        GCP_DETAIL="$GCP_ERRORS of 5 check(s) failed"
-    fi
-else
-    echo "SKIPPED: GCP scan."
-fi
-
 # ─── Azure scan ───────────────────────────────────────────────────────────────
 if [ "$AZURE_READY" = true ]; then
     echo "=== Running Prowler Azure scan ==="
@@ -216,6 +185,50 @@ if [ "$AZURE_READY" = true ]; then
     fi
 else
     echo "SKIPPED: Azure scan."
+fi
+
+# ─── GCP scan (last — allows logging metric propagation time) ────────────────
+if [ "$GCP_READY" = true ]; then
+    GCP_METRIC_TS="/var/tmp/gcp-metric-apply.ts"
+    GCP_METRIC_WAIT=600
+    if [ -f "$GCP_METRIC_TS" ]; then
+        ELAPSED=$(( $(date +%s) - $(cat "$GCP_METRIC_TS") ))
+        REMAINING=$(( GCP_METRIC_WAIT - ELAPSED ))
+        if [ $REMAINING -gt 0 ]; then
+            echo "=== Waiting $REMAINING seconds for GCP logging metric to propagate ==="
+            for i in $(seq "$REMAINING" -10 10); do printf "\r    %3ds remaining..." "$i"; sleep 10; done; echo ""
+        else
+            echo "=== GCP logging metric propagation time elapsed — no wait needed ==="
+        fi
+        rm -f "$GCP_METRIC_TS"
+    fi
+    echo "=== Running Prowler GCP scan ==="
+    GCP_ERRORS=0
+    for CHECK in \
+        cloudstorage_bucket_public_access \
+        compute_firewall_ssh_access_from_the_internet_allowed \
+        iam_sa_no_administrative_privileges \
+        kms_key_rotation_enabled \
+        logging_log_metric_filter_and_alert_for_audit_configuration_changes_enabled; do
+        echo "--- GCP check: $CHECK ---"
+        run_check "$PROWLER" gcp \
+            --check "$CHECK" \
+            --project-id "$PROJECT_ID" \
+            --output-formats json-ocsf \
+            --output-directory "$OUTPUT_DIR" || {
+            echo "WARNING: GCP check $CHECK failed — continuing."
+            GCP_ERRORS=$((GCP_ERRORS + 1))
+        }
+    done
+    if [ $GCP_ERRORS -eq 0 ]; then
+        GCP_STATUS="success"
+        GCP_DETAIL="all 5 checks completed"
+    else
+        GCP_STATUS="partial"
+        GCP_DETAIL="$GCP_ERRORS of 5 check(s) failed"
+    fi
+else
+    echo "SKIPPED: GCP scan."
 fi
 
 # ─── Write status file and determine exit code ────────────────────────────────

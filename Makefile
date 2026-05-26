@@ -11,6 +11,7 @@ CF_SECRET_NAME        := prowler-cf-access-secret
 ENV_DIR    := iac/environments
 OUTPUT_DIR := /var/tmp/prowler-output
 COMBINED   := /tmp/prowler-combined.ocsf.json
+GCP_METRIC_TS := /var/tmp/gcp-metric-apply.ts
 
 TF_VARS    = -var="project_prefix=$(PROJECT_PREFIX)" -var="aws_region=$(AWS_REGION)" -var="gcp_project_id=$(PROJECT_ID)"
 TF_PLAN    = terraform -chdir=$(ENV_DIR) plan
@@ -40,8 +41,7 @@ setup:
 	$(TF_PLAN) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [2/3] Applying GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
-	echo "=== Waiting 10 minutes for GCP logging metric to propagate ===" && \
-	for i in $$(seq 600 -10 10); do printf "\r    %3ds remaining..." $$i; sleep 10; done && echo "" && \
+	date +%s > $(GCP_METRIC_TS) && \
 	echo "=== [3/3] Planning Azure resources ===" && \
 	$(TF_PLAN) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [3/3] Applying Azure resources ===" && \
@@ -68,6 +68,7 @@ before:
 	$(TF_PLAN) -target=module.gcp -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [2/3] Misconfiguring GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
+	date +%s > $(GCP_METRIC_TS) && \
 	echo "=== [3/3] Planning Azure misconfiguration ===" && \
 	$(TF_PLAN) -target=module.azure -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [3/3] Misconfiguring Azure resources ===" && \
@@ -93,8 +94,7 @@ after:
 	$(TF_PLAN) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [2/3] Hardening GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
-	echo "=== Waiting 10 minutes for GCP logging metric to propagate ===" && \
-	for i in $$(seq 600 -10 10); do printf "\r    %3ds remaining..." $$i; sleep 10; done && echo "" && \
+	date +%s > $(GCP_METRIC_TS) && \
 	echo "=== [3/3] Planning Azure hardening ===" && \
 	$(TF_PLAN) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [3/3] Hardening Azure resources ===" && \
