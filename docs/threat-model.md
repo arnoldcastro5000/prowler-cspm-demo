@@ -63,27 +63,27 @@ Visitor → Cloudflare (firewall, DDoS protection) → Cloudflare Worker (adds s
 
 ### What the Cloudflare security features protect against
 
-| Cloudflare feature | Realistic threat |
-|---|---|
-| WAF (Web Application Firewall) | Automated scanners and bots probing for common vulnerabilities (SQL injection, path traversal). The dashboard is static HTML with no backend API, so most attack payloads would fail anyway — WAF blocks them before they reach Cloud Run. |
-| CDN (Content Delivery Network) | Not a security feature per se, but reduces load on Cloud Run by caching static assets at the edge. Indirectly protects against cost-based attacks — an attacker sending millions of requests hits Cloudflare's cache, not your container. |
-| DDoS protection | Volumetric attacks that flood the dashboard with traffic to take it offline. Cloudflare absorbs this at the edge. Without it, Cloud Run would scale up (incurring cost) or hit its concurrency limit and go down. |
-| Bot Fight Mode | Automated scraping and credential-stuffing bots. Detects traffic matching known bot patterns and issues computationally expensive challenges that increase the cost for bots to send requests. Included on the free plan but cannot be customized. |
-| Browser Integrity Check | Requests from fake or non-standard browsers — bots, crawlers, and spammers that send malformed HTTP headers or no user agent. Cloudflare evaluates client behavior across multiple requests and blocks clients that do not behave like a real browser session. |
-| Workers (origin secret injection) | Direct access to Cloud Run bypassing all other protections. The Worker adds `X-CF-Secret` to every request; Cloud Run rejects anything without it. This is the enforcement mechanism that makes all other Cloudflare features mandatory — you can't skip them. |
+| Scenario | What happens | How it is addressed |
+|---|---|---|
+| Automated scanners probe for common vulnerabilities | Bots send SQL injection, path traversal, and other attack payloads to the dashboard | WAF blocks malicious requests before they reach Cloud Run. The dashboard is static HTML with no backend API, so most payloads would fail anyway. |
+| An attacker floods the dashboard with traffic | Volumetric DDoS attack aims to take the site offline | Cloudflare absorbs the traffic at the edge. Without it, Cloud Run would scale up (incurring cost) or hit its concurrency limit and go down. |
+| Millions of requests hit the application server | Cost-based attack or traffic spike overwhelms Cloud Run | CDN caches static assets at the edge. Repeated requests are served from Cloudflare's cache, not the container. |
+| Automated bots scrape or spam the dashboard | Bots send high volumes of requests mimicking real traffic | Bot Fight Mode detects known bot patterns and issues computationally expensive challenges that increase the cost for bots to continue. Included on the free plan but cannot be customized. |
+| Requests arrive from fake or non-standard browsers | Bots and crawlers send malformed HTTP headers or no user agent | Browser Integrity Check evaluates client behavior across multiple requests and blocks clients that do not behave like a real browser session. |
+| Someone bypasses Cloudflare and hits Cloud Run directly | All other Cloudflare protections are skipped | The Worker adds `X-CF-Secret` to every request; Cloud Run rejects anything without it. This makes all other Cloudflare features mandatory — you cannot skip them. |
 
 ### What the HTTP security headers protect against
 
 The dashboard is a static site with no login, no forms, and no user input. These headers protect against threats that exist even for a read-only public site:
 
-| Header | Realistic threat for this project |
-|---|---|
-| `Content-Security-Policy` | If the code repository is compromised and malicious JavaScript is injected, CSP limits where that script can send stolen data and blocks inline scripts without the per-request nonce. Also prevents a compromised npm dependency from loading external resources. |
-| `Strict-Transport-Security` | Without HSTS, a visitor's first request could be intercepted over HTTP before the redirect to HTTPS (SSL stripping). HSTS tells the browser to never attempt HTTP for this domain. |
-| `X-Frame-Options: DENY` | Prevents an attacker from embedding the dashboard in a hidden iframe on a malicious site to perform clickjacking. Low risk since there are no interactive controls, but it closes the path entirely. |
-| `X-Content-Type-Options: nosniff` | Prevents a browser from misinterpreting a JSON findings file as executable JavaScript. Without this, a crafted findings file could theoretically be executed if served with the wrong MIME type. |
-| `Referrer-Policy` | When a visitor clicks the GitHub or LinkedIn links on the landing page, this prevents the full URL path from leaking to those external sites. |
-| `Permissions-Policy` | Blocks any injected script from accessing camera, microphone, geolocation, or payment APIs. The dashboard does not use these, so disabling them eliminates an entire class of attack surface if code is compromised. |
+| Scenario | What happens | How it is addressed |
+|---|---|---|
+| Malicious JavaScript is injected via a compromised repository or npm dependency | The script tries to steal data or load external resources | `Content-Security-Policy` limits where scripts can send data and blocks inline scripts without the per-request nonce. Also prevents loading resources from unauthorized external domains. |
+| A visitor's first request is intercepted over HTTP | An attacker performs SSL stripping before the redirect to HTTPS | `Strict-Transport-Security` tells the browser to never attempt HTTP for this domain. |
+| The dashboard is embedded in an iframe on a malicious site | An attacker attempts clickjacking by overlaying invisible controls | `X-Frame-Options: DENY` prevents any site from framing the dashboard. Low risk since there are no interactive controls, but it closes the path entirely. |
+| A JSON findings file is served with the wrong MIME type | The browser misinterprets the file as executable JavaScript | `X-Content-Type-Options: nosniff` prevents MIME-type sniffing, ensuring files are treated as their declared type. |
+| A visitor clicks an external link on the landing page | The full URL path leaks to GitHub or LinkedIn via the referrer header | `Referrer-Policy` limits referrer information sent to external sites. |
+| Injected script tries to access device hardware | A compromised dependency attempts to use camera, microphone, geolocation, or payment APIs | `Permissions-Policy` disables these browser features entirely. The dashboard does not use them, so disabling them eliminates an entire class of attack surface. |
 
 The most meaningful headers for this project are **CSP** (limits the blast radius of a code compromise) and **HSTS** (prevents downgrade attacks). The others are defense-in-depth — low effort, but they close off attack paths that would otherwise exist by browser default.
 
@@ -91,14 +91,14 @@ The most meaningful headers for this project are **CSP** (limits the blast radiu
 
 These are intentional scope decisions, not oversights:
 
-| Feature not included | Reason |
-|---|---|
-| Continuous monitoring | This project captures point-in-time snapshots, not live state |
-| Security event forwarding (SIEM) | The dashboard is self-contained and does not integrate with external security platforms |
-| Real-time alerting | No notifications are sent when findings change |
-| Multi-account scanning | One account per cloud provider is sufficient for the demonstration |
-| Encryption of findings data | Findings are public by design and contain no sensitive information after redaction |
-| Dashboard container scanning | Infrastructure code is scanned for misconfigurations; the dashboard container image is not |
+| Scenario | What happens | How it is addressed |
+|---|---|---|
+| Infrastructure changes between scans go undetected | This project captures point-in-time snapshots, not live state | Continuous monitoring is out of scope; each scan is a deliberate manual step |
+| Security events are not forwarded to external platforms | The dashboard is self-contained with no log forwarding | SIEM integration is not needed for a single-developer portfolio project |
+| No notifications are sent when findings change | Changes to cloud posture are only visible after the next scan cycle | Real-time alerting is out of scope |
+| Only one account per cloud provider is scanned | The demonstration covers three providers but not multi-account environments | Multi-account scanning is not needed to demonstrate the pipeline |
+| Findings data is not encrypted at rest | Findings JSON is baked into the container image as a static file | Findings are public by design and contain no sensitive information after redaction |
+| The dashboard container image is not scanned | Trivy scans infrastructure code but not the final Docker image | Container image scanning would add value but is not yet implemented |
 
 ---
 
