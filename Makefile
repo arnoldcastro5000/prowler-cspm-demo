@@ -13,6 +13,7 @@ OUTPUT_DIR := /var/tmp/prowler-output
 COMBINED   := /tmp/prowler-combined.ocsf.json
 
 TF_VARS    = -var="project_prefix=$(PROJECT_PREFIX)" -var="aws_region=$(AWS_REGION)" -var="gcp_project_id=$(PROJECT_ID)"
+TF_PLAN    = terraform -chdir=$(ENV_DIR) plan
 TF_APPLY   = bash iac/tf_apply.sh -chdir=$(ENV_DIR) apply
 
 .PHONY: setup before scan after rescan deploy _prowl
@@ -31,13 +32,19 @@ setup:
 	AZURE_SUB_ID=$$(echo "$$AZURE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['subscription_id'])") && \
 	echo "=== Initialising Terraform ===" && \
 	terraform -chdir=$(ENV_DIR) init && \
-	echo "=== [1/3] Creating AWS resources ===" && \
+	echo "=== [1/3] Planning AWS resources ===" && \
+	$(TF_PLAN) -target=module.aws -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
+	echo "=== [1/3] Applying AWS resources ===" && \
 	$(TF_APPLY) -target=module.aws -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
-	echo "=== [2/3] Creating GCP resources ===" && \
+	echo "=== [2/3] Planning GCP resources ===" && \
+	$(TF_PLAN) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
+	echo "=== [2/3] Applying GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
 	echo "=== Waiting 10 minutes for GCP logging metric to propagate ===" && \
 	for i in $$(seq 600 -10 10); do printf "\r    %3ds remaining..." $$i; sleep 10; done && echo "" && \
-	echo "=== [3/3] Creating Azure resources ===" && \
+	echo "=== [3/3] Planning Azure resources ===" && \
+	$(TF_PLAN) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
+	echo "=== [3/3] Applying Azure resources ===" && \
 	$(TF_APPLY) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
 	echo "=== Setup complete. Run 'make before' to begin. ==="
 
@@ -53,10 +60,16 @@ before:
 	export ARM_TENANT_ID=$$(echo "$$AZURE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['tenant_id'])") && \
 	export ARM_SUBSCRIPTION_ID=$$(echo "$$AZURE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['subscription_id'])") && \
 	AZURE_SUB_ID=$$(echo "$$AZURE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['subscription_id'])") && \
+	echo "=== [1/3] Planning AWS misconfiguration ===" && \
+	$(TF_PLAN) -target=module.aws -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [1/3] Misconfiguring AWS resources ===" && \
 	$(TF_APPLY) -target=module.aws -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
+	echo "=== [2/3] Planning GCP misconfiguration ===" && \
+	$(TF_PLAN) -target=module.gcp -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [2/3] Misconfiguring GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
+	echo "=== [3/3] Planning Azure misconfiguration ===" && \
+	$(TF_PLAN) -target=module.azure -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [3/3] Misconfiguring Azure resources ===" && \
 	$(TF_APPLY) -target=module.azure -var-file=before.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve
 
@@ -72,12 +85,18 @@ after:
 	export ARM_TENANT_ID=$$(echo "$$AZURE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['tenant_id'])") && \
 	export ARM_SUBSCRIPTION_ID=$$(echo "$$AZURE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['subscription_id'])") && \
 	AZURE_SUB_ID=$$(echo "$$AZURE_JSON" | python3 -c "import json,sys; print(json.load(sys.stdin)['subscription_id'])") && \
+	echo "=== [1/3] Planning AWS hardening ===" && \
+	$(TF_PLAN) -target=module.aws -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [1/3] Hardening AWS resources ===" && \
 	$(TF_APPLY) -target=module.aws -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
+	echo "=== [2/3] Planning GCP hardening ===" && \
+	$(TF_PLAN) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [2/3] Hardening GCP resources ===" && \
 	$(TF_APPLY) -target=module.gcp -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve && \
 	echo "=== Waiting 10 minutes for GCP logging metric to propagate ===" && \
 	for i in $$(seq 600 -10 10); do printf "\r    %3ds remaining..." $$i; sleep 10; done && echo "" && \
+	echo "=== [3/3] Planning Azure hardening ===" && \
+	$(TF_PLAN) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" && \
 	echo "=== [3/3] Hardening Azure resources ===" && \
 	$(TF_APPLY) -target=module.azure -var-file=after.tfvars $(TF_VARS) -var="azure_subscription_id=$$AZURE_SUB_ID" -auto-approve
 
