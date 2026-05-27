@@ -30,9 +30,19 @@ export default {
       return blocked(400, 'Bad Request')
     }
 
+    // Rule 5: Block encoded traversal and null bytes (inspect raw URL before parsing)
+    if (/%2e%2e|%252e|%2f|%00|%5c/i.test(request.url) || request.url.includes('\\')) {
+      return blocked(400, 'Bad Request')
+    }
+
     const url = new URL(request.url)
 
-    // Rule 3: Path allowlist
+    // Rule 6: URL length limit
+    if (url.pathname.length > 256) {
+      return blocked(414, 'URI Too Long')
+    }
+
+    // Rule 3 + 7: Path allowlist (ASSETS_PATTERN restricts /assets/ to .js and .css)
     if (!VALID_PATHS.has(url.pathname) && !ASSETS_PATTERN.test(url.pathname)) {
       return blocked(404, 'Not Found')
     }
