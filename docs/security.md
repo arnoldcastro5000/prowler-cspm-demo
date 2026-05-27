@@ -61,6 +61,8 @@ Both scans run independently — the local hook catches secrets before they leav
 - **Docker build** validates the container compiles on every push and PR (`.github/workflows/docker-build.yml`).
 - **Dependabot** opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
 - **Dependency Review** scans PRs that change dependency files for known vulnerabilities using GitHub's Advisory Database (`.github/workflows/dependency-review.yml`).
+- **Secret Scan** runs Gitleaks on every push and PR to detect committed credentials, API keys, and tokens (`.github/workflows/secret-scan.yml`).
+- **Worker Lint** runs ESLint on the Cloudflare Worker source on every push and PR touching `cloudflare/` (`.github/workflows/worker-lint.yml`).
 
 ## Data Redaction
 

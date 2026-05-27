@@ -57,7 +57,7 @@ Visitor → Cloudflare (firewall, DDoS protection) → Cloudflare Worker (adds s
 | Someone discovers the application server's direct address | They try to access it without going through Cloudflare | The server rejects any request that does not carry the shared secret |
 | The shared secret is leaked | An attacker could bypass Cloudflare and reach the server directly | The secret is stored in Google Cloud's Secret Manager and can be rotated by redeploying |
 | The Cloudflare Worker stops working | The dashboard goes down because the secret is no longer being added to requests | Manual intervention is required to fix and redeploy the Worker |
-| Someone compromises the code repository | Malicious code could be deployed to the dashboard | 10 automated security checks run on every code change; deployment is a manual step, not automatic |
+| Someone compromises the code repository | Malicious code could be deployed to the dashboard | 11 automated security checks run on every code change; deployment is a manual step, not automatic |
 | A third-party code dependency is compromised | Malicious code enters through a software library update | Automated dependency scanning flags known vulnerabilities; all CI action versions are pinned to exact releases |
 | The local development machine is compromised | Infrastructure configuration files contain resource identifiers | Single-user machine with restricted file permissions; configuration files are never uploaded to the code repository |
 

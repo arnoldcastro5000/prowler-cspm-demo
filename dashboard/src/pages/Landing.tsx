@@ -125,6 +125,8 @@ export default function Landing() {
                   ['Trivy', 'trivy.yml'],
                   ['Zizmor', 'zizmor.yml'],
                   ['Hardcoded Config Check', 'hardcoded-config-check.yml'],
+                  ['Dependency Review', 'dependency-review.yml'],
+                  ['Worker Lint', 'worker-lint.yml'],
                 ].map(([name, file]) => (
                   <tr key={file} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{name}</td>
