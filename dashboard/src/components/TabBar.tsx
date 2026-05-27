@@ -1,9 +1,13 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 
 export default function TabBar() {
   const base = 'px-4 py-2 text-sm font-medium border-b-2 transition-colors'
   const active = 'border-blue-500 text-blue-600'
   const inactive = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+
+  const { pathname } = useLocation()
+  const cspmActive = pathname === '/before' || pathname === '/after'
+  const securityActive = pathname === '/security' || pathname === '/threat-model'
 
   return (
     <div className="border-b border-gray-200 bg-white">
@@ -15,30 +19,56 @@ export default function TabBar() {
         >
           Home
         </NavLink>
-        <NavLink
-          to="/before"
-          className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
-        >
-          Before
-        </NavLink>
-        <NavLink
-          to="/after"
-          className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
-        >
-          After
-        </NavLink>
-        <NavLink
-          to="/security"
-          className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
-        >
-          Security
-        </NavLink>
-        <NavLink
-          to="/threat-model"
-          className={({ isActive }) => `${base} ${isActive ? active : inactive}`}
-        >
-          Threat Model
-        </NavLink>
+        <div className="relative group">
+          <button
+            className={`${base} ${cspmActive ? active : inactive} cursor-default`}
+          >
+            CSPM
+          </button>
+          <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-b-md shadow-lg z-10 min-w-[120px]">
+            <NavLink
+              to="/before"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`
+              }
+            >
+              Before
+            </NavLink>
+            <NavLink
+              to="/after"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`
+              }
+            >
+              After
+            </NavLink>
+          </div>
+        </div>
+        <div className="relative group">
+          <button
+            className={`${base} ${securityActive ? active : inactive} cursor-default`}
+          >
+            Security
+          </button>
+          <div className="absolute left-0 top-full hidden group-hover:block bg-white border border-gray-200 rounded-b-md shadow-lg z-10 min-w-[140px]">
+            <NavLink
+              to="/security"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`
+              }
+            >
+              Controls
+            </NavLink>
+            <NavLink
+              to="/threat-model"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`
+              }
+            >
+              Threat Model
+            </NavLink>
+          </div>
+        </div>
         <NavLink
           to="/architecture"
           className={({ isActive }) => `${base} ${isActive ? active : inactive}`}

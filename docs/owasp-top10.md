@@ -1,4 +1,4 @@
-# OWASP Top 10 — Web Application Security (2021)
+# OWASP Top 10 — Web Application Security (2025)
 
 This project deploys a read-only React dashboard on Cloud Run behind Cloudflare.
 The application has no user input, no authentication system, no database, and no
@@ -28,66 +28,7 @@ See `docs/security.md` → Infrastructure Security. See `docs/threat-model.md` �
 
 ---
 
-## A02: Cryptographic Failures
-
-**Status: Mitigated**
-
-No custom cryptography exists in this project. TLS is handled entirely by
-Cloudflare (edge) and nginx (origin). No passwords, hashes, keys, or sensitive
-tokens are stored or processed by the application.
-
-**Controls in place:**
-
-- Cloudflare Full (Strict) SSL enforced — end-to-end encrypted with origin certificate validation.
-- HSTS header: `max-age=31536000; includeSubDomains` — browsers enforce HTTPS for one year.
-- Origin secret (`CF_ACCESS_SECRET`) transmitted via environment variable at deploy time — not stored in the container image or repository.
-- No password storage, no session tokens, no key derivation, no hashing (no user accounts).
-- All credentials for cloud providers stored in GCP Secret Manager — fetched at runtime, never written to disk.
-
-See `docs/security.md` → HTTP Security Headers, Credential Handling.
-
----
-
-## A03: Injection
-
-**Status: Does not apply**
-
-The dashboard processes no user input. There are no forms, no query parameters
-interpreted by the application, no search functionality, no POST endpoints, no
-database, and no server-side code execution. The entire application serves static
-files.
-
-**Why this does not apply:**
-
-- No SQL, OS commands, LDAP, XPath, or expression language injection surface.
-- Findings JSON validated by Zod schema (`FindingSchema`) before rendering — rejects unexpected fields or shapes.
-- React 18 auto-escapes all JSX expressions. No `dangerouslySetInnerHTML`, `eval()`, or `innerHTML` in the codebase.
-- CSP with per-request nonce blocks inline script injection.
-- Remote markdown rendered via ReactMarkdown, which sanitizes HTML by default.
-
----
-
-## A04: Insecure Design
-
-**Status: Mitigated**
-
-The architecture is deliberately minimal — static files served from a container
-with no backend API. This was an explicit design decision documented in
-`docs/adr/0001-static-findings-json-baked-into-container.md`: no API means no API
-attack surface.
-
-**Controls in place:**
-
-- Threat model created before deployment (`docs/threat-model.md`) — documents attack scenarios, mitigations, and intentional scope exclusions.
-- ADR-0001 documents the rationale for baking findings into the container image (no runtime data fetch, no database, no API).
-- Read-only dashboard with no data mutation capability — the only failure mode is malformed JSON, caught by Zod validation.
-- Defense in depth: Cloudflare edge (DDoS, WAF, Bot Fight) → Cloudflare Worker (path allowlist, method restriction, header validation) → nginx (origin secret validation, security headers) → static React app.
-
-See `docs/threat-model.md`. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
-
----
-
-## A05: Security Misconfiguration
+## A02: Security Misconfiguration
 
 **Status: Mitigated**
 
@@ -107,27 +48,89 @@ See `docs/security.md` → HTTP Security Headers, CI/CD Workflows.
 
 ---
 
-## A06: Vulnerable and Outdated Components
+## A03: Software Supply Chain Failures
 
 **Status: Mitigated**
 
-Every dependency was selected by Claude Code and is tracked through automated
-scanning and update pipelines.
+Every dependency — npm packages, Docker base images, GitHub Actions, Terraform
+providers — is tracked through automated scanning, pinned to immutable
+identifiers, and updated via controlled pipelines.
 
 **Controls in place:**
 
 - CI: `dependency-review.yml` scans npm and pip dependencies for known vulnerabilities on every PR that modifies package files.
 - Dependabot opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies.
-- Docker base images pinned to SHA digests — updates are explicit and reviewed.
 - All GitHub Actions pinned to exact commit SHAs, not mutable version tags.
+- Docker base images pinned to SHA digests — updates are explicit and reviewed.
 - CI: `zizmor.yml` audits GitHub Actions workflows for supply chain risks.
+- CI: `secret-scan.yml` and `hardcoded-config-check.yml` detect unauthorized modifications to source.
 - Python ingest uses only the standard library (zero third-party dependencies).
+- `CLAUDE.md` hard rule: do not add npm packages, pip packages, or Terraform providers not already in the stack.
 
 See `docs/security.md` → CI/CD Workflows.
 
 ---
 
-## A07: Identification and Authentication Failures
+## A04: Cryptographic Failures
+
+**Status: Mitigated**
+
+No custom cryptography exists in this project. TLS is handled entirely by
+Cloudflare (edge) and nginx (origin). No passwords, hashes, keys, or sensitive
+tokens are stored or processed by the application.
+
+**Controls in place:**
+
+- Cloudflare Full (Strict) SSL enforced — end-to-end encrypted with origin certificate validation.
+- HSTS header: `max-age=31536000; includeSubDomains` — browsers enforce HTTPS for one year.
+- Origin secret (`CF_ACCESS_SECRET`) transmitted via environment variable at deploy time — not stored in the container image or repository.
+- No password storage, no session tokens, no key derivation, no hashing (no user accounts).
+- All credentials for cloud providers stored in GCP Secret Manager — fetched at runtime, never written to disk.
+
+See `docs/security.md` → HTTP Security Headers, Credential Handling.
+
+---
+
+## A05: Injection
+
+**Status: Does not apply**
+
+The dashboard processes no user input. There are no forms, no query parameters
+interpreted by the application, no search functionality, no POST endpoints, no
+database, and no server-side code execution. The entire application serves static
+files.
+
+**Why this does not apply:**
+
+- No SQL, OS commands, LDAP, XPath, or expression language injection surface.
+- Findings JSON validated by Zod schema (`FindingSchema`) before rendering — rejects unexpected fields or shapes.
+- React 18 auto-escapes all JSX expressions. No `dangerouslySetInnerHTML`, `eval()`, or `innerHTML` in the codebase.
+- CSP with per-request nonce blocks inline script injection.
+- Remote markdown rendered via ReactMarkdown, which sanitizes HTML by default.
+
+---
+
+## A06: Insecure Design
+
+**Status: Mitigated**
+
+The architecture is deliberately minimal — static files served from a container
+with no backend API. This was an explicit design decision documented in
+`docs/adr/0001-static-findings-json-baked-into-container.md`: no API means no API
+attack surface.
+
+**Controls in place:**
+
+- Threat model created before deployment (`docs/threat-model.md`) — documents attack scenarios, mitigations, and intentional scope exclusions.
+- ADR-0001 documents the rationale for baking findings into the container image (no runtime data fetch, no database, no API).
+- Read-only dashboard with no data mutation capability — the only failure mode is malformed JSON, caught by Zod validation.
+- Defense in depth: Cloudflare edge (DDoS, WAF, Bot Fight) → Cloudflare Worker (path allowlist, method restriction, header validation) → nginx (origin secret validation, security headers) → static React app.
+
+See `docs/threat-model.md`. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
+
+---
+
+## A07: Authentication Failures
 
 **Status: Does not apply**
 
@@ -142,7 +145,7 @@ Run origin but does not authenticate individual users.
 
 ---
 
-## A08: Software and Data Integrity Failures
+## A08: Software or Data Integrity Failures
 
 **Status: Accepted risk**
 
@@ -164,12 +167,12 @@ fetch pattern used by two dashboard pages.
 
 ---
 
-## A09: Security Logging and Monitoring Failures
+## A09: Security Logging and Alerting Failures
 
 **Status: Partially mitigated**
 
-Logging exists at the infrastructure level but no centralized monitoring or
-alerting is configured. This is documented as an intentional scope exclusion.
+Logging exists at the infrastructure level but no centralized alerting is
+configured. This is documented as an intentional scope exclusion.
 
 **Controls in place:**
 
@@ -182,26 +185,24 @@ alerting is configured. This is documented as an intentional scope exclusion.
 - No centralized log aggregation or SIEM.
 - No security alerting for repeated 403/404 patterns or anomalous traffic.
 - No client-side error reporting.
-- Blocked requests in the Cloudflare Worker return appropriate error codes but are not logged to an external monitoring system.
+- Blocked requests in the Cloudflare Worker return appropriate error codes but are not logged to an external alerting system.
 - No real-time notification for security events.
 
 See `docs/threat-model.md` → Intentional scope exclusions (continuous monitoring, SIEM, notifications explicitly listed as out of scope).
 
 ---
 
-## A10: Server-Side Request Forgery (SSRF)
+## A10: Mishandling of Exceptional Conditions
 
 **Status: Mitigated**
 
-No user-controlled URLs exist anywhere in the application. All fetch targets are
-hardcoded, and the Cloudflare Worker proxies only to a fixed origin.
+The application handles error paths explicitly — no component fails open or
+silently continues with unsafe defaults when an unexpected condition occurs.
 
 **Controls in place:**
 
-- React fetch calls in `ThreatModel.tsx` and `Security.tsx` use hardcoded GitHub URLs — not influenced by user input, query parameters, or URL fragments.
-- Cloudflare Worker proxies to a single fixed origin (`CLOUD_RUN_HOST` environment variable).
-- Path allowlist in the Worker prevents path-based SSRF.
-- Request body blocked — no POST data available to inject URLs.
-- HTTP methods restricted to GET/HEAD/OPTIONS.
-- CSP `connect-src 'self' raw.githubusercontent.com` restricts which origins the browser can fetch from.
-- No server-side code that interprets user-supplied URLs.
+- Cloudflare Worker returns specific error codes for every failure path (400, 403, 404, 405, 414, 421, 431, 502) — each with `Cache-Control: no-store` to prevent error responses from being cached.
+- nginx returns 403 when the `X-CF-Secret` header is missing — does not fall through to serving content without origin validation.
+- Zod schema validation rejects malformed findings JSON at parse time — the dashboard renders a loading state rather than displaying corrupt data.
+- `ThreatModel.tsx` and `Security.tsx` catch fetch errors and display an error state rather than crashing or rendering partial content.
+- `run_scan.sh` uses `trap cleanup EXIT` to ensure credential environment variables are unset on both success and failure — no credentials leak on unexpected script termination.
