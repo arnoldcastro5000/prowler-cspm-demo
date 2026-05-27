@@ -1,3 +1,6 @@
+// Suppress zod 4 CSP violation from new Function() probe
+;(globalThis as Record<string, unknown>).__zod_globalConfig = { jitless: true }
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
