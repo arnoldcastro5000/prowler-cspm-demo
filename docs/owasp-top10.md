@@ -24,7 +24,7 @@ validates every request before proxying.
 - Origin protected by `X-CF-Secret` header — direct Cloud Run access without the header returns 403.
 - No user roles, no privilege levels, no authorization logic to bypass.
 
-See `docs/security.md` → Infrastructure Security. See `docs/threat-model.md` → Cloudflare Worker security rules.
+See `docs/security.md` → Infrastructure Security. See `docs/threat-model.md` → Cloudflare Worker security rules. For infrastructure access control (Secret Manager IAM, Terraform credentials, scan pipeline guards), see `docs/security.md` → Credential Handling and `docs/owasp-genai.md` → ASI03 (Identity & Privilege Abuse).
 
 ---
 
