@@ -29,4 +29,5 @@ jobs:
         run: npm install --no-save eslint@9
 
       - name: Lint
-        run: npx eslint cloudflare/
+        run: npx eslint .
+        working-directory: cloudflare
