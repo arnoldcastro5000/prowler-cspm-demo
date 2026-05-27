@@ -87,7 +87,7 @@ export default function Landing() {
                   ['Secrets', 'GCP Secret Manager', 'All cloud credentials fetched at runtime, never stored on disk'],
                   ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
                   ['AI Development', <>Claude Code (sandboxed) + <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
-                  ['CI/CD', 'GitHub Actions + Dependabot', 'Quality gate (tsc, eslint, docker build, shellcheck, trivy, zizmor) + automated dependency updates'],
+                  ['CI/CD', 'GitHub Actions + Dependabot', '11 automated checks block unsafe code before it ships + weekly dependency updates'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
                   ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
                   ['Architecture diagrams', <><a href="https://github.com/vidanov/aws-architecture-diagram-skill" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">/aws-architecture-diagram</a> skill</>, 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
