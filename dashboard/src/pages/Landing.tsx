@@ -72,8 +72,8 @@ export default function Landing() {
             <table className="w-full text-sm table-fixed">
               <thead className="bg-gray-900">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Layer</th>
-                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Technology</th>
+                  <th className="w-1/5 px-4 py-2 text-left text-xs text-gray-500 uppercase">Layer</th>
+                  <th className="w-2/5 px-4 py-2 text-left text-xs text-gray-500 uppercase">Technology</th>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Rationale</th>
                 </tr>
               </thead>
@@ -110,8 +110,8 @@ export default function Landing() {
             <table className="w-full text-sm table-fixed">
               <thead className="bg-gray-900">
                 <tr>
-                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Workflow</th>
-                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Status</th>
+                  <th className="w-1/5 px-4 py-2 text-left text-xs text-gray-500 uppercase">Workflow</th>
+                  <th className="w-2/5 px-4 py-2 text-left text-xs text-gray-500 uppercase">Status</th>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">What it protects against</th>
                 </tr>
               </thead>
