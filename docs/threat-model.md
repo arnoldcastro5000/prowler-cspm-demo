@@ -61,6 +61,17 @@ Visitor → Cloudflare (firewall, DDoS protection) → Cloudflare Worker (adds s
 | A third-party code dependency is compromised | Malicious code enters through a software library update | Automated dependency scanning flags known vulnerabilities; all CI action versions are pinned to exact releases |
 | The local development machine is compromised | Infrastructure configuration files contain resource identifiers | Single-user machine with restricted file permissions; configuration files are never uploaded to the code repository |
 
+### What the Cloudflare security features protect against
+
+| Scenario | What happens | How it is addressed |
+|---|---|---|
+| Automated scanners probe for common vulnerabilities | Bots send SQL injection, path traversal, and other attack payloads to the dashboard | WAF blocks malicious requests before they reach Cloud Run. The dashboard is static HTML with no backend API, so most payloads would fail anyway. |
+| An attacker floods the dashboard with traffic | Volumetric DDoS attack aims to take the site offline | Cloudflare absorbs the traffic at the edge. Without it, Cloud Run would scale up (incurring cost) or hit its concurrency limit and go down. |
+| Millions of requests hit the application server | Cost-based attack or traffic spike overwhelms Cloud Run | CDN caches static assets at the edge. Repeated requests are served from Cloudflare's cache, not the container. |
+| Automated bots scrape or spam the dashboard | Bots send high volumes of requests mimicking real traffic | Bot Fight Mode detects known bot patterns and issues computationally expensive challenges that increase the cost for bots to continue. Included on the free plan but cannot be customized. |
+| Requests arrive from fake or non-standard browsers | Bots and crawlers send malformed HTTP headers or no user agent | Browser Integrity Check evaluates client behavior across multiple requests and blocks clients that do not behave like a real browser session. |
+| Someone bypasses Cloudflare and hits Cloud Run directly | All other Cloudflare protections are skipped | The Worker adds `X-CF-Secret` to every request; Cloud Run rejects anything without it. This makes all other Cloudflare features mandatory — you cannot skip them. |
+
 ### What the Worker security rules protect against
 
 The Cloudflare free plan does not support custom WAF rules, method filtering, or path filtering. The Worker is the only place to enforce these controls. These 8 rules fill the gap between Cloudflare's managed protections and what a paid plan would provide. Rule numbers match the implementation order in `cloudflare/worker.js`.
@@ -75,17 +86,6 @@ The Cloudflare free plan does not support custom WAF rules, method filtering, or
 | 6 | A request carries oversized headers | Attackers use large headers for log flooding, cookie-bombing, or resource exhaustion | The Worker returns 431 if total headers exceed 16KB or any single header exceeds 4KB. Thresholds account for Cloudflare's own headers and enterprise proxy headers. |
 | 7 | A request arrives with an unexpected Host header | Host header injection enables cache poisoning and DNS rebinding | The Worker validates the Host header against the expected domain, comparing case-insensitively and allowing the port variant (`:443`) |
 | 8 | A blocked request is cached by Cloudflare's CDN | An attacker triggers a block for a legitimate path, and the error response gets cached | All error responses include `Cache-Control: no-store` to prevent caching |
-
-### What the Cloudflare security features protect against
-
-| Scenario | What happens | How it is addressed |
-|---|---|---|
-| Automated scanners probe for common vulnerabilities | Bots send SQL injection, path traversal, and other attack payloads to the dashboard | WAF blocks malicious requests before they reach Cloud Run. The dashboard is static HTML with no backend API, so most payloads would fail anyway. |
-| An attacker floods the dashboard with traffic | Volumetric DDoS attack aims to take the site offline | Cloudflare absorbs the traffic at the edge. Without it, Cloud Run would scale up (incurring cost) or hit its concurrency limit and go down. |
-| Millions of requests hit the application server | Cost-based attack or traffic spike overwhelms Cloud Run | CDN caches static assets at the edge. Repeated requests are served from Cloudflare's cache, not the container. |
-| Automated bots scrape or spam the dashboard | Bots send high volumes of requests mimicking real traffic | Bot Fight Mode detects known bot patterns and issues computationally expensive challenges that increase the cost for bots to continue. Included on the free plan but cannot be customized. |
-| Requests arrive from fake or non-standard browsers | Bots and crawlers send malformed HTTP headers or no user agent | Browser Integrity Check evaluates client behavior across multiple requests and blocks clients that do not behave like a real browser session. |
-| Someone bypasses Cloudflare and hits Cloud Run directly | All other Cloudflare protections are skipped | The Worker adds `X-CF-Secret` to every request; Cloud Run rejects anything without it. This makes all other Cloudflare features mandatory — you cannot skip them. |
 
 ### What the HTTP security headers protect against
 
