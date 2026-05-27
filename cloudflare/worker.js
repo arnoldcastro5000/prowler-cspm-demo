@@ -7,6 +7,9 @@ function blocked(status, message) {
 
 export default {
   async fetch(request, env) {
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS' } })
+    }
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return blocked(405, 'Method Not Allowed')
     }
