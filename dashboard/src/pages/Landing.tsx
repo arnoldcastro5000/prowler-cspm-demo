@@ -112,22 +112,23 @@ export default function Landing() {
                 <tr>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Workflow</th>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Status</th>
+                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">What it protects against</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {[
-                  ['Frontend CI', 'frontend-ci.yml'],
-                  ['Docker Build', 'docker-build.yml'],
-                  ['Terraform Validate', 'terraform-validate.yml'],
-                  ['Python Lint', 'python-lint.yml'],
-                  ['Shellcheck', 'shellcheck.yml'],
-                  ['Secret Scan', 'secret-scan.yml'],
-                  ['Trivy', 'trivy.yml'],
-                  ['Zizmor', 'zizmor.yml'],
-                  ['Hardcoded Config Check', 'hardcoded-config-check.yml'],
-                  ['Dependency Review', 'dependency-review.yml'],
-                  ['Worker Lint', 'worker-lint.yml'],
-                ].map(([name, file]) => (
+                  ['Frontend CI', 'frontend-ci.yml', 'Catches code errors and broken builds before they reach the live site'],
+                  ['Docker Build', 'docker-build.yml', 'Verifies the application container builds correctly before deployment'],
+                  ['Terraform Validate', 'terraform-validate.yml', 'Ensures infrastructure configuration is valid before applying to cloud environments'],
+                  ['Python Lint', 'python-lint.yml', 'Detects code quality issues and common security mistakes in the scan pipeline'],
+                  ['Shellcheck', 'shellcheck.yml', 'Catches scripting errors in the scan automation that could cause silent failures'],
+                  ['Secret Scan', 'secret-scan.yml', 'Prevents credentials, API keys, and tokens from being accidentally committed to the repository'],
+                  ['Trivy', 'trivy.yml', 'Scans infrastructure code for known security misconfigurations before deployment'],
+                  ['Zizmor', 'zizmor.yml', 'Audits the CI pipelines themselves for supply chain vulnerabilities'],
+                  ['Hardcoded Config Check', 'hardcoded-config-check.yml', 'Blocks cloud account IDs and resource identifiers from being exposed in source code'],
+                  ['Dependency Review', 'dependency-review.yml', 'Flags third-party libraries with known security vulnerabilities before they are added'],
+                  ['Worker Lint', 'worker-lint.yml', 'Validates the Cloudflare edge security rules that protect the live dashboard'],
+                ].map(([name, file, description]) => (
                   <tr key={file} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{name}</td>
                     <td className="px-4 py-2">
@@ -142,6 +143,7 @@ export default function Landing() {
                         />
                       </a>
                     </td>
+                    <td className="px-4 py-2 text-gray-400">{description}</td>
                   </tr>
                 ))}
               </tbody>
