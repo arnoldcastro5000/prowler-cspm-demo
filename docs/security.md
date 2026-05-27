@@ -39,6 +39,21 @@ Both scans run independently — the local hook catches secrets before they leav
 - **Backend access blocked** — Direct access to the Cloud Run backend URL is blocked — requests without the secret header are rejected with 403. All browser traffic reaches the app through `prowler.cloudsecuritypractice.com` only.
 - **Static findings JSON** — no backend API, no database, no authentication surface. Findings are baked into the Docker image at build time. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
 
+### Cloudflare Worker Security Rules
+
+The Cloudflare free plan does not include custom WAF rules, method filtering, or path filtering. The Worker fills that gap with 8 rules enforced before any request reaches Cloud Run. Rule numbers match the implementation order in `cloudflare/worker.js`.
+
+| Rule | What it does |
+|---|---|
+| **1. Method restriction** | Allows only GET, HEAD, and OPTIONS. Returns 405 for POST, PUT, DELETE, and all other methods. |
+| **2. Body rejection** | Blocks GET/HEAD requests that carry a body, preventing HTTP desync attacks. |
+| **3. Traversal and null byte detection** | Inspects the raw URL for encoded path traversal sequences (`%2e%2e`, `%252e`, `%2f`, `%5c`) and null bytes (`%00`) before parsing. |
+| **4. URL length limit** | Returns 414 for paths exceeding 256 characters, blocking buffer overflow and WAF evasion attempts. |
+| **5. Path allowlist** | Checks every path against an explicit set of valid routes and static files. `/assets/` paths must match Vite's naming convention with only `.js` and `.css` extensions. Returns 404 for everything else. |
+| **6. Header size limits** | Returns 431 if total headers exceed 16 KB or any single header exceeds 4 KB, preventing log flooding and resource exhaustion. |
+| **7. Host header validation** | Validates the Host header against the expected domain (case-insensitive, allows `:443` variant). Returns 421 for mismatches, blocking cache poisoning and DNS rebinding. |
+| **8. Error cache prevention** | All error responses include `Cache-Control: no-store` so blocked requests are never cached by Cloudflare's CDN. |
+
 ## CI/CD Workflows
 
 11 automated workflows run on every push and pull request. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
