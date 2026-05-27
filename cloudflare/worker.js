@@ -9,7 +9,7 @@ const VALID_PATHS = new Set([
 
 const ASSETS_PATTERN = /^\/assets\/[a-zA-Z0-9_-]+-[a-zA-Z0-9]+\.(js|css)$/
 
-const MAX_URL_LENGTH =  256
+const MAX_URL_LENGTH = 256
 const MAX_TOTAL_HEADERS = 8192
 const MAX_SINGLE_HEADER = 2048
 
