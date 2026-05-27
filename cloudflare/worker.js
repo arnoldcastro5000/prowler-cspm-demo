@@ -47,6 +47,25 @@ export default {
       return blocked(404, 'Not Found')
     }
 
+    // Rule 8: Block oversized headers
+    let totalHeaderSize = 0
+    for (const [name, value] of request.headers) {
+      if (name.length + value.length > 4096) {
+        return blocked(431, 'Request Header Fields Too Large')
+      }
+      totalHeaderSize += name.length + value.length
+    }
+    if (totalHeaderSize > 16384) {
+      return blocked(431, 'Request Header Fields Too Large')
+    }
+
+    // Rule 9: Validate Host header
+    const host = (request.headers.get('host') || '').toLowerCase()
+    if (host !== env.EXPECTED_HOST && host !== env.EXPECTED_HOST + ':443') {
+      return blocked(421, 'Misdirected Request')
+    }
+
+    // Proxy to origin
     url.hostname = env.CLOUD_RUN_HOST
     const modified = new Request(url.toString(), {
       method: request.method,
@@ -55,6 +74,10 @@ export default {
         'X-CF-Secret': env.CF_SECRET,
       },
     })
-    return fetch(modified)
+    try {
+      return await fetch(modified)
+    } catch {
+      return blocked(502, 'Bad Gateway')
+    }
   },
 }
