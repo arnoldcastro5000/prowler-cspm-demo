@@ -10,6 +10,6 @@ export default {
       },
       body: request.body,
     });
-    return fetch(modified);
-  }
+    return fetch(modified)
+  },
 }
