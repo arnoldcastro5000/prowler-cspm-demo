@@ -69,7 +69,7 @@ export default function Landing() {
         <div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">Tech stack</h2>
           <div className="border border-gray-800 rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm table-fixed">
               <thead className="bg-gray-900">
                 <tr>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Layer</th>
@@ -107,7 +107,7 @@ export default function Landing() {
         <div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">CI Status</h2>
           <div className="border border-gray-800 rounded-lg overflow-hidden">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm table-fixed">
               <thead className="bg-gray-900">
                 <tr>
                   <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Workflow</th>
