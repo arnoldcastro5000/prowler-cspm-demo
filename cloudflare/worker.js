@@ -1,5 +1,5 @@
 // Valid routes and static files — update when dashboard changes
-// Routes: dashboard/src/main.tsx | Static files: dashboard/public/
+// Source: dashboard/src/main.tsx (routes) | dashboard/public/ (static files)
 const VALID_PATHS = new Set([
   '/', '/before', '/after', '/security', '/threat-model', '/architecture',
   '/findings_before.json', '/findings_after.json',
