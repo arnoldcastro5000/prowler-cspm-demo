@@ -39,30 +39,29 @@ Both scans run independently — the local hook catches secrets before they leav
 - **Backend access blocked** — Direct access to the Cloud Run backend URL is blocked — requests without the secret header are rejected with 403. All browser traffic reaches the app through `prowler.cloudsecuritypractice.com` only.
 - **Static findings JSON** — no backend API, no database, no authentication surface. Findings are baked into the Docker image at build time. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
 
-## IaC Security
+## CI/CD Workflows
 
-- **Trivy** scans Terraform modules for misconfigurations on every push and PR (`.github/workflows/trivy.yml`). Findings upload to the GitHub Security tab via SARIF.
-- **Terraform validate** runs `terraform fmt --check` and `terraform validate` on every push and PR (`.github/workflows/terraform-validate.yml`). Catches syntax errors and formatting issues.
+11 automated workflows run on every push and pull request. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
+
+| Workflow | What it protects against |
+|---|---|
+| Frontend CI | Catches code errors and broken builds before they reach the live site |
+| Docker Build | Verifies the application container builds correctly before deployment |
+| Terraform Validate | Ensures infrastructure configuration is valid before applying to cloud environments |
+| Python Lint | Detects code quality issues and common security mistakes in the scan pipeline |
+| Shellcheck | Catches scripting errors in the scan automation that could cause silent failures |
+| Secret Scan | Prevents credentials, API keys, and tokens from being accidentally committed to the repository |
+| Trivy | Scans infrastructure code for known security misconfigurations before deployment |
+| Zizmor | Audits the CI pipelines themselves for supply chain vulnerabilities |
+| Hardcoded Config Check | Blocks cloud account IDs and resource identifiers from being exposed in source code |
+| Dependency Review | Flags third-party libraries with known security vulnerabilities before they are added |
+| Worker Lint | Validates the Cloudflare edge security rules that protect the live dashboard |
+
+Additional notes:
+
 - **Terraform state** is stored locally on the WSL2 machine and excluded from git via `.gitignore`. No remote backend.
 - The intentional misconfigurations in `iac/modules/` are expected Trivy findings — they represent the before-state infrastructure this project is designed to demonstrate.
-
-## CI/CD Pipeline Security
-
-- **Zizmor** audits GitHub Actions workflow files for supply chain risks on every push and PR (`.github/workflows/zizmor.yml`). Findings upload to the GitHub Security tab via SARIF.
-- All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags.
-- `persist-credentials: false` is set on all checkout actions.
-- **Hardcoded config check** (`.github/workflows/hardcoded-config-check.yml`) scans source files on every push and PR for hardcoded cloud account identifiers, resource IDs, regions, and personal identifiers.
-
-## Code Quality and Safety
-
-- **Shellcheck** lints `run_scan.sh` on every push and PR (`.github/workflows/shellcheck.yml`).
-- **Ruff** lints `ingest_prowler.py` on every push and PR (`.github/workflows/python-lint.yml`).
-- **Frontend CI** runs `tsc --noEmit`, `eslint`, and `vite build` on every push and PR (`.github/workflows/frontend-ci.yml`).
-- **Docker build** validates the container compiles on every push and PR (`.github/workflows/docker-build.yml`).
 - **Dependabot** opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
-- **Dependency Review** scans PRs that change dependency files for known vulnerabilities using GitHub's Advisory Database (`.github/workflows/dependency-review.yml`).
-- **Secret Scan** runs Gitleaks on every push and PR to detect committed credentials, API keys, and tokens (`.github/workflows/secret-scan.yml`).
-- **Worker Lint** runs ESLint on the Cloudflare Worker source on every push and PR touching `cloudflare/` (`.github/workflows/worker-lint.yml`).
 
 ## Data Redaction
 
