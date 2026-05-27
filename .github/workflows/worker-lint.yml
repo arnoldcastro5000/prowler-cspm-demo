@@ -1,0 +1,32 @@
+name: Worker Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/**'
+  pull_request:
+    paths:
+      - 'cloudflare/**'
+
+permissions: {}
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642195f572a2b2b9ddf7bfe # v6.4.0
+        with:
+          node-version: '20'
+
+      - name: Install ESLint
+        run: npm install --no-save eslint@9
+
+      - name: Lint
+        run: npx eslint cloudflare/
