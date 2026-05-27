@@ -6,7 +6,7 @@ const VALID_PATHS = new Set([
   '/favicon.svg', '/robots.txt', '/sitemap.xml',
 ])
 
-const ASSETS_PATTERN = /^\/assets\/[a-zA-Z0-9_-]+-[a-zA-Z0-9]+\.(js|css)$/
+const ASSETS_PATTERN = /^\/assets\/[a-zA-Z0-9_-]+-[a-zA-Z0-9_]+\.(js|css)$/
 
 function blocked(status, message) {
   return new Response(message, {
