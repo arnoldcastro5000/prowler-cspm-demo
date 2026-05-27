@@ -63,19 +63,18 @@ Visitor → Cloudflare (firewall, DDoS protection) → Cloudflare Worker (adds s
 
 ### What the Worker security rules protect against
 
-The Cloudflare free plan does not support custom WAF rules, method filtering, or path filtering. The Worker is the only place to enforce these controls. These rules fill the gap between Cloudflare's managed protections and what a paid plan would provide.
+The Cloudflare free plan does not support custom WAF rules, method filtering, or path filtering. The Worker is the only place to enforce these controls. These 8 rules fill the gap between Cloudflare's managed protections and what a paid plan would provide. Rule numbers match the implementation order in `cloudflare/worker.js`.
 
-| Scenario | What happens | How it is addressed |
-|---|---|---|
-| A POST, PUT, or DELETE request is sent to the dashboard | The site is read-only — any write method is by definition malicious or accidental | The Worker returns 405 Method Not Allowed for any method other than GET, HEAD, or OPTIONS. OPTIONS is allowed because browser extensions or Cloudflare features may trigger CORS preflight requests. |
-| A GET request arrives with a body | Attackers use GET-with-body to exploit differences in how proxies and servers parse requests (HTTP desync) | The Worker returns 400 Bad Request if the request has a body |
-| A request targets a path that does not exist | Scanners probe for `/wp-admin`, `/.env`, `/.git/config`, `/admin`, `/api/` | The Worker checks the path against an allowlist of valid routes and static files and returns 404 for anything else |
-| A request has an extremely long URL | Attackers pad URLs to overflow buffers or evade WAF pattern matching | The Worker returns 414 URI Too Long for paths exceeding 256 characters |
-| A request contains encoded path traversal or null bytes | Double-encoded sequences like `%252e%252e` bypass basic traversal detection | The Worker inspects the raw URL before parsing and blocks encoded traversal sequences and null bytes |
-| A request under `/assets/` targets an unexpected file type | Scanners probe for web shells and PHP backdoors in asset directories | The Worker validates that `/assets/` paths match Vite's naming convention and only allow `.js` and `.css` extensions |
-| A request carries oversized headers | Attackers use large headers for log flooding, cookie-bombing, or resource exhaustion | The Worker returns 431 if total headers exceed 16KB or any single header exceeds 4KB. Thresholds account for Cloudflare's own headers and enterprise proxy headers. |
-| A request arrives with an unexpected Host header | Host header injection enables cache poisoning and DNS rebinding | The Worker validates the Host header against the expected domain, comparing case-insensitively and allowing the port variant (`:443`) |
-| A blocked request is cached by Cloudflare's CDN | An attacker triggers a block for a legitimate path, and the error response gets cached | All error responses include `Cache-Control: no-store` to prevent caching |
+| Rule | Scenario | What happens | How it is addressed |
+|---|---|---|---|
+| 1 | A POST, PUT, or DELETE request is sent to the dashboard | The site is read-only — any write method is by definition malicious or accidental | The Worker returns 405 Method Not Allowed for any method other than GET, HEAD, or OPTIONS. OPTIONS is allowed because browser extensions or Cloudflare features may trigger CORS preflight requests. |
+| 2 | A GET request arrives with a body | Attackers use GET-with-body to exploit differences in how proxies and servers parse requests (HTTP desync) | The Worker returns 400 Bad Request if the request has a body |
+| 3 | A request contains encoded path traversal or null bytes | Double-encoded sequences like `%252e%252e` bypass basic traversal detection | The Worker inspects the raw URL before parsing and blocks encoded traversal sequences and null bytes |
+| 4 | A request has an extremely long URL | Attackers pad URLs to overflow buffers or evade WAF pattern matching | The Worker returns 414 URI Too Long for paths exceeding 256 characters |
+| 5 | A request targets a path that does not exist or an unexpected file type under `/assets/` | Scanners probe for `/wp-admin`, `/.env`, `/.git/config`, `/admin`, `/api/`, web shells, and PHP backdoors | The Worker checks the path against an allowlist of valid routes and static files. `/assets/` paths must match Vite's naming convention and only `.js` and `.css` extensions are allowed. Returns 404 for anything else. |
+| 6 | A request carries oversized headers | Attackers use large headers for log flooding, cookie-bombing, or resource exhaustion | The Worker returns 431 if total headers exceed 16KB or any single header exceeds 4KB. Thresholds account for Cloudflare's own headers and enterprise proxy headers. |
+| 7 | A request arrives with an unexpected Host header | Host header injection enables cache poisoning and DNS rebinding | The Worker validates the Host header against the expected domain, comparing case-insensitively and allowing the port variant (`:443`) |
+| 8 | A blocked request is cached by Cloudflare's CDN | An attacker triggers a block for a legitimate path, and the error response gets cached | All error responses include `Cache-Control: no-store` to prevent caching |
 
 ### What the Cloudflare security features protect against
 

@@ -17,7 +17,7 @@ function blocked(status, message) {
 
 export default {
   async fetch(request, env) {
-    // Rule 1: Allow OPTIONS, block all other non-GET/HEAD methods
+    // 1. Allow OPTIONS, block all other non-GET/HEAD methods
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS' } })
     }
@@ -25,29 +25,29 @@ export default {
       return blocked(405, 'Method Not Allowed')
     }
 
-    // Rule 2: Block request bodies
+    // 2. Block request bodies
     if (request.body !== null) {
       return blocked(400, 'Bad Request')
     }
 
-    // Rule 5: Block encoded traversal and null bytes (inspect raw URL before parsing)
+    // 3. Block encoded traversal and null bytes (inspect raw URL before parsing)
     if (/%2e%2e|%252e|%2f|%00|%5c/i.test(request.url) || request.url.includes('\\')) {
       return blocked(400, 'Bad Request')
     }
 
     const url = new URL(request.url)
 
-    // Rule 6: URL length limit
+    // 4. URL length limit
     if (url.pathname.length > 256) {
       return blocked(414, 'URI Too Long')
     }
 
-    // Rule 3 + 7: Path allowlist (ASSETS_PATTERN restricts /assets/ to .js and .css)
+    // 5. Path allowlist (ASSETS_PATTERN restricts /assets/ to .js and .css)
     if (!VALID_PATHS.has(url.pathname) && !ASSETS_PATTERN.test(url.pathname)) {
       return blocked(404, 'Not Found')
     }
 
-    // Rule 8: Block oversized headers
+    // 6. Block oversized headers
     let totalHeaderSize = 0
     for (const [name, value] of request.headers) {
       if (name.length + value.length > 4096) {
@@ -59,7 +59,7 @@ export default {
       return blocked(431, 'Request Header Fields Too Large')
     }
 
-    // Rule 9: Validate Host header
+    // 7. Validate Host header
     const host = (request.headers.get('host') || '').toLowerCase()
     if (host !== env.EXPECTED_HOST && host !== env.EXPECTED_HOST + ':443') {
       return blocked(421, 'Misdirected Request')
