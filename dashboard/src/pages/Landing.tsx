@@ -37,7 +37,7 @@ export default function Landing() {
           </p>
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed">
             <li><span className="text-white font-semibold">CSPM</span> — 19 of 19 misconfigurations remediated across AWS, GCP, and Azure (100% closure rate, verified by re-scan)</li>
-            <li><span className="text-white font-semibold">Secure cloud architecture</span> — Dashboard deployed behind Cloudflare WAF + DDoS protection; Dashboard accessible only through Cloudflare</li>
+            <li><span className="text-white font-semibold">Secure cloud architecture</span> — This dashboard deployed behind Cloudflare WAF + DDoS protection; it is accessible only through Cloudflare</li>
             <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passed 11 automated CI security gates before merge</li>
           </ol>
         </div>
