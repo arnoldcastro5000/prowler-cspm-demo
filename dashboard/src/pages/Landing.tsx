@@ -10,7 +10,7 @@ export default function Landing() {
         {/* Hero */}
         <div>
           <h1 className="text-4xl font-bold text-white mb-4">Prowler CSPM</h1>
-          <p className="text-xl text-gray-300 leading-relaxed mb-4">
+          <p className="text-xl italic text-gray-300 leading-relaxed mb-4">
             Cloud misconfiguration is the{' '}
             <a
               href="https://www.rsaconference.com/library/blog/cloud-misconfigurations-still-the-biggest-threat-in-2025"
@@ -21,10 +21,17 @@ export default function Landing() {
               #1 cloud security threat
             </a>
             {' '}— the average breach costs <span className="text-white font-semibold">CAD 5.95 million</span> and
-            takes over 180 days to detect. This project demonstrates end-to-end misconfiguration detection
-            and remediation across AWS, GCP, and Azure using real Prowler scans against
-            live infrastructure.
+            takes over <span className="text-white font-semibold">180 days to detect</span>.
           </p>
+          <p className="text-xl text-gray-300 leading-relaxed mb-4">
+            This proof-of-concept demonstrates three security capabilities an organization needs in place
+            before pushing workloads to the cloud:
+          </p>
+          <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed mb-4">
+            <li><span className="text-white font-semibold">Cloud Security Posture Management</span> — a repeatable pattern for detecting and remediating misconfigurations across AWS, GCP, and Azure</li>
+            <li><span className="text-white font-semibold">Secure cloud architecture</span> — defence-in-depth hosting for web applications</li>
+            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — sandboxed agentic coding with auditable CI guardrails on every change</li>
+          </ol>
           <p className="text-xl text-gray-300 leading-relaxed">
             19 failures found. 19 fixed after remediation.
           </p>
