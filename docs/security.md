@@ -1,6 +1,6 @@
 # Security Controls
 
-**Security posture: defence-in-depth applied to every stage of the lifecycle.** Secrets are never on disk; every code change passes through automated gates; the runtime surface is reduced to a single hardened path; the application enforces modern browser controls; and the AI development environment runs sandboxed. No layer is asked to be perfect — the posture survives the failure of any one.
+**Security posture: defence-in-depth applied to every stage of the lifecycle.** Secrets are never on disk; every code change passes through automated gates; the runtime surface is reduced to a single hardened path; the application enforces modern browser controls; and the AI development environment runs sandboxed.
 
 ## At a glance
 
