@@ -1,6 +1,6 @@
 # OWASP GenAI Security Frameworks
 
-This project was built entirely by Claude Code, an AI coding agent. The LLM is the *development tool*, not a feature in the application — the deployed dashboard does not call any model and contains no AI runtime surface. This document maps two additional OWASP GenAI frameworks to this project's development workflow; the OWASP Top 10 for LLM Applications is covered separately in `docs/owasp-llm.md`.
+This project was built with Claude Code, an AI coding agent. The LLM is the *development tool*, not a feature in the application — the deployed dashboard does not call any model and contains no AI runtime surface. This document maps two additional OWASP GenAI frameworks to this project's development workflow; the OWASP Top 10 for LLM Applications is covered separately in `docs/owasp-llm.md`.
 
 **Part 1** (OWASP Top 10 for Agentic Applications, 2026): **6 mitigated · 1 not applicable · 2 partially mitigated (R01, R02) · 1 accepted (R03).**
 
