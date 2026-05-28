@@ -1,21 +1,29 @@
 # OWASP Top 10 for LLM Applications (2025)
 
-This project was built entirely by Claude Code, an AI coding agent. The LLM is
-the development tool, not a feature in the application. The following maps each
-OWASP LLM risk to this project's development workflow and documents the controls
-in place.
+This project was built entirely by Claude Code, an AI coding agent. The LLM is the *development tool*, not a feature in the application — the deployed dashboard does not call any model and contains no AI runtime surface. Mapped against the OWASP Top 10 for LLM Applications (2025 edition): **five categories are mitigated, two are not applicable (model training and vector-database risks the project does not implement), two carry documented residual risk** (LLM01 prompt injection — blast radius contained but model-level vector cannot be eliminated; LLM03 supply chain — AI-fabricated typosquat in initial dep selection has no specific detection), **and one is accepted by design** (LLM07: `CLAUDE.md` is published to the public repository because transparency is the point of a portfolio project). Each category is detailed below with controls in place; the **residual risk register** at the end consolidates the three open items (R01, R02, R03) with treatments named.
+
+## Status at a glance
+
+| # | Category | Status | Why |
+|---|---|---|---|
+| LLM01 | Prompt Injection | 🟡 Partially mitigated | **R01**: blast radius contained (sandbox approval gate, network allowlist, `--dry-run` makes) — model-level injection vector cannot be fully prevented through wrapper controls |
+| LLM02 | Sensitive Information Disclosure | 🟢 Mitigated | `redact_resource()` in ingest strips IDs; `.gitignore` excludes state/creds; CI `hardcoded-config-check` + Gitleaks |
+| LLM03 | Supply Chain Vulnerabilities | 🟡 Partially mitigated | Known-bad caught (Dependency Review + Dependabot); Actions + Docker images SHA-pinned; hard rule blocks new deps — **R02**: AI-fabricated typosquat in initial dep selection has no specific detection |
+| LLM04 | Data and Model Poisoning | ⚪ Does not apply | Project uses Claude Code as a third-party tool; no training, fine-tuning, or model hosting |
+| LLM05 | Improper Output Handling | 🟢 Mitigated | React auto-escape; no `eval()` / `innerHTML` / `subprocess`; Zod validation; CSP + nosniff; TS strict + ESLint |
+| LLM06 | Excessive Agency | 🟢 Mitigated | Per-command approval; make `--dry-run` only; `git push` not auto-allowed; `make deploy` needs human |
+| LLM07 | System Prompt Leakage | 🟡 Accepted risk | **R03**: `CLAUDE.md` is public by design; secret names ≠ values; `.claude/settings.local.json` is gitignored |
+| LLM08 | Vector and Embedding Weaknesses | ⚪ Does not apply | No vector DB, embedding store, or RAG pipeline |
+| LLM09 | Misinformation | 🟢 Mitigated | 11 CI checks; Prowler before/after as IaC integration test; OWASP ZAP; single-dev review; Zod runtime validation |
+| LLM10 | Unbounded Consumption | 🟢 Mitigated | Sandbox prevents runaway commands; Cloudflare CDN + DDoS + Bot Fight; Worker rules 4 & 6; Cloud Run scales to zero |
 
 ---
 
 ## LLM01: Prompt Injection
 
-**Status: Mitigated**
+**Status:** 🟡 Partially mitigated
 
-Claude Code reads `CLAUDE.md`, project files, and scan output as context during
-development sessions. If any file in the working tree contained adversarial
-instructions — a crafted comment in a dependency README, a malicious resource
-name in Prowler output, or an injected PR description — it could attempt to
-influence the agent to bypass its hard rules.
+Claude Code reads `CLAUDE.md`, project files, and scan output as context during development sessions. If any file in the working tree contained adversarial instructions — a crafted comment in a dependency README, a malicious resource name in Prowler output, or an injected PR description — it could attempt to influence the agent to bypass its hard rules. Prompt injection is fundamentally a model-level vulnerability that wrapper controls cannot eliminate; the controls below contain the *blast radius* of a successful injection rather than prevent the vector itself.
 
 **Controls in place:**
 
@@ -25,20 +33,21 @@ influence the agent to bypass its hard rules.
 - Network access is limited to `api.github.com` — the agent cannot exfiltrate data or fetch attacker-controlled payloads.
 - `.gitignore` excludes `node_modules/`, `prowler/output/`, and `*.tfstate` from version control, though the agent can still read these locally during development.
 
-**Recommended future control:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context entirely, reducing the surface area for indirect prompt injection through attacker-influenced file content.
+**Residual risk (R01):** see Residual risk register.
+
+**Improvement opportunities:**
+
+- Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context entirely, reducing the surface area for indirect prompt injection through attacker-influenced file content.
+
+See `docs/security.md` → Pillar 5 (AI Development Guardrails).
 
 ---
 
 ## LLM02: Sensitive Information Disclosure
 
-**Status: Mitigated**
+**Status:** 🟢 Mitigated
 
-Claude Code has read access to the entire project directory during development.
-Files in the working tree may contain real cloud resource identifiers — Prowler
-scan output with ARNs and subscription IDs, Terraform state with resource
-metadata, or shell scripts referencing Secret Manager secret names. If the agent
-echoed these values into committed code, logs, or debug output, real
-infrastructure identifiers could leak into the public repository.
+Claude Code has read access to the entire project directory during development. Files in the working tree may contain real cloud resource identifiers — Prowler scan output with ARNs and subscription IDs, Terraform state with resource metadata, or shell scripts referencing Secret Manager secret names. If the agent echoed these values into committed code, logs, or debug output, real infrastructure identifiers could leak into the public repository.
 
 **Controls in place:**
 
@@ -49,61 +58,54 @@ infrastructure identifiers could leak into the public repository.
 - CI: `secret-scan.yml` runs Gitleaks on every push and PR to catch exposed credentials.
 - Sandbox: network restricted to `api.github.com` — the agent cannot send project data to arbitrary external endpoints.
 
-See `docs/security.md` → Credential Handling, Data Redaction, Secret Scanning.
+See `docs/security.md` → Pillar 1 (Credential & Secrets Hygiene).
 
 ---
 
 ## LLM03: Supply Chain Vulnerabilities
 
-**Status: Mitigated**
+**Status:** 🟡 Partially mitigated
 
-Claude Code selected every dependency in this project — npm packages, pip
-packages, Terraform providers, GitHub Actions, and Docker base images. An AI
-agent recommends packages from its training data without independently verifying
-authenticity. A typosquatted or compromised package recommended by the LLM would
-enter the project's supply chain.
+Claude Code selected every dependency in this project — npm packages, pip packages, Terraform providers, GitHub Actions, and Docker base images. An AI agent recommends packages from its training data without independently verifying authenticity. A typosquatted or compromised package recommended by the LLM would enter the project's supply chain. Going forward, the hard rule + per-command approval gate on `npm install` controls *future* additions; the residual is in the *initial selection* — a typosquat already in `package-lock.json` from the AI-driven setup that has not yet been flagged in any vulnerability database has no current detection.
 
 **Controls in place:**
 
-- CI: `dependency-review.yml` scans npm and pip dependencies for known vulnerabilities on every PR that modifies package files.
+- CI: `dependency-review.yml` scans npm and pip dependencies for *known* vulnerabilities on every PR that modifies package files. (Does not detect novel typosquats.)
 - Dependabot opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
-- All GitHub Actions in CI are pinned to exact commit SHAs, not mutable version tags — verified across all 11 workflow files.
-- Docker base images in `dashboard/Dockerfile` are pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.27-alpine@sha256:...`).
+- All GitHub Actions in CI are pinned to exact commit SHAs, not mutable version tags — immune to namespace hijack on the Actions registry.
+- Docker base images in `dashboard/Dockerfile` are pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.27-alpine@sha256:...`) — immune to image namespace hijack.
 - CI: `zizmor.yml` audits GitHub Actions workflows for supply chain risks.
-- `CLAUDE.md` hard rule: do not add npm packages, pip packages, or Terraform providers not already in the stack.
+- `CLAUDE.md` hard rule: do not add npm packages, pip packages, or Terraform providers not already in the stack — blocks the agent from adding any new dep.
 - Sandbox: `autoAllowBashIfSandboxed: false` — the agent cannot run `npm install` without explicit user approval.
 - Python ingest uses only the standard library (zero third-party dependencies).
 
-**Recommended future control:** Add a SAST scanner (e.g., Semgrep) to CI to catch code-level security anti-patterns that type checking and linting do not detect — injection, XSS, insecure randomness, and other patterns in AI-generated code.
+**Residual risk (R02):** see Residual risk register.
 
-See `docs/security.md` → CI/CD Workflows.
+**Improvement opportunities:**
+
+- Add `npm audit` to `frontend-ci.yml` to check installed packages against known vulnerabilities (covers npm specifically, beyond Dependency Review).
+- Add a SAST scanner (e.g., Semgrep) to CI to catch code-level security anti-patterns in dependencies — injection, XSS, insecure randomness, suspicious post-install scripts, and other patterns in AI-recommended packages.
+- Consider adding `--ignore-scripts` to `npm ci` in CI to prevent lifecycle script execution during build.
+
+See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
 
 ---
 
 ## LLM04: Data and Model Poisoning
 
-**Status: Does not apply**
+**Status:** ⚪ Does not apply
 
-This risk concerns adversaries manipulating an LLM's training data or
-fine-tuning to produce biased or malicious outputs. This project uses Claude Code
-as a third-party development tool via Anthropic's API — it does not train,
-fine-tune, or host any model. The project has no influence over Claude Code's
-training data or model weights.
+This risk concerns adversaries manipulating an LLM's training data or fine-tuning to produce biased or malicious outputs. This project uses Claude Code as a third-party development tool via Anthropic's API — it does not train, fine-tune, or host any model. The project has no influence over Claude Code's training data or model weights.
 
-`CLAUDE.md` hard rules and sandbox settings provide session-level behavioral
-constraints that operate independently of model training, but these are
-guardrails on usage, not defenses against model poisoning.
+`CLAUDE.md` hard rules and sandbox settings provide session-level behavioral constraints that operate independently of model training, but these are guardrails on usage, not defenses against model poisoning.
 
 ---
 
 ## LLM05: Improper Output Handling
 
-**Status: Mitigated**
+**Status:** 🟢 Mitigated
 
-AI-generated code goes directly into a production codebase. If Claude Code
-introduced `dangerouslySetInnerHTML`, `eval()`, shell injection, or other unsafe
-output patterns, the deployed application would be vulnerable — and the
-vulnerability would have been authored by the AI, not a human.
+AI-generated code goes directly into a production codebase. If Claude Code introduced `dangerouslySetInnerHTML`, `eval()`, shell injection, or other unsafe output patterns, the deployed application would be vulnerable — and the vulnerability would have been authored by the AI, not a human.
 
 **Controls in place:**
 
@@ -116,20 +118,19 @@ vulnerability would have been authored by the AI, not a human.
 - Cloudflare Worker blocks all non-GET/HEAD/OPTIONS methods.
 - CI: TypeScript strict mode + ESLint `recommended-type-checked` catch type errors and common anti-patterns.
 
-**Recommended future control:** A SAST scanner in CI would automatically flag `dangerouslySetInnerHTML`, `eval()`, `document.write`, `subprocess.call(shell=True)`, and similar unsafe output patterns if the AI introduces them in future changes — turning a point-in-time observation into automated enforcement.
+**Improvement opportunities:**
 
-See `docs/security.md` → HTTP Security Headers, CI/CD Workflows.
+- A SAST scanner in CI would automatically flag `dangerouslySetInnerHTML`, `eval()`, `document.write`, `subprocess.call(shell=True)`, and similar unsafe output patterns if the AI introduces them in future changes — turning a point-in-time observation into automated enforcement. (Same SAST scanner addresses R02 — see Residual risk register.)
+
+See `docs/security.md` → Pillar 4 (Hardened Application Surface) → HTTP security headers; Pillar 2 (Secure Build & Supply Chain).
 
 ---
 
 ## LLM06: Excessive Agency
 
-**Status: Mitigated**
+**Status:** 🟢 Mitigated
 
-Claude Code can execute shell commands, modify files, and commit to git. Without
-constraints, the agent could run `terraform apply` against live infrastructure,
-push to main, install arbitrary packages, or modify CI workflows to remove
-security checks.
+Claude Code can execute shell commands, modify files, and commit to git. Without constraints, the agent could run `terraform apply` against live infrastructure, push to main, install arbitrary packages, or modify CI workflows to remove security checks.
 
 **Controls in place:**
 
@@ -141,19 +142,15 @@ security checks.
 - Deployment (`make deploy`) is not in the auto-allow list and requires human approval.
 - `run_scan.sh` guards require committed code and green CI before executing scans.
 
-See `docs/security.md` → AI Development Sandbox.
+See `docs/security.md` → Pillar 5 (AI Development Guardrails).
 
 ---
 
 ## LLM07: System Prompt Leakage
 
-**Status: Accepted risk**
+**Status:** 🟡 Accepted risk
 
-`CLAUDE.md` functions as the system prompt for Claude Code sessions in this
-project. It contains the full repository structure, Makefile targets, Terraform
-variable names, Prowler check IDs, and GCP Secret Manager secret names. If this
-content were leaked, an attacker would learn the project's operational workflow
-and the exact names of secrets stored in Secret Manager.
+`CLAUDE.md` functions as the system prompt for Claude Code sessions in this project. It contains the full repository structure, Makefile targets, Terraform variable names, Prowler check IDs, and GCP Secret Manager secret names. If this content were leaked, an attacker would learn the project's operational workflow and the exact names of secrets stored in Secret Manager.
 
 **Why this is accepted:**
 
@@ -162,28 +159,23 @@ and the exact names of secrets stored in Secret Manager.
 - `.claude/settings.local.json` — which contains the sandbox permissions and auto-allow rules — is gitignored and not published. The operational constraints on the agent are not exposed.
 - No real credentials, keys, tokens, or account IDs appear in `CLAUDE.md`.
 
+**Residual risk (R03):** see Residual risk register.
+
 ---
 
 ## LLM08: Vector and Embedding Weaknesses
 
-**Status: Does not apply**
+**Status:** ⚪ Does not apply
 
-This risk concerns applications that use vector databases and embeddings for
-retrieval-augmented generation (RAG). This project does not use any vector
-database, embedding store, or RAG pipeline. There is no semantic search over code
-or documents. Claude Code's built-in codebase indexing is managed by Anthropic's
-infrastructure and is outside the project's control surface.
+This risk concerns applications that use vector databases and embeddings for retrieval-augmented generation (RAG). This project does not use any vector database, embedding store, or RAG pipeline. There is no semantic search over code or documents. Claude Code's built-in codebase indexing is managed by Anthropic's infrastructure and is outside the project's control surface.
 
 ---
 
 ## LLM09: Misinformation
 
-**Status: Mitigated**
+**Status:** 🟢 Mitigated
 
-Claude Code could generate code that appears correct but contains subtle logical
-errors — a Terraform security group rule that looks restrictive but actually
-allows all traffic, a redaction regex that misses an edge case, a CSP header with
-an overly permissive directive, or documentation claims that are inaccurate.
+Claude Code could generate code that appears correct but contains subtle logical errors — a Terraform security group rule that looks restrictive but actually allows all traffic, a redaction regex that misses an edge case, a CSP header with an overly permissive directive, or documentation claims that are inaccurate.
 
 **Controls in place:**
 
@@ -194,18 +186,15 @@ an overly permissive directive, or documentation claims that are inaccurate.
 - Human reviews all commits — single-developer project with no auto-merge.
 - Zod schema validation catches malformed data at runtime, preventing silently corrupt findings from rendering.
 
-See `docs/security.md` → CI/CD Workflows, DAST.
+See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain); Pillar 4 (Hardened Application Surface) → DAST.
 
 ---
 
 ## LLM10: Unbounded Consumption
 
-**Status: Mitigated**
+**Status:** 🟢 Mitigated
 
-On the development side, Claude Code could generate unbounded output, run
-long-running commands, or create files that exhaust disk space. On the deployed
-application side, the dashboard could be targeted for cost-based attacks against
-Cloud Run.
+On the development side, Claude Code could generate unbounded output, run long-running commands, or create files that exhaust disk space. On the deployed application side, the dashboard could be targeted for cost-based attacks against Cloud Run.
 
 **Controls in place — development side:**
 
@@ -220,4 +209,14 @@ Cloud Run.
 - Cloud Run scales to zero when idle — no baseline cost.
 - No backend API, no database, no per-request LLM cost — the entire application is static files served from a container. The only variable cost is Cloud Run instances.
 
-See `docs/security.md` → Infrastructure Security, CI/CD Workflows.
+See `docs/security.md` → Pillar 3 (Defended Runtime Edge); Pillar 2 (Secure Build & Supply Chain).
+
+---
+
+## Residual risk register
+
+| ID | Category | Risk | Status | Treatment / compensating control |
+|---|---|---|---|---|
+| **R01** | LLM01 Prompt Injection | Adversarial file content (dep README, Prowler scan output, PR description) could influence the agent. Sandbox prevents silent shell exec, network exfil, and infrastructure mutation, but the agent could still write subtly malicious code into files, recommend bad changes under plausible justification, or shape commit text. Prompt injection is a model-level vulnerability that wrapper controls cannot fully prevent. | Partial mitigation | **Compensating controls:** Sandbox `autoAllowBashIfSandboxed: false` (per-command approval); network restricted to `api.github.com`; make targets `--dry-run` only; `git push` not auto-allowed; single-developer review on every commit; 11 CI gates catch known-bad code patterns. **Treatment:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context, reducing the surface area for indirect prompt injection through attacker-influenced file content. |
+| **R02** | LLM03 Supply Chain Vulnerabilities | Claude Code chose every dependency in this project. Dependency Review catches *known* CVEs; Dependabot updates *existing* deps; SHA-pinning protects against namespace squatting on Actions and Docker images. A typosquatted npm or pip package already in `package-lock.json` from the initial AI-driven selection — that has not yet been flagged in any vulnerability database — has no current detection mechanism. | Partial mitigation | **Compensating controls:** `CLAUDE.md` hard rule blocks the agent from adding any new dep; sandbox requires explicit approval for `npm install`; all GitHub Actions and Docker base images SHA-pinned (immune to namespace hijack); Python ingest uses only stdlib (zero third-party). **Treatment:** Add `npm audit` to `frontend-ci.yml` and a SAST scanner (e.g., Semgrep) to CI to catch novel typosquat patterns, malicious post-install scripts, and code-level anti-patterns in dependencies. Consider `--ignore-scripts` on `npm ci`. |
+| **R03** | LLM07 System Prompt Leakage | `CLAUDE.md` (the agent's system prompt) is committed to a public repository; it contains the full repo structure, Makefile targets, Terraform variable names, Prowler check IDs, and GCP Secret Manager secret names | Accepted by design | **Compensating controls:** Secret names are not values — knowing `prowler-aws-access-key-id` provides no access without GCP IAM + `gcloud auth` ADC. `.claude/settings.local.json` (sandbox permissions and auto-allow rules) is gitignored and not published. No real credentials, keys, tokens, or account IDs appear in `CLAUDE.md`. **Treatment:** None — accepted by design; transparency is the point of the portfolio project. If the repo ever moves private or carries real customer data, revisit by moving operational details into a gitignored `CLAUDE.local.md` and keeping only public-safe guidance in `CLAUDE.md`. |
