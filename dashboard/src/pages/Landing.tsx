@@ -29,7 +29,7 @@ export default function Landing() {
           </p>
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed mb-4">
             <li><span className="text-white font-semibold">Cloud Security Posture Management</span> — a repeatable pattern for detecting and remediating misconfigurations across AWS, GCP, and Azure</li>
-            <li><span className="text-white font-semibold">Secure cloud architecture</span> — defence-in-depth hosting for web applications</li>
+            <li><span className="text-white font-semibold">Secure cloud architecture</span> — defence-in-depth deployment for web applications</li>
             <li><span className="text-white font-semibold">Secure AI-assisted development</span> — sandboxed agentic coding with auditable CI guardrails on every change</li>
           </ol>
           <p className="text-xl text-gray-300 leading-relaxed mb-4">
