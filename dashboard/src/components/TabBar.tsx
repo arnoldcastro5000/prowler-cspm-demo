@@ -8,7 +8,7 @@ export default function TabBar() {
   const { pathname } = useLocation()
   const cspmActive = pathname === '/before' || pathname === '/after'
   const securityActive = pathname === '/security' || pathname === '/threat-model'
-  const frameworksActive = pathname === '/owasp-top-10' || pathname === '/owasp-cicd' || pathname === '/owasp-llm' || pathname === '/owasp-genai'
+  const complianceActive = pathname === '/owasp-top-10' || pathname === '/owasp-cicd' || pathname === '/owasp-llm' || pathname === '/owasp-genai'
 
   return (
     <div className="border-b border-gray-800 bg-gray-900">
@@ -81,9 +81,9 @@ export default function TabBar() {
         <div className="relative group flex">
           <NavLink
             to="/owasp-top-10"
-            className={`${base} ${frameworksActive ? active : inactive}`}
+            className={`${base} ${complianceActive ? active : inactive}`}
           >
-            Standards
+            Compliance
           </NavLink>
           <div className="absolute left-0 top-full hidden group-hover:block bg-gray-900 border border-gray-700 rounded-b-md shadow-lg z-10 min-w-[160px]">
             <NavLink
