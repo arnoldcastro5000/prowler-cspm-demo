@@ -5,3 +5,7 @@ compatibility_date = "2026-05-27"
 [[routes]]
 pattern = "prowler.cloudsecuritypractice.com/*"
 zone_name = "cloudsecuritypractice.com"
+
+[[routes]]
+pattern = "cloudsecuritypractice.com/*"
+zone_name = "cloudsecuritypractice.com"

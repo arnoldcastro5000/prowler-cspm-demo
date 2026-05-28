@@ -18,6 +18,14 @@ function blocked(status, message) {
 
 export default {
   async fetch(request, env) {
+    // 0. Redirect root domain to canonical subdomain
+    const reqHost = (request.headers.get('host') || '').toLowerCase()
+    if (reqHost === env.ROOT_DOMAIN || reqHost === env.ROOT_DOMAIN + ':443') {
+      const redirectUrl = new URL(request.url)
+      redirectUrl.hostname = env.EXPECTED_HOST
+      return Response.redirect(redirectUrl.toString(), 301)
+    }
+
     // 1. Allow OPTIONS, block all other non-GET/HEAD methods
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS' } })
