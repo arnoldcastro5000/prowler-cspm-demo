@@ -1,6 +1,7 @@
 // Source: dashboard/src/main.tsx (routes) | dashboard/public/ (static files)
 const VALID_PATHS = new Set([
-  '/', '/before', '/after', '/security', '/threat-model', '/architecture', '/owasp-top-10',
+  '/', '/before', '/after', '/security', '/threat-model', '/architecture',
+  '/owasp-top-10', '/owasp-cicd', '/owasp-llm', '/owasp-genai',
   '/findings_before.json', '/findings_after.json',
   '/prowler-cspm-pipeline.png', '/og-image.png',
   '/favicon.svg', '/robots.txt', '/sitemap.xml',

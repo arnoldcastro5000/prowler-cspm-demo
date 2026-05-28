@@ -8,7 +8,7 @@ export default function TabBar() {
   const { pathname } = useLocation()
   const cspmActive = pathname === '/before' || pathname === '/after'
   const securityActive = pathname === '/security' || pathname === '/threat-model'
-  const frameworksActive = pathname === '/owasp-top-10'
+  const frameworksActive = pathname === '/owasp-top-10' || pathname === '/owasp-cicd' || pathname === '/owasp-llm' || pathname === '/owasp-genai'
 
   return (
     <div className="border-b border-gray-800 bg-gray-900">
@@ -93,6 +93,30 @@ export default function TabBar() {
               }
             >
               OWASP Top 10
+            </NavLink>
+            <NavLink
+              to="/owasp-cicd"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-400 bg-blue-950' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`
+              }
+            >
+              OWASP Top 10 CI/CD
+            </NavLink>
+            <NavLink
+              to="/owasp-llm"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-400 bg-blue-950' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`
+              }
+            >
+              OWASP Top 10 LLM
+            </NavLink>
+            <NavLink
+              to="/owasp-genai"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-400 bg-blue-950' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`
+              }
+            >
+              OWASP Gen-AI
             </NavLink>
           </div>
         </div>
