@@ -1,6 +1,10 @@
 # Prowler CSPM
 
-A cloud security reference project that scans real cloud infrastructure across AWS, GCP, and Azure for misconfigurations, then displays a before/after remediation dashboard. Documented for reproducibility.
+This proof-of-concept demonstrates three security capabilities an organization needs in place before pushing workloads to the cloud:
+
+- **Cloud Security Posture Management** — a repeatable pattern for detecting and remediating misconfigurations across AWS, GCP, and Azure
+- **Secure cloud architecture** — defence-in-depth deployment for web applications
+- **Secure AI-assisted development** — sandboxed agentic coding with auditable CI guardrails on every change
 
 Live demo → `prowler.cloudsecuritypractice.com`
 
