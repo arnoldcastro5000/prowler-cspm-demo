@@ -83,7 +83,7 @@ export default function TabBar() {
             to="/owasp-top-10"
             className={`${base} ${frameworksActive ? active : inactive}`}
           >
-            Frameworks
+            Standards
           </NavLink>
           <div className="absolute left-0 top-full hidden group-hover:block bg-gray-900 border border-gray-700 rounded-b-md shadow-lg z-10 min-w-[160px]">
             <NavLink
