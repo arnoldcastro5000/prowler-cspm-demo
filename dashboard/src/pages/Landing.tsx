@@ -20,7 +20,7 @@ export default function Landing() {
             >
               #1 cloud security threat
             </a>
-            {' '}— the average breach costs <span className="text-white font-semibold">$4.3 million</span> and
+            {' '}— the average breach costs <span className="text-white font-semibold">CAD 5.95 million</span> and
             takes over 180 days to detect. This project demonstrates end-to-end misconfiguration detection
             and remediation across AWS, GCP, and Azure using real Prowler scans against
             live infrastructure.
