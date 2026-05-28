@@ -1,17 +1,31 @@
 # Security Controls
 
-A consolidated reference of all security decisions and controls applied to this project.
+**Security posture: defence-in-depth applied to every stage of the lifecycle.** Secrets are never on disk; every code change passes through automated gates; the runtime surface is reduced to a single hardened path; the application enforces modern browser controls; and the AI development environment runs sandboxed. No layer is asked to be perfect — the posture survives the failure of any one.
+
+## At a glance
+
+| Control family | Threat addressed | Primary controls | Verified by |
+|---|---|---|---|
+| **1. Credential & secrets hygiene** | Credential theft, exposure in git | GCP Secret Manager, runtime `trap` cleanup, Gitleaks (pre-commit + CI), data redaction | Two independent Gitleaks scans + redaction in published findings |
+| **2. Secure build & supply chain** | Compromised dependencies, CI takeover | 11 automated workflows, SHA-pinned actions, `persist-credentials: false`, Dependabot, Trivy, Zizmor | CI gate status on every push and PR |
+| **3. Defended runtime edge** | DDoS, web attacks, origin bypass | Cloudflare WAF + DDoS + Bot Fight + SSL Strict; 8 Worker rules; origin shared secret | Direct-to-origin requests return 403; Worker Lint CI |
+| **4. Hardened application surface** | XSS, clickjacking, MIME sniffing, downgrade | 6 HTTP security headers (CSP w/ nonce, HSTS, X-Frame, etc.) | OWASP ZAP baseline scan |
+| **5. AI development guardrails** | Inadvertent destructive change, data exfiltration via agent | Sandboxed Claude Code (filesystem / network / command restrictions) | Sandbox config enforced on every session |
 
 ---
 
-## Credential Handling
+## 1. Credential & Secrets Hygiene
+
+*Credentials live in one place, are never written to disk, and are scanned twice before they can leak.*
+
+### Credential handling
 
 - All cloud credentials (AWS, GCP, Azure) are stored in **GCP Secret Manager** — never on disk, never in environment files, never committed to git.
 - Credentials are fetched at runtime by WSL2 using `gcloud auth` ADC. See `prowler/run_scan.sh` and `Makefile`.
 - `run_scan.sh` uses a `trap cleanup EXIT` to unset all exported credential environment variables on exit, whether the scan succeeds or fails.
 - The Cloudflare origin validation secret is fetched from Secret Manager at deploy time and set as a Cloud Run environment variable — it is never stored in the image or repository.
 
-## Secret Scanning
+### Secret scanning
 
 | Control | Where | Trigger |
 |---|---|---|
@@ -20,41 +34,20 @@ A consolidated reference of all security decisions and controls applied to this 
 
 Both scans run independently — the local hook catches secrets before they leave the machine; the CI workflow catches anything that slips through.
 
-## Infrastructure Security
+### Data redaction
 
-### Cloudflare Edge
+- All cloud account identifiers are stripped from findings JSON before publication — account IDs, subscription IDs, resource IDs, and bucket names are removed or replaced with placeholders.
+- The raw Prowler output field is not written to findings JSON, as it contains unsanitized scan data.
 
-| Feature | Status | What it does |
-|---|---|---|
-| **DDoS Protection** | Always on | Blocks volumetric and application-layer attacks automatically |
-| **WAF (Managed Rules)** | Always on | Blocks common attacks — SQLi, XSS, etc. |
-| **Bot Fight Mode** | Enabled | Challenges automated bots and scrapers |
-| **Browser Integrity Check** | Enabled (default) | Blocks requests with suspicious or spoofed browser headers |
-| **SSL Full (Strict)** | Enabled | End-to-end encrypted, validates origin certificate |
-| **Cloudflare Worker** | Enabled | Injects `X-CF-Secret` header — direct Cloud Run access returns 403 |
+### Terraform state
 
-### Cloud Run Origin
+- **Terraform state** is stored locally on the WSL2 machine and excluded from git via `.gitignore`. No remote backend — state files contain sensitive values and never leave the developer workstation.
 
-- **Cloudflare origin protection** — A Cloudflare Worker injects a shared secret header (`X-CF-Secret`) on every proxied request. nginx on Cloud Run validates that header and rejects requests without it with 403, preventing direct origin bypass.
-- **Backend access blocked** — Direct access to the Cloud Run backend URL is blocked — requests without the secret header are rejected with 403. All browser traffic reaches the app through `prowler.cloudsecuritypractice.com` only.
-- **Static findings JSON** — no backend API, no database, no authentication surface. Findings are baked into the Docker image at build time. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
+---
 
-### Cloudflare Worker Security Rules
+## 2. Secure Build & Supply Chain
 
-The Cloudflare free plan does not include custom WAF rules, method filtering, or path filtering. The Worker fills that gap with 8 rules enforced before any request reaches Cloud Run. Rule numbers match the implementation order in `cloudflare/worker.js`.
-
-| Rule | What it does |
-|---|---|
-| **1. Method restriction** | Allows only GET, HEAD, and OPTIONS. Returns 405 for POST, PUT, DELETE, and all other methods. |
-| **2. Body rejection** | Blocks GET/HEAD requests that carry a body, preventing HTTP desync attacks. |
-| **3. Traversal and null byte detection** | Inspects the raw URL for encoded path traversal sequences (`%2e%2e`, `%252e`, `%2f`, `%5c`) and null bytes (`%00`) before parsing. |
-| **4. URL length limit** | Returns 414 for paths exceeding 256 characters, blocking buffer overflow and WAF evasion attempts. |
-| **5. Path allowlist** | Checks every path against an explicit set of valid routes and static files. `/assets/` paths must match Vite's naming convention with only `.js` and `.css` extensions. Returns 404 for everything else. |
-| **6. Header size limits** | Returns 431 if total headers exceed 16 KB or any single header exceeds 4 KB, preventing log flooding and resource exhaustion. |
-| **7. Host header validation** | Validates the Host header against the expected domain (case-insensitive, allows `:443` variant). Returns 421 for mismatches, blocking cache poisoning and DNS rebinding. |
-| **8. Error cache prevention** | All error responses include `Cache-Control: no-store` so blocked requests are never cached by Cloudflare's CDN. |
-
-## CI/CD Workflows
+*Every change ships through 11 automated security gates. Dependencies pin to SHAs and are reviewed weekly.*
 
 11 automated workflows run on every push and pull request. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
 
@@ -74,16 +67,55 @@ The Cloudflare free plan does not include custom WAF rules, method filtering, or
 
 Additional notes:
 
-- **Terraform state** is stored locally on the WSL2 machine and excluded from git via `.gitignore`. No remote backend.
 - The intentional misconfigurations in `iac/modules/` are expected Trivy findings — they represent the before-state infrastructure this project is designed to demonstrate.
 - **Dependabot** opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
+- For a full risk analysis of the CI/CD pipeline against the **OWASP Top 10 CI/CD Security Risks**, see `docs/owasp-cicd.md`.
 
-## Data Redaction
+---
 
-- All cloud account identifiers are stripped from findings JSON before publication — account IDs, subscription IDs, resource IDs, and bucket names are removed or replaced with placeholders.
-- The raw Prowler output field is not written to findings JSON, as it contains unsanitized scan data.
+## 3. Defended Runtime Edge
 
-## HTTP Security Headers
+*The dashboard is reachable through one hardened path — Cloudflare's WAF and 8 Worker rules. Direct origin access returns 403.*
+
+### Cloudflare edge
+
+| Feature | Status | What it does |
+|---|---|---|
+| **DDoS Protection** | Always on | Blocks volumetric and application-layer attacks automatically |
+| **WAF (Managed Rules)** | Always on | Blocks common attacks — SQLi, XSS, etc. |
+| **Bot Fight Mode** | Enabled | Challenges automated bots and scrapers |
+| **Browser Integrity Check** | Enabled (default) | Blocks requests with suspicious or spoofed browser headers |
+| **SSL Full (Strict)** | Enabled | End-to-end encrypted, validates origin certificate |
+| **Cloudflare Worker** | Enabled | Injects `X-CF-Secret` header — direct Cloud Run access returns 403 |
+
+### Cloud Run origin
+
+- **Cloudflare origin protection** — A Cloudflare Worker injects a shared secret header (`X-CF-Secret`) on every proxied request. nginx on Cloud Run validates that header and rejects requests without it with 403, preventing direct origin bypass.
+- **Backend access blocked** — Direct access to the Cloud Run backend URL is blocked — requests without the secret header are rejected with 403. All browser traffic reaches the app through `prowler.cloudsecuritypractice.com` only.
+- **Static findings JSON** — no backend API, no database, no authentication surface. Findings are baked into the Docker image at build time. See `docs/adr/0001-static-findings-json-baked-into-container.md`.
+
+### Cloudflare Worker security rules
+
+The Cloudflare free plan does not include custom WAF rules, method filtering, or path filtering. The Worker fills that gap with 8 rules enforced before any request reaches Cloud Run. Rule numbers match the implementation order in `cloudflare/worker.js`.
+
+| Rule | What it does |
+|---|---|
+| **1. Method restriction** | Allows only GET, HEAD, and OPTIONS. Returns 405 for POST, PUT, DELETE, and all other methods. |
+| **2. Body rejection** | Blocks GET/HEAD requests that carry a body, preventing HTTP desync attacks. |
+| **3. Traversal and null byte detection** | Inspects the raw URL for encoded path traversal sequences (`%2e%2e`, `%252e`, `%2f`, `%5c`) and null bytes (`%00`) before parsing. |
+| **4. URL length limit** | Returns 414 for paths exceeding 256 characters, blocking buffer overflow and WAF evasion attempts. |
+| **5. Path allowlist** | Checks every path against an explicit set of valid routes and static files. `/assets/` paths must match Vite's naming convention with only `.js` and `.css` extensions. Returns 404 for everything else. |
+| **6. Header size limits** | Returns 431 if total headers exceed 16 KB or any single header exceeds 4 KB, preventing log flooding and resource exhaustion. |
+| **7. Host header validation** | Validates the Host header against the expected domain (case-insensitive, allows `:443` variant). Returns 421 for mismatches, blocking cache poisoning and DNS rebinding. |
+| **8. Error cache prevention** | All error responses include `Cache-Control: no-store` so blocked requests are never cached by Cloudflare's CDN. |
+
+---
+
+## 4. Hardened Application Surface
+
+*The application enforces modern browser controls and is verified by dynamic scanning.*
+
+### HTTP security headers
 
 Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container:
 
@@ -96,13 +128,15 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 | `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | Disables unused browser features |
 | `Content-Security-Policy` | `default-src 'self'; script-src 'self' 'nonce-<per-request>'; img-src 'self' github.com; connect-src 'self' raw.githubusercontent.com; style-src 'self'; font-src 'self'` | Prevents cross-site scripting (XSS) by restricting resource loading to same-origin plus explicitly allowed external domains. Per-request nonce allows Cloudflare Bot Fight Mode scripts without `unsafe-inline`. |
 
-## DAST — Dynamic Application Security Testing
+### DAST — Dynamic Application Security Testing
 
 OWASP ZAP baseline scan is run manually against the local development server (`http://localhost:5173/`). The scan covers passive checks across all discovered URLs.
 
 ---
 
-## AI Development Sandbox
+## 5. AI Development Guardrails
+
+*AI-assisted development runs under least privilege — bounded filesystem, network, and command access.*
 
 Claude Code was used throughout this project with sandboxed execution enabled. The sandbox enforces:
 
@@ -114,7 +148,7 @@ This ensures that AI-assisted development cannot inadvertently write to sensitiv
 
 ---
 
-## Hard Rules (enforced in CLAUDE.md)
+## Appendix — Hard rules (enforced in CLAUDE.md)
 
 - No hardcoded cloud account IDs, project IDs, subscription IDs, or tenant IDs anywhere in code or configuration.
 - No hardcoded cloud regions inline in scripts or Terraform — defined as named variables only.
