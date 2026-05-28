@@ -8,11 +8,11 @@ interface Props {
 const options: Severity[] = ['all', 'critical', 'high', 'medium', 'low']
 
 const colors: Record<Severity, string> = {
-  all: 'bg-gray-100 text-gray-700 border-gray-300',
-  critical: 'bg-red-50 text-red-700 border-red-300',
-  high: 'bg-orange-50 text-orange-700 border-orange-300',
-  medium: 'bg-yellow-50 text-yellow-700 border-yellow-300',
-  low: 'bg-gray-50 text-gray-600 border-gray-300',
+  all: 'bg-gray-800 text-gray-300 border-gray-700',
+  critical: 'bg-red-950 text-red-400 border-red-800',
+  high: 'bg-orange-950 text-orange-400 border-orange-800',
+  medium: 'bg-yellow-950 text-yellow-400 border-yellow-800',
+  low: 'bg-gray-800 text-gray-400 border-gray-700',
 }
 
 const activeColors: Record<Severity, string> = {
@@ -26,7 +26,7 @@ const activeColors: Record<Severity, string> = {
 export default function SeverityFilter({ value, onChange }: Props) {
   return (
     <div className="flex gap-2 items-center flex-wrap">
-      <span className="text-xs text-gray-500 uppercase tracking-wide">Severity</span>
+      <span className="text-xs text-gray-400 uppercase tracking-wide">Severity</span>
       {options.map(opt => (
         <button
           key={opt}

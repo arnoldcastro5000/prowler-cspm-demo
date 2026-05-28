@@ -4,9 +4,7 @@ import PipelineDiagram from '../components/PipelineDiagram'
 export default function Landing() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
-      <div className="bg-white">
-        <TabBar />
-      </div>
+      <TabBar />
       <div className="max-w-4xl mx-auto px-6 py-16 space-y-16">
 
         {/* Hero */}

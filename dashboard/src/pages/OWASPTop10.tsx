@@ -3,9 +3,9 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import TabBar from '../components/TabBar'
 
-const RAW_URL = 'https://raw.githubusercontent.com/arnoldcastro5000/prowler-cspm-demo/main/docs/security.md'
+const RAW_URL = 'https://raw.githubusercontent.com/arnoldcastro5000/prowler-cspm-demo/main/docs/owasp-top10.md'
 
-export default function Security() {
+export default function OWASPTop10() {
   const [content, setContent] = useState<string>('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -17,7 +17,7 @@ export default function Security() {
         return r.text()
       })
       .then(setContent)
-      .catch(() => setError('Failed to load security controls document.'))
+      .catch(() => setError('Failed to load OWASP Top 10 document.'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -42,8 +42,10 @@ export default function Security() {
               components={{
                 h1: ({ children }) => <h1 className="text-2xl font-bold text-gray-100 mb-4 pb-2 border-b border-gray-700">{children}</h1>,
                 h2: ({ children }) => <h2 className="text-lg font-semibold text-gray-100 mt-8 mb-3">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-base font-semibold text-gray-200 mt-6 mb-2">{children}</h3>,
                 p: ({ children }) => <p className="text-gray-300 text-sm leading-relaxed mb-3">{children}</p>,
                 ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-sm text-gray-300">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside space-y-1 mb-3 text-sm text-gray-300">{children}</ol>,
                 li: ({ children }) => <li className="leading-relaxed">{children}</li>,
                 code: ({ children }) => <code className="text-xs bg-gray-800 px-1 py-0.5 rounded font-mono text-gray-200">{children}</code>,
                 hr: () => <hr className="my-6 border-gray-700" />,

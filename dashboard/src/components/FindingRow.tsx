@@ -6,21 +6,21 @@ interface Props {
 }
 
 const severityBadge: Record<string, string> = {
-  critical: 'bg-red-100 text-red-700',
-  high: 'bg-orange-100 text-orange-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-gray-100 text-gray-600',
+  critical: 'bg-red-900/50 text-red-400',
+  high: 'bg-orange-900/50 text-orange-400',
+  medium: 'bg-yellow-900/50 text-yellow-400',
+  low: 'bg-gray-700 text-gray-400',
 }
 
 const providerBadge: Record<string, string> = {
-  aws: 'bg-orange-50 text-orange-800',
-  gcp: 'bg-blue-50 text-blue-800',
-  azure: 'bg-sky-50 text-sky-800',
+  aws: 'border-blue-500 text-blue-400',
+  gcp: 'border-blue-500 text-blue-400',
+  azure: 'border-blue-500 text-blue-400',
 }
 
 const statusBadge: Record<string, string> = {
-  fail: 'bg-red-100 text-red-700',
-  pass: 'bg-green-100 text-green-700',
+  fail: 'bg-red-900/50 text-red-400',
+  pass: 'bg-green-900/50 text-green-400',
 }
 
 export default function FindingRow({ finding }: Props) {
@@ -29,11 +29,11 @@ export default function FindingRow({ finding }: Props) {
   return (
     <>
       <tr
-        className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+        className="border-b border-gray-800 hover:bg-gray-800/50 cursor-pointer"
         onClick={() => setExpanded(e => !e)}
       >
         <td className="px-4 py-3">
-          <span className={`px-2 py-0.5 rounded text-xs font-medium uppercase ${providerBadge[finding.provider]}`}>
+          <span className={`px-2 py-0.5 rounded-full border text-xs font-medium uppercase ${providerBadge[finding.provider]}`}>
             {finding.provider}
           </span>
         </td>
@@ -42,8 +42,8 @@ export default function FindingRow({ finding }: Props) {
             {finding.severity}
           </span>
         </td>
-        <td className="px-4 py-3 text-sm text-gray-700">{finding.title}</td>
-        <td className="px-4 py-3 text-xs font-mono text-gray-500 max-w-xs truncate" title={finding.resource}>
+        <td className="px-4 py-3 text-sm text-gray-200">{finding.title}</td>
+        <td className="px-4 py-3 text-xs font-mono text-gray-400 max-w-xs truncate" title={finding.resource}>
           {finding.resource}
         </td>
         <td className="px-4 py-3">
@@ -53,20 +53,20 @@ export default function FindingRow({ finding }: Props) {
         </td>
       </tr>
       {expanded && (
-        <tr className="bg-gray-50 border-b border-gray-200">
+        <tr className="bg-gray-900 border-b border-gray-700">
           <td colSpan={5} className="px-6 py-4">
             <div className="grid grid-cols-3 gap-4 text-sm mb-3">
               <div>
-                <span className="text-xs text-gray-400 uppercase tracking-wide">Category</span>
-                <p className="text-gray-700 capitalize">{finding.category}</p>
+                <span className="text-xs text-gray-500 uppercase tracking-wide">Category</span>
+                <p className="text-gray-200 capitalize">{finding.category}</p>
               </div>
               <div>
-                <span className="text-xs text-gray-400 uppercase tracking-wide">Check ID</span>
-                <p className="font-mono text-gray-700 text-xs">{finding.check_id}</p>
+                <span className="text-xs text-gray-500 uppercase tracking-wide">Check ID</span>
+                <p className="font-mono text-gray-200 text-xs">{finding.check_id}</p>
               </div>
               <div>
-                <span className="text-xs text-gray-400 uppercase tracking-wide">Scanned at</span>
-                <p className="text-gray-700">{new Date(finding.scanned_at).toLocaleString()}</p>
+                <span className="text-xs text-gray-500 uppercase tracking-wide">Scanned at</span>
+                <p className="text-gray-200">{new Date(finding.scanned_at).toLocaleString()}</p>
               </div>
             </div>
           </td>

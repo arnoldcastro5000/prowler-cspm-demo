@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { NavLink } from 'react-router-dom'
 import { FindingSchema, type Finding } from '../types/finding'
 import TabBar from '../components/TabBar'
 import Scorecard from '../components/Scorecard'
@@ -30,21 +31,26 @@ export default function Before() {
     : findings.filter(f => f.severity === severity)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-950">
       <TabBar />
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        <h1 className="text-2xl font-bold text-gray-800">Before Remediation</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-100">Before Remediation</h1>
+          <NavLink to="/after" className="text-lg text-blue-400 hover:text-blue-300 underline underline-offset-2 flex items-center gap-1">
+            After Remediation <span>→</span>
+          </NavLink>
+        </div>
 
         {loading && (
           <div className="animate-pulse space-y-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-10 bg-gray-200 rounded" />
+              <div key={i} className="h-10 bg-gray-800 rounded" />
             ))}
           </div>
         )}
 
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded text-red-700 text-sm">{error}</div>
+          <div className="p-4 bg-red-950 border border-red-800 rounded text-red-400 text-sm">{error}</div>
         )}
 
         {!loading && !error && (

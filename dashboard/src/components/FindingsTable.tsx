@@ -33,15 +33,15 @@ export default function FindingsTable({ findings }: Props) {
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">
               {provider.toUpperCase()} - {group.length} check{group.length !== 1 ? 's' : ''}
             </h3>
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-800 rounded-lg overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="bg-gray-800 border-b border-gray-700">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Provider</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Severity</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Resource</th>
-                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">Provider</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">Severity</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">Title</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">Resource</th>
+                    <th className="px-4 py-2 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
                   </tr>
                 </thead>
                 <tbody>
