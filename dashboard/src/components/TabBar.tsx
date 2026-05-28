@@ -20,7 +20,7 @@ export default function TabBar() {
         >
           Home
         </NavLink>
-        <div className="relative group">
+        <div className="relative group flex">
           <NavLink
             to="/before"
             className={`${base} ${cspmActive ? active : inactive}`}
@@ -46,7 +46,7 @@ export default function TabBar() {
             </NavLink>
           </div>
         </div>
-        <div className="relative group">
+        <div className="relative group flex">
           <NavLink
             to="/security"
             className={`${base} ${securityActive ? active : inactive}`}
@@ -78,7 +78,7 @@ export default function TabBar() {
         >
           Architecture
         </NavLink>
-        <div className="relative group">
+        <div className="relative group flex">
           <NavLink
             to="/owasp-top-10"
             className={`${base} ${frameworksActive ? active : inactive}`}
