@@ -127,18 +127,18 @@ export default function Landing() {
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {[
-                  ['Frontend CI', 'frontend-ci.yml', 'Catches code errors and broken builds before they reach the live site'],
-                  ['Docker Build', 'docker-build.yml', 'Catches container and Dockerfile build errors before deployment, so a broken or undeployable image never reaches the live site'],
-                  ['Terraform Validate', 'terraform-validate.yml', 'Ensures infrastructure configuration is valid before applying to cloud environments'],
-                  ['Python Lint', 'python-lint.yml', 'Detects code quality issues and common security mistakes in the scan pipeline'],
                   ['Semgrep SAST', 'semgrep.yml', 'Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues'],
-                  ['Shellcheck', 'shellcheck.yml', 'Catches scripting errors in the scan automation that could cause silent failures'],
-                  ['Secret Scan', 'secret-scan.yml', 'Prevents credentials, API keys, and tokens from being accidentally committed to the repository'],
-                  ['Trivy', 'trivy.yml', 'Scans infrastructure code for known security misconfigurations before deployment'],
-                  ['Zizmor', 'zizmor.yml', 'Audits the CI pipelines themselves for supply chain vulnerabilities'],
-                  ['Hardcoded Config Check', 'hardcoded-config-check.yml', 'Blocks cloud account IDs and resource identifiers from being exposed in source code'],
-                  ['Dependency Review', 'dependency-review.yml', 'Flags third-party libraries with known security vulnerabilities before they are added'],
-                  ['Worker Lint', 'worker-lint.yml', 'Validates the Cloudflare edge security rules that protect the live dashboard'],
+                  ['Python Lint (Ruff · Bandit)', 'python-lint.yml', 'Scans the Python ingest code for security flaws and code-quality issues before they ship'],
+                  ['Secret Scan (Gitleaks)', 'secret-scan.yml', 'Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo'],
+                  ['Hardcoded Config Check (custom grep)', 'hardcoded-config-check.yml', 'Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code'],
+                  ['Dependency Review (GitHub)', 'dependency-review.yml', 'Flags any newly added or updated dependency with known security vulnerabilities before it merges'],
+                  ['Trivy', 'trivy.yml', 'Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure'],
+                  ['Zizmor', 'zizmor.yml', 'Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions'],
+                  ['Worker Lint (ESLint)', 'worker-lint.yml', 'Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge'],
+                  ['Frontend CI (TypeScript · ESLint · Vite)', 'frontend-ci.yml', 'Catches type errors, code-quality issues, and broken builds in the dashboard source before they reach the live site'],
+                  ['Shellcheck', 'shellcheck.yml', 'Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures'],
+                  ['Terraform Validate', 'terraform-validate.yml', 'Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure'],
+                  ['Docker Build', 'docker-build.yml', 'Catches container and Dockerfile build errors before deployment, so a broken or undeployable image never reaches the live site'],
                 ].map(([name, file, description]) => (
                   <tr key={file} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{name}</td>
