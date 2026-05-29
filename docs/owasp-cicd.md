@@ -23,11 +23,11 @@ This project's CI/CD pipeline comprises 11 GitHub Actions workflows that lint, v
 
 **Status:** 🟡 Partially mitigated
 
-Flow control mechanisms prevent code from reaching production without passing required gates. This project's 11 CI workflows are advisory — nothing programmatically blocks `make deploy` if they fail. Branch protection rules are not enforced, and there are no GitHub Environment protection rules on Cloud Run deployment.
+Flow control mechanisms prevent code from reaching production without passing required gates. This project's 12 CI workflows are advisory — nothing programmatically blocks `make deploy` if they fail. Branch protection rules are not enforced, and there are no GitHub Environment protection rules on Cloud Run deployment.
 
 **Controls in place:**
 
-- 11 CI workflows run on every push and PR — TypeScript strict, ESLint, Bandit, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate.
+- 12 CI workflows run on every push and PR — TypeScript strict, ESLint, Bandit, Semgrep, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate.
 - `run_scan.sh` guards require committed code and green CI before scans execute.
 - Single developer reviews all commits — no auto-merge.
 - Deployment is manual (`make deploy` from WSL2, never triggered by CI).
@@ -70,7 +70,7 @@ See `docs/security.md` → Pillar 1 (Credential & Secrets Hygiene).
 
 **Status:** 🟢 Mitigated
 
-This is the most relevant CI/CD risk for this project. The pipeline consumes npm packages (dashboard), GitHub Actions (11 workflows), Docker base images, and Terraform providers. A compromised dependency could execute during `npm ci`, `docker build`, or workflow steps.
+This is the most relevant CI/CD risk for this project. The pipeline consumes npm packages (dashboard), GitHub Actions (12 workflows), Docker base images, and Terraform providers. A compromised dependency could execute during `npm ci`, `docker build`, or workflow steps.
 
 **Controls in place:**
 

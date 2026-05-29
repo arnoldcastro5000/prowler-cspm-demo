@@ -7,7 +7,7 @@
 | Control family | Threat addressed | Primary controls | Verified by |
 |---|---|---|---|
 | **1. Credential & secrets hygiene** | Credential theft, exposure in git | GCP Secret Manager, runtime `trap` cleanup, Gitleaks (pre-commit + CI), data redaction | Two independent Gitleaks scans + redaction in published findings |
-| **2. Secure build & supply chain** | Compromised dependencies, CI takeover | 11 automated workflows, SHA-pinned actions, `persist-credentials: false`, Dependabot, Trivy, Zizmor | CI gate status on every push and PR |
+| **2. Secure build & supply chain** | Compromised dependencies, CI takeover | 12 automated workflows, SHA-pinned actions, `persist-credentials: false`, Dependabot, Trivy, Zizmor | CI gate status on every push and PR |
 | **3. Defended runtime edge** | DDoS, web attacks, origin bypass | Cloudflare WAF + DDoS + Bot Fight + SSL Strict; 8 Worker rules; origin shared secret | Direct-to-origin requests return 403; Worker Lint CI |
 | **4. Hardened application surface** | XSS, clickjacking, MIME sniffing, downgrade | 6 HTTP security headers (CSP w/ nonce, HSTS, X-Frame, etc.) | OWASP ZAP baseline scan |
 | **5. AI development guardrails** | Inadvertent destructive change, data exfiltration via agent | Sandboxed Claude Code (filesystem / network / command restrictions) | Sandbox config enforced on every session |
@@ -47,9 +47,9 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ## 2. Secure Build & Supply Chain
 
-*Every change ships through 11 automated security gates. Dependencies pin to SHAs and are reviewed weekly.*
+*Every change ships through 12 automated security gates. Dependencies pin to SHAs and are reviewed weekly.*
 
-11 automated workflows run on every push and pull request. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
+12 automated workflows run on every push and pull request. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
 
 | Workflow | What it protects against |
 |---|---|

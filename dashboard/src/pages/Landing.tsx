@@ -38,7 +38,7 @@ export default function Landing() {
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed">
             <li><span className="text-white font-semibold">CSPM</span> — 19 of 19 misconfigurations remediated across AWS, GCP, and Azure (100% closure rate, verified by re-scan)</li>
             <li><span className="text-white font-semibold">Secure cloud architecture</span> — This dashboard deployed behind Cloudflare WAF + DDoS protection; it is accessible only through Cloudflare</li>
-            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passed 11 automated CI security gates before merge</li>
+            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passed 12 automated CI security gates before merge</li>
           </ol>
         </div>
 
@@ -97,7 +97,7 @@ export default function Landing() {
                   ['Secrets', 'GCP Secret Manager', 'All cloud credentials fetched at runtime, never stored on disk'],
                   ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
                   ['AI Development', <>Claude Code (sandboxed) + <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
-                  ['CI/CD', 'GitHub Actions + Dependabot', '11 automated checks block unsafe code before it ships + weekly dependency updates'],
+                  ['CI/CD', 'GitHub Actions + Dependabot', '12 automated checks block unsafe code before it ships + weekly dependency updates'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
                   ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
                   ['Architecture diagrams', <><a href="https://github.com/vidanov/aws-architecture-diagram-skill" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">/aws-architecture-diagram</a> skill</>, 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
@@ -131,6 +131,7 @@ export default function Landing() {
                   ['Docker Build', 'docker-build.yml', 'Verifies the application container builds correctly before deployment'],
                   ['Terraform Validate', 'terraform-validate.yml', 'Ensures infrastructure configuration is valid before applying to cloud environments'],
                   ['Python Lint', 'python-lint.yml', 'Detects code quality issues and common security mistakes in the scan pipeline'],
+                  ['Semgrep SAST', 'semgrep.yml', 'Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues'],
                   ['Shellcheck', 'shellcheck.yml', 'Catches scripting errors in the scan automation that could cause silent failures'],
                   ['Secret Scan', 'secret-scan.yml', 'Prevents credentials, API keys, and tokens from being accidentally committed to the repository'],
                   ['Trivy', 'trivy.yml', 'Scans infrastructure code for known security misconfigurations before deployment'],

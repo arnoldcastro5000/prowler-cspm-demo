@@ -25,7 +25,7 @@ The OWASP Top 10 for Agentic Applications identifies the most critical security 
 | ASI02 | Tool Misuse & Exploitation | 🟢 Mitigated | Per-command sandbox approval; only `run_scan.sh` pre-approved for edits; `git push` not auto-allowed |
 | ASI03 | Identity & Privilege Abuse | 🟢 Mitigated | Sandbox network restriction blocks all cloud provider APIs even though developer ADC is configured on the machine |
 | ASI04 | Agentic Supply Chain Compromise | 🟡 Partially mitigated | **R02**: AI-fabricated typosquat in initial dep selection has no specific detection (same residual as LLM03) |
-| ASI05 | Unexpected Code Execution | 🟢 Mitigated | Sandbox approval gate; 11 CI workflows validate committed code; no `eval` / `innerHTML` / `subprocess` in codebase |
+| ASI05 | Unexpected Code Execution | 🟢 Mitigated | Sandbox approval gate; 12 CI workflows validate committed code; no `eval` / `innerHTML` / `subprocess` in codebase |
 | ASI06 | Memory & Context Poisoning | 🟢 Mitigated | Auto-memory writes are per-call user-visible (Write tool calls); memory files gitignored and outside the repo PR surface; CLAUDE.md changes visible in `git diff` |
 | ASI07 | Insecure Inter-Agent Communication | ⚪ Does not apply | Single agent in single session; no inter-agent messaging or orchestration |
 | ASI08 | Cascading Agent Failures | 🟢 Mitigated | Multiple gates break cascades: `--dry-run`; CI required before scans; Zod runtime validation; no auto-merge, no auto-deploy |
@@ -117,7 +117,7 @@ Claude Code generates TypeScript, Python, HCL, and shell code, and can execute g
 **Controls in place:**
 
 - `autoAllowBashIfSandboxed: false` — generated code cannot execute without human approval at the command level.
-- 11 CI workflows validate all committed code: TypeScript strict mode, ESLint type-checked, Bandit (Python), Trivy (IaC), shellcheck (bash), secret scan, hardcoded config check.
+- 12 CI workflows validate all committed code: TypeScript strict mode, ESLint type-checked, Bandit (Python), Semgrep (JS/TS), Trivy (IaC), shellcheck (bash), secret scan, hardcoded config check.
 - Prowler before/after scan pattern serves as an integration test — if the Terraform is wrong, Prowler catches it.
 - Make commands restricted to `--dry-run`.
 - No `eval()`, `subprocess.call(shell=True)`, `dangerouslySetInnerHTML`, or `os.system` in the codebase.
@@ -166,7 +166,7 @@ A small agent error could propagate through connected systems. A wrong Terraform
 - Make commands restricted to `--dry-run` — the agent cannot trigger real infrastructure changes that would cascade.
 - `run_scan.sh` guards require committed code and green CI before scanning, creating a dependency chain that blocks downstream effects of upstream errors.
 - Zod schema validation rejects malformed findings at runtime — corrupt data does not render silently.
-- 11 CI checks validate code at multiple layers (type safety, lint, security, build).
+- 12 CI checks validate code at multiple layers (type safety, lint, security, build).
 - Human reviews all commits before they reach main.
 - No auto-merge, no auto-deploy — human gates break the cascade.
 
@@ -182,7 +182,7 @@ Claude Code produces persuasive, well-formatted explanations with high confidenc
 
 - `autoAllowBashIfSandboxed: false` forces a deliberate approval decision on every command, creating friction that demands attention.
 - `git push` not auto-allowed — a separate approval gate.
-- 11 CI checks provide independent validation (the human does not have to catch everything alone).
+- 12 CI checks provide independent validation (the human does not have to catch everything alone).
 - Session start checklist forces the developer to check CI status before proceeding.
 
 **Residual risk (R03):** see Residual risk register.
@@ -223,8 +223,8 @@ The OWASP LLM AI Cybersecurity & Governance Checklist is designed for organizati
 | GOV06 | Governance | 🟡 Adapted to single-dev scale | No corporate governance; CLAUDE.md + sandbox + CI + doc suite are the individual-scale equivalents |
 | GOV07 | Legal | ⚪ Does not apply | No IT/legal partnerships; no DPAs; no end-user ToS (no accounts) |
 | GOV08 | Regulatory | ⚪ Does not apply | No regulated data; demo accounts; no PII/PHI/financial; no SOC 2/HIPAA/GDPR applicability |
-| GOV09 | Using or Implementing LLM Solutions | 🟢 Mitigated | Sandbox enforces FS/network/command restrictions; secrets in Secret Manager; 11 CI workflows |
-| GOV10 | TEVV | 🟢 Mitigated | 11 CI workflows (T); ZAP scan (E); human review + CI gates (V); Prowler before/after + Zod (V) |
+| GOV09 | Using or Implementing LLM Solutions | 🟢 Mitigated | Sandbox enforces FS/network/command restrictions; secrets in Secret Manager; 12 CI workflows |
+| GOV10 | TEVV | 🟢 Mitigated | 12 CI workflows (T); ZAP scan (E); human review + CI gates (V); Prowler before/after + Zod (V) |
 | GOV11 | Model and Risk Cards | 🟡 Adapted to single-dev scale | No model training; CLAUDE.md = operational model card; owasp-llm + this doc = risk card |
 | GOV12 | RAG: LLM Optimization | ⚪ Does not apply | No RAG pipeline, vector DB, or embedding store |
 | GOV13 | AI Red Teaming | 🟡 Adapted to single-dev scale | Cannot red-team Claude itself (third-party service); Prowler before/after is effective IaC red-teaming |
@@ -242,7 +242,7 @@ Evaluate threats from adversaries targeting the AI-assisted development workflow
 - `docs/threat-model.md` documents all threat scenarios including supply chain and repository compromise.
 - `docs/owasp-llm.md` maps all 10 OWASP LLM risks with controls.
 - This document (Part 1) maps all 10 OWASP agentic risks with controls.
-- Layered defence: sandbox + hard rules + 11 CI workflows + human review.
+- Layered defence: sandbox + hard rules + 12 CI workflows + human review.
 
 See `docs/threat-model.md`, `docs/owasp-llm.md`.
 
@@ -340,7 +340,7 @@ Threat-model LLM components, ensure data protection, and verify pipeline securit
 
 - Sandbox settings enforce filesystem, network, and command restrictions.
 - Data protection: network restricted to `api.github.com`, credentials in Secret Manager (not on disk), `.gitignore` excludes sensitive files, `CLAUDE.md` hard rules prohibit credential exposure.
-- Pipeline security: 11 CI workflows, SHA-pinned GitHub Actions, Dependabot, `run_scan.sh` guards.
+- Pipeline security: 12 CI workflows, SHA-pinned GitHub Actions, Dependabot, `run_scan.sh` guards.
 
 See `docs/security.md` → Pillar 5 (AI Development Guardrails); Pillar 1 (Credential & Secrets Hygiene); Pillar 2 (Secure Build & Supply Chain).
 
@@ -354,7 +354,7 @@ Every line of code in this project was generated by Claude Code. TEVV applies to
 
 **Controls in place:**
 
-- **Testing**: 11 CI workflows run on every push and PR — TypeScript strict, ESLint, Bandit, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate.
+- **Testing**: 12 CI workflows run on every push and PR — TypeScript strict, ESLint, Bandit, Semgrep, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate.
 - **Evaluation**: OWASP ZAP baseline scan evaluates the deployed application's security posture.
 - **Verification**: Human reviews all commits; `run_scan.sh` guards require green CI before scanning.
 - **Validation**: Prowler before/after scan pattern validates that IaC produces the intended security state (15 checks deliberately misconfigured, then remediated); Zod schema validation rejects malformed data at runtime.
@@ -406,9 +406,9 @@ This project cannot red-team the Claude Code model itself — it is a third-part
 
 | ID | Category | Risk | Status | Treatment / compensating control |
 |---|---|---|---|---|
-| **R01** | ASI01 Agent Goal Hijack | Adversarial file content (dependency README, Prowler scan output, PR description) could influence the agent. Sandbox prevents silent shell exec, network exfil, and infrastructure mutation, but the agent could still write subtly malicious code into files, recommend bad changes under plausible justification, or shape commit text. Goal hijack is a model-level vulnerability that wrapper controls cannot fully prevent. | Partial mitigation | **Compensating controls:** Sandbox `autoAllowBashIfSandboxed: false` (per-command approval); network restricted to `api.github.com`; make targets `--dry-run` only; `git push` not auto-allowed; single-developer review on every commit; 11 CI gates catch known-bad code patterns. **Treatment:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context. Same treatment as `docs/owasp-llm.md` → R01. |
+| **R01** | ASI01 Agent Goal Hijack | Adversarial file content (dependency README, Prowler scan output, PR description) could influence the agent. Sandbox prevents silent shell exec, network exfil, and infrastructure mutation, but the agent could still write subtly malicious code into files, recommend bad changes under plausible justification, or shape commit text. Goal hijack is a model-level vulnerability that wrapper controls cannot fully prevent. | Partial mitigation | **Compensating controls:** Sandbox `autoAllowBashIfSandboxed: false` (per-command approval); network restricted to `api.github.com`; make targets `--dry-run` only; `git push` not auto-allowed; single-developer review on every commit; 12 CI gates catch known-bad code patterns. **Treatment:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context. Same treatment as `docs/owasp-llm.md` → R01. |
 | **R02** | ASI04 Agentic Supply Chain Compromise | Claude Code chose every dependency in this project. Dependency Review catches *known* CVEs; Dependabot updates *existing* deps; SHA-pinning protects Actions and Docker base images. A typosquatted npm or pip package already in `package-lock.json` from the initial AI-driven selection — that has not yet been flagged in any vulnerability database — has no current detection mechanism. | Partial mitigation | **Compensating controls:** `CLAUDE.md` hard rule blocks the agent from adding any new dep; sandbox requires explicit approval for `npm install`; all GitHub Actions and Docker base images SHA-pinned; Python ingest uses only stdlib (zero third-party). **Treatment:** Add `npm audit` to `frontend-ci.yml` and a SAST scanner (e.g., Semgrep) to CI. Same treatment as `docs/owasp-llm.md` → R02. |
-| **R03** | ASI09 Human–Agent Trust Exploitation | Claude Code produces persuasive, well-formatted explanations with high confidence. A single developer could over-rely on the agent — approving security-relevant commands without scrutiny, accepting "this change is safe" explanations rubber-stamp, or trusting claims that a CI check is unnecessary. | Accepted by design | **Compensating controls:** `autoAllowBashIfSandboxed: false` forces a deliberate approval decision on every command (friction demands attention); `git push` not auto-allowed (separate gate); 11 CI checks provide independent validation; session-start checklist requires CI status check. **Treatment:** None at the technical level — the residual is the single developer's own judgment. No control can fully prevent a human from trusting an AI agent too much. Compensate via deliberate slowdown on security-sensitive approvals and periodic re-reading of CLAUDE.md hard rules. |
+| **R03** | ASI09 Human–Agent Trust Exploitation | Claude Code produces persuasive, well-formatted explanations with high confidence. A single developer could over-rely on the agent — approving security-relevant commands without scrutiny, accepting "this change is safe" explanations rubber-stamp, or trusting claims that a CI check is unnecessary. | Accepted by design | **Compensating controls:** `autoAllowBashIfSandboxed: false` forces a deliberate approval decision on every command (friction demands attention); `git push` not auto-allowed (separate gate); 12 CI checks provide independent validation; session-start checklist requires CI status check. **Treatment:** None at the technical level — the residual is the single developer's own judgment. No control can fully prevent a human from trusting an AI agent too much. Compensate via deliberate slowdown on security-sensitive approvals and periodic re-reading of CLAUDE.md hard rules. |
 
 ---
 
