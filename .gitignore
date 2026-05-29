@@ -50,3 +50,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Local working docs — never commit
+findings.md
+lesson.md
