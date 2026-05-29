@@ -1,0 +1,38 @@
+rules:
+  - id: react-no-dangerously-set-inner-html
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: >
+      dangerouslySetInnerHTML bypasses React's built-in XSS escaping.
+      Sanitize input first; if intentional, add `// nosemgrep: react-no-dangerously-set-inner-html`
+      with a justification.
+    patterns:
+      - pattern-either:
+          - pattern: <$EL ... dangerouslySetInnerHTML={$X} ... />
+          - pattern: <$EL ... dangerouslySetInnerHTML={$X} ...>...</$EL>
+
+  - id: js-no-eval
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: eval() allows arbitrary code execution.
+    pattern: eval(...)
+
+  - id: js-no-new-function
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: new Function(...) is eval() by another name.
+    pattern: new Function(...)
+
+  - id: js-no-document-write
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: document.write() can introduce XSS and is a known anti-pattern.
+    pattern: document.write(...)
+
+  - id: js-no-inner-html-assignment
+    languages: [typescript, javascript]
+    severity: WARNING
+    message: Assigning to innerHTML can introduce XSS; prefer textContent or sanitize.
+    patterns:
+      - pattern: $EL.innerHTML = $X
+      - pattern-not: $EL.innerHTML = ""

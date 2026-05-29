@@ -1,0 +1,49 @@
+name: Semgrep SAST
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'dashboard/src/**'
+      - 'cloudflare/**'
+      - '.semgrep/**'
+      - '.github/workflows/semgrep.yml'
+  pull_request:
+    paths:
+      - 'dashboard/src/**'
+      - 'cloudflare/**'
+      - '.semgrep/**'
+      - '.github/workflows/semgrep.yml'
+
+permissions: {}
+
+jobs:
+  semgrep:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.11'
+
+      - run: pip install semgrep==1.164.0
+
+      - name: Run Semgrep
+        run: |
+          semgrep scan \
+            --config .semgrep \
+            --error \
+            --sarif --output semgrep.sarif \
+            dashboard/src cloudflare
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@458d36d7d4f47d0dd16ca424c1d3cda0060f1360 # v3
+        with:
+          sarif_file: semgrep.sarif
