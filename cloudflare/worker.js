@@ -5,6 +5,7 @@ const VALID_PATHS = new Set([
   '/findings_before.json', '/findings_after.json',
   '/prowler-cspm-pipeline.png', '/og-image.png',
   '/favicon.svg', '/robots.txt', '/sitemap.xml',
+  '/google2f6ba5fa8c90cf5f.html',
 ])
 
 const ASSETS_PATTERN = /^\/assets\/[a-zA-Z0-9_-]+-[a-zA-Z0-9_]+\.(js|css)$/

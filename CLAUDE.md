@@ -32,6 +32,10 @@ continuous monitoring — all findings are point-in-time scan snapshots.
 │       ├── before.tfvars            # All insecure toggles = true, EC2 running
 │       ├── after.tfvars             # All hardened toggles = false, EC2 stopped
 │       └── terraform.tfstate        # Local state — do not commit
+├── cloudflare/
+│   ├── worker.js                    # Cloudflare Worker — proxies traffic to Cloud Run with security rules
+│   ├── wrangler.toml                # Worker deployment config (Cloudflare pulls source from GitHub)
+│   └── eslint.config.js             # ESLint config for Worker Lint CI
 ├── prowler/
 │   └── run_scan.sh                  # Fetches secrets from Secret Manager, scans all three providers, writes JSON output files locally
 ├── ingest/
