@@ -128,7 +128,7 @@ export default function Landing() {
               <tbody className="divide-y divide-gray-800">
                 {[
                   ['Frontend CI', 'frontend-ci.yml', 'Catches code errors and broken builds before they reach the live site'],
-                  ['Docker Build', 'docker-build.yml', 'Verifies the application container builds correctly before deployment'],
+                  ['Docker Build', 'docker-build.yml', 'Catches container and Dockerfile build errors before deployment, so a broken or undeployable image never reaches the live site'],
                   ['Terraform Validate', 'terraform-validate.yml', 'Ensures infrastructure configuration is valid before applying to cloud environments'],
                   ['Python Lint', 'python-lint.yml', 'Detects code quality issues and common security mistakes in the scan pipeline'],
                   ['Semgrep SAST', 'semgrep.yml', 'Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues'],
