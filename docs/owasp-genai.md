@@ -409,3 +409,31 @@ This project cannot red-team the Claude Code model itself — it is a third-part
 | **R01** | ASI01 Agent Goal Hijack | Adversarial file content (dependency README, Prowler scan output, PR description) could influence the agent. Sandbox prevents silent shell exec, network exfil, and infrastructure mutation, but the agent could still write subtly malicious code into files, recommend bad changes under plausible justification, or shape commit text. Goal hijack is a model-level vulnerability that wrapper controls cannot fully prevent. | Partial mitigation | **Compensating controls:** Sandbox `autoAllowBashIfSandboxed: false` (per-command approval); network restricted to `api.github.com`; make targets `--dry-run` only; `git push` not auto-allowed; single-developer review on every commit; 11 CI gates catch known-bad code patterns. **Treatment:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context. Same treatment as `docs/owasp-llm.md` → R01. |
 | **R02** | ASI04 Agentic Supply Chain Compromise | Claude Code chose every dependency in this project. Dependency Review catches *known* CVEs; Dependabot updates *existing* deps; SHA-pinning protects Actions and Docker base images. A typosquatted npm or pip package already in `package-lock.json` from the initial AI-driven selection — that has not yet been flagged in any vulnerability database — has no current detection mechanism. | Partial mitigation | **Compensating controls:** `CLAUDE.md` hard rule blocks the agent from adding any new dep; sandbox requires explicit approval for `npm install`; all GitHub Actions and Docker base images SHA-pinned; Python ingest uses only stdlib (zero third-party). **Treatment:** Add `npm audit` to `frontend-ci.yml` and a SAST scanner (e.g., Semgrep) to CI. Same treatment as `docs/owasp-llm.md` → R02. |
 | **R03** | ASI09 Human–Agent Trust Exploitation | Claude Code produces persuasive, well-formatted explanations with high confidence. A single developer could over-rely on the agent — approving security-relevant commands without scrutiny, accepting "this change is safe" explanations rubber-stamp, or trusting claims that a CI check is unnecessary. | Accepted by design | **Compensating controls:** `autoAllowBashIfSandboxed: false` forces a deliberate approval decision on every command (friction demands attention); `git push` not auto-allowed (separate gate); 11 CI checks provide independent validation; session-start checklist requires CI status check. **Treatment:** None at the technical level — the residual is the single developer's own judgment. No control can fully prevent a human from trusting an AI agent too much. Compensate via deliberate slowdown on security-sensitive approvals and periodic re-reading of CLAUDE.md hard rules. |
+
+---
+
+## Remediation log
+
+*Added 2026-05-29. The per-category assessments and the residual risk register above are retained as the original point-in-time review. This log records remediation completed since, without altering the original findings.*
+
+### RL-01 — SAST scanner added in CI
+
+Addresses the control surface under **ASI05** (Unexpected Code Execution) and part of the **R02 / ASI04** treatment. Mirrors `docs/owasp-llm.md` → Remediation log RL-01.
+
+**Implemented:** a Semgrep SAST gate now runs on every push/PR that touches `dashboard/src/**` or `cloudflare/**`.
+
+- Workflow: `.github/workflows/semgrep.yml` — Semgrep pinned to `1.164.0`, SHA-pinned actions, gates on findings (`--error`), SARIF uploaded to **Security → Code scanning**.
+- Rules: `.semgrep/rules.yml` — vendored locally (no registry pull → reproducible), covering `eval`, `new Function`, `document.write`, `innerHTML` assignment, and `dangerouslySetInnerHTML`.
+- Validated: rules confirmed to fire against a positive-test fixture; 0 findings on current code.
+
+| Original item | Status now |
+|---|---|
+| ASI05 — "No `eval()`, `subprocess.call(shell=True)`, `dangerouslySetInnerHTML`… in the codebase" (point-in-time observation) | ✅ Now enforced automatically for JS/TS in CI, not just observed. |
+| ASI04 / R02 — "Add … a SAST scanner (e.g., Semgrep) to CI" | ◑ Partially done (see scope note). |
+
+**Scope clarification (for accuracy against the original wording):**
+
+- Semgrep here scans **first-party source** (`dashboard/src`, `cloudflare`), **not** `node_modules`. It does not, on its own, detect typosquatted packages or malicious post-install scripts — so that part of the R02 treatment remains **open**.
+- The Python pattern cited under ASI05 (`subprocess.call(shell=True)`) was already covered by **Bandit** (`python-lint.yml`, scanning `ingest/`). Semgrep was deliberately scoped to JS/TS to avoid overlap: Bandit owns Python, Trivy owns IaC, Semgrep owns JS/TS.
+
+**Still open (R02):** add `npm audit` to `frontend-ci.yml`; add `--ignore-scripts` to `npm ci`.

@@ -220,3 +220,31 @@ See `docs/security.md` → Pillar 3 (Defended Runtime Edge); Pillar 2 (Secure Bu
 | **R01** | LLM01 Prompt Injection | Adversarial file content (dep README, Prowler scan output, PR description) could influence the agent. Sandbox prevents silent shell exec, network exfil, and infrastructure mutation, but the agent could still write subtly malicious code into files, recommend bad changes under plausible justification, or shape commit text. Prompt injection is a model-level vulnerability that wrapper controls cannot fully prevent. | Partial mitigation | **Compensating controls:** Sandbox `autoAllowBashIfSandboxed: false` (per-command approval); network restricted to `api.github.com`; make targets `--dry-run` only; `git push` not auto-allowed; single-developer review on every commit; 11 CI gates catch known-bad code patterns. **Treatment:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context, reducing the surface area for indirect prompt injection through attacker-influenced file content. |
 | **R02** | LLM03 Supply Chain Vulnerabilities | Claude Code chose every dependency in this project. Dependency Review catches *known* CVEs; Dependabot updates *existing* deps; SHA-pinning protects against namespace squatting on Actions and Docker images. A typosquatted npm or pip package already in `package-lock.json` from the initial AI-driven selection — that has not yet been flagged in any vulnerability database — has no current detection mechanism. | Partial mitigation | **Compensating controls:** `CLAUDE.md` hard rule blocks the agent from adding any new dep; sandbox requires explicit approval for `npm install`; all GitHub Actions and Docker base images SHA-pinned (immune to namespace hijack); Python ingest uses only stdlib (zero third-party). **Treatment:** Add `npm audit` to `frontend-ci.yml` and a SAST scanner (e.g., Semgrep) to CI to catch novel typosquat patterns, malicious post-install scripts, and code-level anti-patterns in dependencies. Consider `--ignore-scripts` on `npm ci`. |
 | **R03** | LLM07 System Prompt Leakage | `CLAUDE.md` (the agent's system prompt) is committed to a public repository; it contains the full repo structure, Makefile targets, Terraform variable names, Prowler check IDs, and GCP Secret Manager secret names | Accepted by design | **Compensating controls:** Secret names are not values — knowing `prowler-aws-access-key-id` provides no access without GCP IAM + `gcloud auth` ADC. `.claude/settings.local.json` (sandbox permissions and auto-allow rules) is gitignored and not published. No real credentials, keys, tokens, or account IDs appear in `CLAUDE.md`. **Treatment:** None — accepted by design; transparency is the point of the portfolio project. If the repo ever moves private or carries real customer data, revisit by moving operational details into a gitignored `CLAUDE.local.md` and keeping only public-safe guidance in `CLAUDE.md`. |
+
+---
+
+## Remediation log
+
+*Added 2026-05-29. The per-category assessments and the residual risk register above are retained as the original point-in-time review. This log records remediation completed since, without altering the original findings.*
+
+### RL-01 — SAST scanner added in CI
+
+Addresses the improvement opportunities under **LLM05** and **LLM03**, and part of the **R02** treatment.
+
+**Implemented:** a Semgrep SAST gate now runs on every push/PR that touches `dashboard/src/**` or `cloudflare/**`.
+
+- Workflow: `.github/workflows/semgrep.yml` — Semgrep pinned to `1.164.0`, SHA-pinned actions, gates on findings (`--error`), SARIF uploaded to **Security → Code scanning**.
+- Rules: `.semgrep/rules.yml` — vendored locally (no registry pull → reproducible), covering `eval`, `new Function`, `document.write`, `innerHTML` assignment, and `dangerouslySetInnerHTML`.
+- Validated: rules confirmed to fire against a positive-test fixture; 0 findings on current code.
+
+| Original item | Status now |
+|---|---|
+| LLM05 — "A SAST scanner would flag `dangerouslySetInnerHTML`, `eval()`, `document.write`…" | ✅ Implemented for JS/TS — moves from point-in-time observation to automated regression enforcement. |
+| LLM03 / R02 — "Add a SAST scanner (e.g., Semgrep)…" | ◑ Partially done (see scope note). |
+
+**Scope clarification (for accuracy against the original wording):**
+
+- Semgrep here scans **first-party source** (`dashboard/src`, `cloudflare`), **not** `node_modules`. It does not, on its own, detect typosquatted packages or malicious post-install scripts — so that part of the R02 treatment remains **open**.
+- The Python example cited under LLM05 (`subprocess.call(shell=True)`) was already covered by **Bandit** (`python-lint.yml`, scanning `ingest/`). Semgrep was deliberately scoped to JS/TS to avoid overlap: Bandit owns Python, Trivy owns IaC, Semgrep owns JS/TS.
+
+**Still open (R02):** add `npm audit` to `frontend-ci.yml`; add `--ignore-scripts` to `npm ci`.
