@@ -247,4 +247,16 @@ Addresses the improvement opportunities under **LLM05** and **LLM03**, and part 
 - Semgrep here scans **first-party source** (`dashboard/src`, `cloudflare`), **not** `node_modules`. It does not, on its own, detect typosquatted packages or malicious post-install scripts — so that part of the R02 treatment remains **open**.
 - The Python example cited under LLM05 (`subprocess.call(shell=True)`) was already covered by **Bandit** (`python-lint.yml`, scanning `ingest/`). Semgrep was deliberately scoped to JS/TS to avoid overlap: Bandit owns Python, Trivy owns IaC, Semgrep owns JS/TS.
 
-**Still open (R02):** add `npm audit` to `frontend-ci.yml`; add `--ignore-scripts` to `npm ci`.
+**R02 follow-ups:** see RL-02.
+
+### RL-02 — Install-script execution blocked (`--ignore-scripts`)
+
+Addresses the "malicious post-install scripts" element of the **R02** treatment.
+
+**Implemented (2026-05-29):** `npm ci --ignore-scripts` is now used in both install paths — `.github/workflows/frontend-ci.yml` and `dashboard/Dockerfile` (build stage) — blocking dependency lifecycle (preinstall/install/postinstall) scripts from executing on CI runners and the Docker builder, the primary npm supply-chain RCE vector.
+
+- Verified safe: only `esbuild` (binary delivered by an optional dependency, not its postinstall) and macOS-only `fsevents` declare install scripts; a clean `npm ci --ignore-scripts` produced a byte-identical build, and Frontend CI + Docker Build passed on commit `11b9a30`.
+
+**Decision — `npm audit` not adopted as a gate:** it is known-advisory detection that overlaps the existing `dependency-review` action (PRs) and Dependabot (weekly + security alerts), currently reports 2 moderate advisories in build-toolchain transitive deps not exploitable in a static-site bundle (so a default gate would fail CI on non-issues), and cannot detect novel typosquats. If added later it should be advisory-only (`--audit-level=high`).
+
+**R02 status:** the install-script execution path is now closed; the novel-typosquat-in-initial-selection core remains an **accepted residual** — no detection mechanism exists for an unreported typosquat.
