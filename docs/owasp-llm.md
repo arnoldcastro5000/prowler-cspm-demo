@@ -73,7 +73,7 @@ Claude Code selected every dependency in this project — npm packages, pip pack
 - CI: `dependency-review.yml` scans npm and pip dependencies for *known* vulnerabilities on every PR that modifies package files. (Does not detect novel typosquats.)
 - Dependabot opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
 - All GitHub Actions in CI are pinned to exact commit SHAs, not mutable version tags — immune to namespace hijack on the Actions registry.
-- Docker base images in `dashboard/Dockerfile` are pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.27-alpine@sha256:...`) — immune to image namespace hijack.
+- Docker base images in `dashboard/Dockerfile` are pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.30-alpine@sha256:...`) — immune to image namespace hijack. Base image upgraded from 1.27 to 1.30 (latest stable) to clear unfixed HIGH CVEs; see RL-06 in `docs/owasp-cicd.md`.
 - CI: `zizmor.yml` audits GitHub Actions workflows for supply chain risks.
 - `CLAUDE.md` hard rule: do not add npm packages, pip packages, or Terraform providers not already in the stack — blocks the agent from adding any new dep.
 - Sandbox: `autoAllowBashIfSandboxed: false` — the agent cannot run `npm install` without explicit user approval.
@@ -83,9 +83,9 @@ Claude Code selected every dependency in this project — npm packages, pip pack
 
 **Improvement opportunities:**
 
-- Add `npm audit` to `frontend-ci.yml` to check installed packages against known vulnerabilities (covers npm specifically, beyond Dependency Review).
-- Add a SAST scanner (e.g., Semgrep) to CI to catch code-level security anti-patterns in dependencies — injection, XSS, insecure randomness, suspicious post-install scripts, and other patterns in AI-recommended packages.
-- Consider adding `--ignore-scripts` to `npm ci` in CI to prevent lifecycle script execution during build.
+- ~~Add `npm audit` to `frontend-ci.yml`~~ — evaluated and not adopted as a gate; see RL-02 in `docs/owasp-cicd.md`.
+- ~~Add a SAST scanner (e.g., Semgrep) to CI~~ — implemented: `semgrep.yml` scans `.ts`, `.tsx`, and `.js` source files on every push and PR (RL-01 in `docs/owasp-cicd.md`).
+- ~~Consider adding `--ignore-scripts` to `npm ci` in CI~~ — implemented: `npm ci --ignore-scripts` in `frontend-ci.yml` and `dashboard/Dockerfile` Stage 1.
 
 See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
 

@@ -65,7 +65,7 @@ Both scans run independently — the local hook catches secrets before they leav
 | Frontend CI (TypeScript · ESLint · Vite · lockfile-lint) | Validates lockfile integrity against the official npm registry (supply-chain) and catches type errors, code-quality issues, and broken builds in the dashboard TypeScript source (.ts, .tsx) before they reach the live site |
 | Shellcheck | Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures |
 | Terraform Validate | Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure |
-| Docker Build | Catches container and Dockerfile build errors before deployment, so a broken or undeployable image never reaches the live site |
+| Docker Build | Builds the image and scans it with Trivy for CRITICAL and HIGH CVEs (fixable only); SARIF results go to the GitHub Security tab. nginx Stage 2 runs as `USER nginx` (non-root, CIS Docker 4.1). Catches build errors and known vulnerabilities before deployment. |
 
 Additional notes:
 

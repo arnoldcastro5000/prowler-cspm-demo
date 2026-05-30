@@ -46,9 +46,9 @@ Security headers, container images, and infrastructure configuration are all exp
 **Controls in place:**
 
 - `nginx.conf` sets 6 security headers: CSP (with per-request nonce), HSTS, X-Frame-Options (DENY), X-Content-Type-Options (nosniff), Permissions-Policy (disables camera, microphone, geolocation, payment), Referrer-Policy.
-- Docker base images pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.27-alpine@sha256:...`).
+- Docker base images pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.30-alpine@sha256:...`).
 - CI: `terraform-validate.yml` checks Terraform format and validity on every push.
-- CI: `trivy.yml` scans IaC for known misconfigurations (SARIF output uploaded to GitHub Security tab).
+- CI: `trivy.yml` scans IaC for known misconfigurations; `docker-build.yml` scans the built container image for CRITICAL and HIGH CVEs with available fixes — both upload SARIF to the GitHub Security tab (RL-06 in `docs/owasp-cicd.md`).
 - Cloudflare Worker blocks path traversal attempts (`%2e%2e`, null bytes, encoded sequences).
 - nginx error pages do not expose version information or stack details.
 

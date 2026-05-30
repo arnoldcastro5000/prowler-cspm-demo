@@ -7,7 +7,7 @@
 | Threat domain | Primary threats | Mitigations | Residual risk |
 |---|---|---|---|
 | **1. Credential & secrets** | Credential theft, leakage in git, exposure in published findings | GCP Secret Manager, runtime `trap` cleanup, Gitleaks (pre-commit + CI), identifier redaction | Commit of a new secret format Gitleaks doesn't yet pattern-match |
-| **2. Build & supply chain** | Compromised dependency, malicious commit, CI runner takeover | 13 CI gates, SHA-pinned actions, `persist-credentials: false`, Dependabot, Socket.dev, Zizmor | Zero-day in a pinned dependency before the next Dependabot PR |
+| **2. Build & supply chain** | Compromised dependency, malicious commit, CI runner takeover | 13 CI gates, SHA-pinned actions, `persist-credentials: false`, Dependabot, Socket.dev, Zizmor, Trivy image scan; `make deploy` CI gate | Zero-day in a pinned dependency before the next Dependabot PR |
 | **3. Runtime edge** | DDoS, web attack payloads, origin bypass, bot scraping | Cloudflare WAF + DDoS + Bot Fight; 8 Worker rules; origin shared secret | Cloudflare account compromise; shared-secret leak (rotatable) |
 | **4. Application surface** | XSS via injected JS, clickjacking, MIME sniffing, downgrade | CSP w/ nonce, HSTS, X-Frame, X-Content-Type-Options, Referrer-Policy, Permissions-Policy | Browser-level zero-day |
 | **5. AI development** | Destructive shell action via agent, data exfiltration via agent, secret written by agent | Sandboxed Claude Code (filesystem / network / command restrictions); permission prompts on destructive operations | Agent operating outside the sandbox; user fatigue approving prompts |
@@ -35,7 +35,7 @@
 | Scenario | What happens | How it is addressed |
 |---|---|---|
 | Compromised npm, pip, or Terraform dependency is pulled in | Malicious code enters the build pipeline through a library update | Dependabot opens weekly PRs to update dependencies; the Dependency Review workflow flags any added dependency with a known CVE before merge |
-| Malicious commit is pushed to the repository | Bad code reaches the deployed dashboard | 13 automated CI checks run on every push and PR; all GitHub Actions are pinned to commit SHAs (not mutable tags); deployment is a manual step from the developer workstation, never auto-deployed from CI |
+| Malicious commit is pushed to the repository | Bad code reaches the deployed dashboard | 13 automated CI checks run on every push and PR; all GitHub Actions are pinned to commit SHAs (not mutable tags); deployment is a manual step from the developer workstation, never auto-deployed from CI; `make deploy` aborts if the latest CI run on `main` is not `success` |
 | CI runner is compromised | Attacker steals credentials persisted by the runner | `persist-credentials: false` is set on all checkout actions; no long-lived cloud credentials are stored in GitHub secrets — all credentials live in GCP Secret Manager and are fetched from WSL2 only |
 | CI workflow itself is modified to bypass checks | Attacker amends a workflow file to skip security gates | Zizmor audits the workflows themselves for supply-chain weaknesses (action injection, expression-based RCE, etc.) on every change to `.github/workflows/` |
 | Intentional Trivy findings on `iac/modules/` mask a genuine misconfiguration | Reviewer dismisses a real finding as expected noise | Findings on `iac/modules/` are pre-known and documented as the before-state baseline; findings elsewhere in the codebase are unexpected and must be triaged |
@@ -169,7 +169,7 @@ These are intentional scope decisions, not oversights:
 | No notifications are sent when findings change | Changes to cloud posture are only visible after the next scan cycle | Real-time alerting is out of scope |
 | Only one account per cloud provider is scanned | The demonstration covers three providers but not multi-account environments | Multi-account scanning is not needed to demonstrate the pipeline |
 | Findings data is not encrypted at rest | Findings JSON is baked into the container image as a static file | Findings are public by design and contain no sensitive information after redaction |
-| The dashboard container image is not scanned | Trivy scans infrastructure code but not the final Docker image | Container image scanning would add value but is not yet implemented |
+| The dashboard container image is scanned by Trivy on every push and PR touching `dashboard/**` | CRITICAL and HIGH CVEs with available fixes fail the workflow; SARIF results surface in the GitHub Security tab | Zero-day in the base image before the next Dependabot PR |
 
 ---
 

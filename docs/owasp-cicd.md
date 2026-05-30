@@ -1,12 +1,12 @@
 # OWASP Top 10 CI/CD Security Risks
 
-This project's CI/CD pipeline comprises 12 GitHub Actions workflows that lint, validate, and scan on every push and PR; a manual `make deploy` from WSL2 that builds and pushes the dashboard container to GCP Artifact Registry; and a Cloudflare Worker deployed from GitHub via wrangler. Infrastructure across AWS, GCP, and Azure is managed with Terraform, and all cloud credentials live in GCP Secret Manager. Mapped against the OWASP Top 10 CI/CD Security Risks: **seven categories are mitigated and three carry documented residual risk** (CICD-R01: no programmatic gate between CI status and `make deploy`; CICD-R02: no image signing or provenance attestation; CICD-R03: no CI failure alerting or deploy audit trail). Each risk is detailed below with controls in place and improvement opportunities; the **residual risk register** at the end consolidates the three open items with proposed treatments.
+This project's CI/CD pipeline comprises 12 GitHub Actions workflows that lint, validate, and scan on every push and PR; a manual `make deploy` from WSL2 that builds and pushes the dashboard container to GCP Artifact Registry; and a Cloudflare Worker deployed from GitHub via wrangler. Infrastructure across AWS, GCP, and Azure is managed with Terraform, and all cloud credentials live in GCP Secret Manager. Mapped against the OWASP Top 10 CI/CD Security Risks: **seven categories are mitigated and three carry documented residual risk** (CICD-R01: no branch protection on `main` requiring status checks; CICD-R02: no image signing or provenance attestation; CICD-R03: no CI failure alerting). Each risk is detailed below with controls in place and improvement opportunities; the **residual risk register** at the end consolidates the three open items with proposed treatments.
 
 ## Status at a glance
 
 | # | Category | Status | Why |
 |---|---|---|---|
-| CICD-SEC-1 | Insufficient Flow Control Mechanisms | 🟡 Partially mitigated | CI is advisory (**CICD-R01**); single-dev review + manual deploy is the compensating gate |
+| CICD-SEC-1 | Insufficient Flow Control Mechanisms | 🟡 Partially mitigated | `make deploy` aborts on non-success CI (RL-07); **CICD-R01**: no branch protection on `main` |
 | CICD-SEC-2 | Inadequate Identity and Access Management | 🟢 Mitigated | Minimal `permissions:` blocks; `persist-credentials: false`; no shared CI service accounts |
 | CICD-SEC-3 | Dependency Chain Abuse | 🟢 Mitigated | All Actions and base images SHA-pinned; Dependabot weekly; zero Python 3rd-party — **highest-relevance risk for this project** |
 | CICD-SEC-4 | Poisoned Pipeline Execution (PPE) | 🟢 Mitigated | Single-dev (no fork PRs); Zizmor audit; `contents: read`; no `pull_request_target` |
@@ -14,8 +14,8 @@ This project's CI/CD pipeline comprises 12 GitHub Actions workflows that lint, v
 | CICD-SEC-6 | Insufficient Credential Hygiene | 🟢 Mitigated | All creds in GCP Secret Manager; Gitleaks pre-commit + CI; `trap cleanup EXIT` in scan pipeline |
 | CICD-SEC-7 | Insecure System Configuration | 🟢 Mitigated | GitHub-hosted runners only (ephemeral, patched); no self-hosted runners |
 | CICD-SEC-8 | Ungoverned Usage of Third-Party Services | 🟢 Mitigated | All Actions SHA-pinned; Dependabot weekly; Zizmor audit |
-| CICD-SEC-9 | Improper Artifact Integrity Validation | 🟡 Partially mitigated | Build inputs SHA-pinned; build + deploy on same machine; **CICD-R02**: no image signing or provenance |
-| CICD-SEC-10 | Insufficient Logging and Visibility | 🟡 Partially mitigated | GH run history + SARIF in Security tab; **CICD-R03**: no CI failure alerts, no deploy audit log |
+| CICD-SEC-9 | Improper Artifact Integrity Validation | 🟡 Partially mitigated | Build inputs SHA-pinned; Trivy image scan gates CRITICAL/HIGH CVEs (RL-06); deploy by immutable digest (RL-07); **CICD-R02**: no image signing or provenance |
+| CICD-SEC-10 | Insufficient Logging and Visibility | 🟡 Partially mitigated | GH run history + SARIF in Security tab; `make deploy` writes audit log (RL-07); **CICD-R03**: no CI failure alerting |
 
 ---
 
@@ -85,9 +85,9 @@ This is the most relevant CI/CD risk for this project. The pipeline consumes npm
 
 **Improvement opportunities:**
 
-- Add `npm audit` to the `frontend-ci.yml` workflow to check installed packages against known vulnerabilities.
-- Consider adding `--ignore-scripts` to `npm ci` in CI to prevent lifecycle script execution during build.
-- Add container image scanning (Trivy) on the built Docker image, not just IaC — acknowledged in `docs/threat-model.md` as not yet implemented.
+- ~~Add `npm audit` to the `frontend-ci.yml` workflow~~ — evaluated and not adopted as a gate; see RL-02.
+- ~~Consider adding `--ignore-scripts` to `npm ci` in CI~~ — implemented: `npm ci --ignore-scripts` in `frontend-ci.yml` and `dashboard/Dockerfile` Stage 1.
+- ~~Add container image scanning (Trivy) on the built Docker image, not just IaC~~ — implemented: Trivy image scan added to `docker-build.yml`, gates on CRITICAL/HIGH CVEs with available fixes (RL-06).
 - Consider generating an SBOM (Software Bill of Materials) during Docker build.
 
 See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain). See `docs/owasp-top10.md` → A03 (Software Supply Chain Failures).
@@ -272,9 +272,9 @@ See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain). See `docs/owa
 
 | ID | Category | Risk | Status | Treatment / compensating control |
 |---|---|---|---|---|
-| **CICD-R01** | CICD-SEC-1 Insufficient Flow Control Mechanisms | `make deploy` is not programmatically blocked by failing CI; no GitHub branch protection on `main` requiring status checks | Partially mitigated | **Compensating controls:** single-developer review on every commit; manual deploy from WSL2; session-start checklist in `CLAUDE.md` requiring `gh run list` before any work. **Treatment:** add CI-status check inside `make deploy` (abort if the latest run on `main` failed); enable branch protection on `main` requiring all checks to pass before merge. |
-| **CICD-R02** | CICD-SEC-9 Improper Artifact Integrity Validation | Docker images pushed to GCP Artifact Registry without signing or SLSA provenance attestation; no verification that the deployed image matches what CI validated | Partially mitigated | **Compensating controls:** build inputs SHA-pinned (Docker base, npm via `package-lock.json`); build and deploy happen on the same machine in the same command (no untrusted artifact handoff); Artifact Registry is private. **Treatment:** sign images with cosign before push; generate and attach SLSA provenance; log image digest in deploy output for an audit trail. |
-| **CICD-R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partially mitigated | **Compensating controls:** 13 independent checks + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check; Harden Runner (audit mode) records runner egress connections in the Frontend CI job summary (RL-05). **Treatment:** add failure-notification webhook on workflow failure; `make deploy` appends timestamp + image digest + git SHA to a local log file; aggregate SARIF findings into a single view. |
+| **CICD-R01** | CICD-SEC-1 Insufficient Flow Control Mechanisms | `make deploy` is not programmatically blocked by failing CI; no GitHub branch protection on `main` requiring status checks | Partially mitigated | **Compensating controls:** single-developer review on every commit; manual deploy from WSL2; session-start checklist in `CLAUDE.md` requiring `gh run list` before any work; `make deploy` aborts if the latest CI run on `main` is not `success` (RL-07). **Treatment:** enable branch protection on `main` requiring all checks to pass before merge. |
+| **CICD-R02** | CICD-SEC-9 Improper Artifact Integrity Validation | Docker images pushed to GCP Artifact Registry without signing or SLSA provenance attestation; no verification that the deployed image matches what CI validated | Partially mitigated | **Compensating controls:** build inputs SHA-pinned (Docker base, npm via `package-lock.json`); build and deploy happen on the same machine in the same command (no untrusted artifact handoff); Artifact Registry is private; Trivy image scan gates on CRITICAL/HIGH fixable CVEs on every `docker build` CI run (RL-06); `make deploy` deploys by immutable image digest, not mutable tag (RL-07). **Treatment:** sign images with cosign before push; generate and attach SLSA provenance. |
+| **CICD-R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partially mitigated | **Compensating controls:** 13 independent checks + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check; Harden Runner (audit mode) records runner egress connections in the Frontend CI job summary (RL-05); `make deploy` appends timestamp + git SHA + image digest to `deploy.log` after every successful deploy (RL-07). **Treatment:** add failure-notification webhook on workflow failure; aggregate SARIF findings into a single view. |
 
 ---
 
@@ -343,3 +343,27 @@ Partially addresses **CICD-SEC-10** (Insufficient Logging and Visibility) by add
 **Scope:** `frontend-ci.yml` only. Other workflows do not yet have Harden Runner.
 
 CICD-SEC-10 status remains **🟡 Partially mitigated** — CICD-R03 (no CI failure alerting, no deploy audit trail) is unaffected. Harden Runner audit adds a new visibility layer but does not close those gaps.
+
+### RL-06 — Trivy image scan + non-root nginx added to Docker Build CI
+
+Partially addresses **CICD-R02** (Improper Artifact Integrity Validation) by adding CVE scanning to the Docker build pipeline. Also hardens the runtime image by running nginx as a non-root user (CIS Docker 4.1).
+
+**Implemented (2026-05-30):** `aquasecurity/trivy-action` (SHA-pinned, same version as IaC scan) added to `docker-build.yml` in image scan mode. Builds the image with `load: true`, scans for CRITICAL and HIGH CVEs with `ignore-unfixed: true`, and fails the workflow on any finding with an available fix. SARIF results upload to the GitHub Security tab via `!cancelled()` so findings are visible even on failure. Base image upgraded from `nginx:1.27-alpine` to `nginx:1.30-alpine` (latest stable) — 1.27 had 9 unfixed HIGH CVEs (musl, nghttp2, libxml2, zlib) with no rebuilt image available on Docker Hub. nginx Stage 2 now runs as `USER nginx` with appropriate permission fixes (`chown -R` on conf.d, cache, and PID file; `user` directive stripped from main nginx.conf).
+
+CICD-SEC-9 status remains **🟡 Partially mitigated** — image signing and SLSA provenance (CICD-R02 full treatment) are not yet implemented.
+
+### RL-07 — `make deploy` hardened: CI gate, digest deploy, and audit log
+
+Partially addresses **CICD-R01** (Insufficient Flow Control Mechanisms), **CICD-R02** (Improper Artifact Integrity Validation), and **CICD-R03** (Insufficient Logging and Visibility) by adding three controls to the `make deploy` target.
+
+**Implemented (2026-05-30):**
+
+**CI gate (CICD-R01):** `make deploy` now checks the latest CI run on `main` via `gh run list` before building. Aborts with an explicit `FAILING` message if the conclusion is not `success`; prints `PASSING` and proceeds otherwise.
+
+**Immutable digest deploy (CICD-R02):** After `docker push`, the image digest is captured via `docker inspect` (SHA extracted with `awk -F@ '{print $2}'`, then prefixed with the full registry path to avoid local tag pollution from test builds). `gcloud run deploy` receives the full `REGISTRY@sha256:...` reference instead of the mutable `:latest` tag — ensuring the exact image that was pushed is what Cloud Run runs.
+
+**Audit log (CICD-R03):** After a successful deploy, `make deploy` appends a tab-delimited line to `deploy.log` at the repo root (`timestamp TAB git-SHA TAB image-digest`). `deploy.log` is gitignored. The `DEPLOY_LOG` variable in the Makefile config block controls the path.
+
+CICD-SEC-1 status remains **🟡 Partially mitigated** — branch protection on `main` is not yet enabled (CICD-R01 full treatment).
+CICD-SEC-9 status remains **🟡 Partially mitigated** — image signing and SLSA provenance are not yet implemented (CICD-R02 full treatment).
+CICD-SEC-10 status remains **🟡 Partially mitigated** — CI failure alerting is not yet implemented (CICD-R03 full treatment).
