@@ -1,12 +1,12 @@
 # OWASP Top 10 CI/CD Security Risks
 
-This project's CI/CD pipeline comprises 11 GitHub Actions workflows that lint, validate, and scan on every push and PR; a manual `make deploy` from WSL2 that builds and pushes the dashboard container to GCP Artifact Registry; and a Cloudflare Worker deployed from GitHub via wrangler. Infrastructure across AWS, GCP, and Azure is managed with Terraform, and all cloud credentials live in GCP Secret Manager. Mapped against the OWASP Top 10 CI/CD Security Risks: **seven categories are mitigated and three carry documented residual risk** (R01: no programmatic gate between CI status and `make deploy`; R02: no image signing or provenance attestation; R03: no CI failure alerting or deploy audit trail). Each risk is detailed below with controls in place and improvement opportunities; the **residual risk register** at the end consolidates the three open items with proposed treatments.
+This project's CI/CD pipeline comprises 12 GitHub Actions workflows that lint, validate, and scan on every push and PR; a manual `make deploy` from WSL2 that builds and pushes the dashboard container to GCP Artifact Registry; and a Cloudflare Worker deployed from GitHub via wrangler. Infrastructure across AWS, GCP, and Azure is managed with Terraform, and all cloud credentials live in GCP Secret Manager. Mapped against the OWASP Top 10 CI/CD Security Risks: **seven categories are mitigated and three carry documented residual risk** (CICD-R01: no programmatic gate between CI status and `make deploy`; CICD-R02: no image signing or provenance attestation; CICD-R03: no CI failure alerting or deploy audit trail). Each risk is detailed below with controls in place and improvement opportunities; the **residual risk register** at the end consolidates the three open items with proposed treatments.
 
 ## Status at a glance
 
 | # | Category | Status | Why |
 |---|---|---|---|
-| CICD-SEC-1 | Insufficient Flow Control Mechanisms | 🟡 Partially mitigated | CI is advisory (**R01**); single-dev review + manual deploy is the compensating gate |
+| CICD-SEC-1 | Insufficient Flow Control Mechanisms | 🟡 Partially mitigated | CI is advisory (**CICD-R01**); single-dev review + manual deploy is the compensating gate |
 | CICD-SEC-2 | Inadequate Identity and Access Management | 🟢 Mitigated | Minimal `permissions:` blocks; `persist-credentials: false`; no shared CI service accounts |
 | CICD-SEC-3 | Dependency Chain Abuse | 🟢 Mitigated | All Actions and base images SHA-pinned; Dependabot weekly; zero Python 3rd-party — **highest-relevance risk for this project** |
 | CICD-SEC-4 | Poisoned Pipeline Execution (PPE) | 🟢 Mitigated | Single-dev (no fork PRs); Zizmor audit; `contents: read`; no `pull_request_target` |
@@ -14,8 +14,8 @@ This project's CI/CD pipeline comprises 11 GitHub Actions workflows that lint, v
 | CICD-SEC-6 | Insufficient Credential Hygiene | 🟢 Mitigated | All creds in GCP Secret Manager; Gitleaks pre-commit + CI; `trap cleanup EXIT` in scan pipeline |
 | CICD-SEC-7 | Insecure System Configuration | 🟢 Mitigated | GitHub-hosted runners only (ephemeral, patched); no self-hosted runners |
 | CICD-SEC-8 | Ungoverned Usage of Third-Party Services | 🟢 Mitigated | All Actions SHA-pinned; Dependabot weekly; Zizmor audit |
-| CICD-SEC-9 | Improper Artifact Integrity Validation | 🟡 Partially mitigated | Build inputs SHA-pinned; build + deploy on same machine; **R02**: no image signing or provenance |
-| CICD-SEC-10 | Insufficient Logging and Visibility | 🟡 Partially mitigated | GH run history + SARIF in Security tab; **R03**: no CI failure alerts, no deploy audit log |
+| CICD-SEC-9 | Improper Artifact Integrity Validation | 🟡 Partially mitigated | Build inputs SHA-pinned; build + deploy on same machine; **CICD-R02**: no image signing or provenance |
+| CICD-SEC-10 | Insufficient Logging and Visibility | 🟡 Partially mitigated | GH run history + SARIF in Security tab; **CICD-R03**: no CI failure alerts, no deploy audit log |
 
 ---
 
@@ -229,7 +229,7 @@ Docker images are pushed to GCP Artifact Registry without signing or provenance 
 - GCP Artifact Registry is private — not publicly writable.
 - Build and deploy happen on the same machine in the same command — no artifact handoff between systems.
 
-**Residual risk (R02):** see Residual risk register.
+**Residual risk (CICD-R02):** see Residual risk register.
 
 **Improvement opportunities:**
 
@@ -253,9 +253,9 @@ GitHub Actions retains run logs, and Trivy uploads SARIF results to the GitHub S
 - GitHub Actions run history retained and visible in the repository.
 - SARIF uploads from Trivy visible in the GitHub Security tab.
 - Session start checklist in `CLAUDE.md` requires checking `gh run list` for failures at the start of every session.
-- 11 independent workflows provide broad coverage — a failure in one does not silence the others.
+- 12 independent workflows provide broad coverage — a failure in one does not silence the others.
 
-**Residual risk (R03):** see Residual risk register.
+**Residual risk (CICD-R03):** see Residual risk register.
 
 **Improvement opportunities:**
 
@@ -272,6 +272,46 @@ See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain). See `docs/owa
 
 | ID | Category | Risk | Status | Treatment / compensating control |
 |---|---|---|---|---|
-| **R01** | CICD-SEC-1 Insufficient Flow Control Mechanisms | `make deploy` is not programmatically blocked by failing CI; no GitHub branch protection on `main` requiring status checks | Partial mitigation | **Compensating controls:** single-developer review on every commit; manual deploy from WSL2; session-start checklist in `CLAUDE.md` requiring `gh run list` before any work. **Treatment:** add CI-status check inside `make deploy` (abort if the latest run on `main` failed); enable branch protection on `main` requiring all checks to pass before merge. |
-| **R02** | CICD-SEC-9 Improper Artifact Integrity Validation | Docker images pushed to GCP Artifact Registry without signing or SLSA provenance attestation; no verification that the deployed image matches what CI validated | Partial mitigation | **Compensating controls:** build inputs SHA-pinned (Docker base, npm via `package-lock.json`); build and deploy happen on the same machine in the same command (no untrusted artifact handoff); Artifact Registry is private. **Treatment:** sign images with cosign before push; generate and attach SLSA provenance; log image digest in deploy output for an audit trail. |
-| **R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partial mitigation | **Compensating controls:** 11 independent workflows + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check. **Treatment:** add failure-notification webhook on workflow failure; `make deploy` appends timestamp + image digest + git SHA to a local log file; aggregate SARIF findings into a single view. |
+| **CICD-R01** | CICD-SEC-1 Insufficient Flow Control Mechanisms | `make deploy` is not programmatically blocked by failing CI; no GitHub branch protection on `main` requiring status checks | Partially mitigated | **Compensating controls:** single-developer review on every commit; manual deploy from WSL2; session-start checklist in `CLAUDE.md` requiring `gh run list` before any work. **Treatment:** add CI-status check inside `make deploy` (abort if the latest run on `main` failed); enable branch protection on `main` requiring all checks to pass before merge. |
+| **CICD-R02** | CICD-SEC-9 Improper Artifact Integrity Validation | Docker images pushed to GCP Artifact Registry without signing or SLSA provenance attestation; no verification that the deployed image matches what CI validated | Partially mitigated | **Compensating controls:** build inputs SHA-pinned (Docker base, npm via `package-lock.json`); build and deploy happen on the same machine in the same command (no untrusted artifact handoff); Artifact Registry is private. **Treatment:** sign images with cosign before push; generate and attach SLSA provenance; log image digest in deploy output for an audit trail. |
+| **CICD-R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partially mitigated | **Compensating controls:** 12 independent workflows + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check. **Treatment:** add failure-notification webhook on workflow failure; `make deploy` appends timestamp + image digest + git SHA to a local log file; aggregate SARIF findings into a single view. |
+
+---
+
+## Remediation log
+
+*Added 2026-05-29. The per-category assessments and the residual risk register above are retained as the original point-in-time review. This log records remediation completed since, without altering the original findings.*
+
+### RL-01 — SAST scanner added in CI
+
+Adds a code-level scanning gate to the pipeline, strengthening **CICD-SEC-3** (Dependency Chain Abuse) and **CICD-SEC-4** (Poisoned Pipeline Execution). This is the workflow that moved the pipeline count from 11 to 12. Mirrors `docs/owasp-llm.md` → Remediation log RL-01 and `docs/owasp-genai.md` → Remediation log RL-01.
+
+**Implemented:** a Semgrep SAST gate now runs on every push/PR that touches `dashboard/src/**` or `cloudflare/**`.
+
+- Workflow: `.github/workflows/semgrep.yml` — Semgrep pinned to `1.164.0`, SHA-pinned actions, gates on findings (`--error`), SARIF uploaded to **Security → Code scanning**.
+- Rules: `.semgrep/rules.yml` — vendored locally (no registry pull → reproducible), covering `eval`, `new Function`, `document.write`, `innerHTML` assignment, and `dangerouslySetInnerHTML`.
+- Validated: rules confirmed to fire against a positive-test fixture; 0 findings on current code.
+
+**Scope clarification (for accuracy against the original wording):**
+
+- Semgrep scans **first-party source** (`dashboard/src`, `cloudflare`), **not** `node_modules` — it does not, on its own, detect typosquatted packages or malicious post-install scripts.
+- Coverage is partitioned to avoid overlap: Bandit owns Python (`python-lint.yml`, scanning `ingest/`), Trivy owns IaC, Semgrep owns JS/TS.
+
+**Follow-ups:** see RL-02.
+
+### RL-02 — Install-script execution blocked (`--ignore-scripts`)
+
+Closes the **"Consider adding `--ignore-scripts` to `npm ci`"** improvement opportunity under **CICD-SEC-3** (Dependency Chain Abuse), and removes a dependency-install code-execution path relevant to **CICD-SEC-4** (Poisoned Pipeline Execution). Mirrors `docs/owasp-llm.md` → Remediation log RL-02 and `docs/owasp-genai.md` → Remediation log RL-02.
+
+**Implemented (2026-05-29):** `npm ci --ignore-scripts` is now used in both install paths — `.github/workflows/frontend-ci.yml` and `dashboard/Dockerfile` (build stage) — blocking dependency lifecycle (preinstall/install/postinstall) scripts from executing on CI runners and the Docker builder, the primary npm supply-chain RCE vector.
+
+- Verified safe: only `esbuild` (binary delivered by an optional dependency, not its postinstall) and macOS-only `fsevents` declare install scripts; a clean `npm ci --ignore-scripts` produced a byte-identical build, and Frontend CI + Docker Build passed on commit `11b9a30`.
+
+**Decision — `npm audit` not adopted as a gate:** supersedes the **"Add `npm audit` to the `frontend-ci.yml` workflow"** improvement opportunity under CICD-SEC-3. It is known-advisory detection that overlaps the existing `dependency-review` action (PRs) and Dependabot (weekly + security alerts), currently reports 2 moderate advisories in build-toolchain transitive deps not exploitable in a static-site bundle (so a default gate would fail CI on non-issues), and cannot detect novel typosquats. If added later it should be advisory-only (`--audit-level=high`).
+
+| Original improvement opportunity (CICD-SEC-3) | Status now |
+|---|---|
+| "Consider adding `--ignore-scripts` to `npm ci`…" | ✅ Implemented in `frontend-ci.yml` and `dashboard/Dockerfile`. |
+| "Add `npm audit` to the `frontend-ci.yml` workflow…" | Not adopted as a gate — see decision above. |
+
+**Status:** the install-script execution path is now closed. The novel-typosquat-in-initial-selection residual — tracked project-wide as LLM-R02 in `docs/owasp-llm.md` and GENAI-R02 in `docs/owasp-genai.md` (distinct from this document's own CICD-R02, which concerns artifact integrity) — is not a CI/CD-framework residual here (CICD-SEC-3 is assessed as mitigated) and is unaffected by these changes.

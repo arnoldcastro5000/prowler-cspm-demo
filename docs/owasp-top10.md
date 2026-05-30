@@ -1,6 +1,6 @@
 # OWASP Top 10 — Web Application Security (2025)
 
-This project deploys a read-only React dashboard on Cloud Run behind Cloudflare. The application has no user input, no authentication system, no database, and no backend API. Mapped against the OWASP Top 10 for Web Application Security (2025 edition): **six categories are mitigated, two are not applicable to a static read-only architecture, and two carry documented residual risk.** Each category is detailed below with its controls and gaps; the **residual risk register** at the end consolidates the two outstanding items (R01: runtime markdown fetch without SRI; R02: SIEM out of scope).
+This project deploys a read-only React dashboard on Cloud Run behind Cloudflare. The application has no user input, no authentication system, no database, and no backend API. Mapped against the OWASP Top 10 for Web Application Security (2025 edition): **six categories are mitigated, two are not applicable to a static read-only architecture, and two carry documented residual risk.** Each category is detailed below with its controls and gaps; the **residual risk register** at the end consolidates the two outstanding items (WEB-R01: runtime markdown fetch without SRI; WEB-R02: SIEM out of scope).
 
 ## Status at a glance
 
@@ -13,8 +13,8 @@ This project deploys a read-only React dashboard on Cloud Run behind Cloudflare.
 | A05 | Injection | ⚪ Does not apply | No input surface; React auto-escapes; Zod validates findings; CSP nonce blocks inline scripts |
 | A06 | Insecure Design | 🟢 Mitigated | Threat model + ADR predate deployment; minimal architecture (no API); defence-in-depth at every layer |
 | A07 | Authentication Failures | ⚪ Does not apply | No user accounts, login, sessions, cookies, JWTs, or password storage |
-| A08 | Software or Data Integrity Failures | 🟡 Accepted risk | Build artifacts and findings integrity strong; **R01**: runtime markdown fetch from GitHub lacks SRI |
-| A09 | Security Logging and Alerting Failures | 🟡 Partially mitigated | Cloud Logging + Cloudflare analytics in place; **R02**: no SIEM or real-time alerting (intentionally out of scope) |
+| A08 | Software or Data Integrity Failures | 🟡 Accepted risk | Build artifacts and findings integrity strong; **WEB-R01**: runtime markdown fetch from GitHub lacks SRI |
+| A09 | Security Logging and Alerting Failures | 🟡 Partially mitigated | Cloud Logging + Cloudflare analytics in place; **WEB-R02**: no SIEM or real-time alerting (intentionally out of scope) |
 | A10 | Mishandling of Exceptional Conditions | 🟢 Mitigated | Explicit error codes at every layer; nginx fails closed without origin secret; `trap cleanup EXIT` in scan pipeline |
 
 ---
@@ -152,7 +152,7 @@ Most integrity controls are strong. The residual risk is the remote markdown fet
 - CI: `secret-scan.yml` (Gitleaks) detects unauthorized modifications that introduce credentials.
 - CI: `hardcoded-config-check.yml` detects cloud account IDs or resource identifiers introduced into source.
 
-**Residual risk (R01):**
+**Residual risk (WEB-R01):**
 
 - `ThreatModel.tsx` and `Security.tsx` fetch markdown at runtime from `raw.githubusercontent.com` with no subresource integrity (SRI) or signature verification. If the GitHub account were compromised, poisoned markdown would render on the dashboard. ReactMarkdown sanitizes HTML (no XSS from this vector), but the content itself could be misleading or defamatory.
 - SRI is not practical for dynamic markdown content (the hash changes on every commit). The mitigation is GitHub account security (2FA, audit log) — outside this project's direct control.
@@ -171,7 +171,7 @@ Logging exists at the infrastructure level but no centralized alerting is config
 - Cloudflare provides analytics, firewall events, and bot detection metrics on the free tier.
 - OWASP ZAP baseline scan is run manually against the deployed application.
 
-**Gaps — intentionally out of scope (R02):**
+**Gaps — intentionally out of scope (WEB-R02):**
 
 - No centralized log aggregation or SIEM.
 - No security alerting for repeated 403/404 patterns or anomalous traffic.
@@ -203,5 +203,5 @@ The application handles error paths explicitly — no component fails open or si
 
 | ID | Category | Risk | Status | Treatment / compensating control |
 |---|---|---|---|---|
-| **R01** | A08 — Software or Data Integrity Failures | Markdown fetched at runtime from `raw.githubusercontent.com` by `ThreatModel.tsx` and `Security.tsx` has no SRI or signature verification; a compromised GitHub account could poison rendered content | Accepted | ReactMarkdown sanitizes HTML (no XSS from this vector); residual is misleading or defamatory content. Compensating control: GitHub account 2FA and audit log review — outside this project's direct control. SRI is impractical because the markdown changes on every commit. |
-| **R02** | A09 — Security Logging and Alerting Failures | No centralized log aggregation, SIEM, real-time alerting on 403/404 patterns, or external forwarding of Worker-blocked requests | Out of scope | Documented as intentional scope exclusion for a single-developer portfolio project. See `docs/threat-model.md` → Appendix B. Treatment if scope expands: forward Cloud Logging + Cloudflare events to an external SIEM (e.g., Grafana Cloud, Better Stack) and add alerting rules for blocked-request anomalies. |
+| **WEB-R01** | A08 — Software or Data Integrity Failures | Markdown fetched at runtime from `raw.githubusercontent.com` by `ThreatModel.tsx` and `Security.tsx` has no SRI or signature verification; a compromised GitHub account could poison rendered content | Accepted | ReactMarkdown sanitizes HTML (no XSS from this vector); residual is misleading or defamatory content. Compensating control: GitHub account 2FA and audit log review — outside this project's direct control. SRI is impractical because the markdown changes on every commit. |
+| **WEB-R02** | A09 — Security Logging and Alerting Failures | No centralized log aggregation, SIEM, real-time alerting on 403/404 patterns, or external forwarding of Worker-blocked requests | Out of scope | Documented as intentional scope exclusion for a single-developer portfolio project. See `docs/threat-model.md` → Appendix B. Treatment if scope expands: forward Cloud Logging + Cloudflare events to an external SIEM (e.g., Grafana Cloud, Better Stack) and add alerting rules for blocked-request anomalies. |

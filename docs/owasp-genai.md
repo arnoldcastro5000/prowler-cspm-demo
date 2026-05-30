@@ -2,14 +2,14 @@
 
 This project was built with Claude Code, an AI coding agent. The LLM is the *development tool*, not a feature in the application — the deployed dashboard does not call any model and contains no AI runtime surface. This document maps two additional OWASP GenAI frameworks to this project's development workflow; the OWASP Top 10 for LLM Applications is covered separately in `docs/owasp-llm.md`.
 
-**Part 1** (OWASP Top 10 for Agentic Applications, 2026): **6 mitigated · 1 not applicable · 2 partially mitigated (R01, R02) · 1 accepted (R03).**
+**Part 1** (OWASP Top 10 for Agentic Applications, 2026): **6 mitigated · 1 not applicable · 2 partially mitigated (GENAI-R01, GENAI-R02) · 1 accepted (GENAI-R03).**
 
 **Part 2** (LLM AI Cybersecurity & Governance Checklist v1.1): **5 mitigated · 4 not applicable · 4 adapted to single-developer scale.** The four "partially applicable" governance items are *scaling adaptations* (the requirement only partially fits a one-person project), not control gaps, so they do not appear in the residual risk register.
 
 Three open residual risks across both frameworks, consolidated in the **residual risk register** at the end:
-- **R01** — agent goal hijack (blast radius contained; model-level vector cannot be eliminated; same residual as `owasp-llm.md` → R01)
-- **R02** — initial AI-driven dependency selection has no typosquat detection (same residual as `owasp-llm.md` → R02)
-- **R03** — human-agent trust: single-developer judgment cannot be technically enforced
+- **GENAI-R01** — agent goal hijack (blast radius contained; model-level vector cannot be eliminated; same residual as `owasp-llm.md` → LLM-R01)
+- **GENAI-R02** — initial AI-driven dependency selection has no typosquat detection (same residual as `owasp-llm.md` → LLM-R02)
+- **GENAI-R03** — human-agent trust: single-developer judgment cannot be technically enforced
 
 ---
 
@@ -21,15 +21,15 @@ The OWASP Top 10 for Agentic Applications identifies the most critical security 
 
 | # | Category | Status | Why |
 |---|---|---|---|
-| ASI01 | Agent Goal Hijack | 🟡 Partially mitigated | **R01**: blast radius contained (sandbox approval, network allowlist, `--dry-run` makes) — model-level injection vector cannot be fully prevented |
+| ASI01 | Agent Goal Hijack | 🟡 Partially mitigated | **GENAI-R01**: blast radius contained (sandbox approval, network allowlist, `--dry-run` makes) — model-level injection vector cannot be fully prevented |
 | ASI02 | Tool Misuse & Exploitation | 🟢 Mitigated | Per-command sandbox approval; only `run_scan.sh` pre-approved for edits; `git push` not auto-allowed |
 | ASI03 | Identity & Privilege Abuse | 🟢 Mitigated | Sandbox network restriction blocks all cloud provider APIs even though developer ADC is configured on the machine |
-| ASI04 | Agentic Supply Chain Compromise | 🟡 Partially mitigated | **R02**: AI-fabricated typosquat in initial dep selection has no specific detection (same residual as LLM03) |
+| ASI04 | Agentic Supply Chain Compromise | 🟡 Partially mitigated | **GENAI-R02**: AI-fabricated typosquat in initial dep selection has no specific detection (same residual as LLM03) |
 | ASI05 | Unexpected Code Execution | 🟢 Mitigated | Sandbox approval gate; 12 CI workflows validate committed code; no `eval` / `innerHTML` / `subprocess` in codebase |
 | ASI06 | Memory & Context Poisoning | 🟢 Mitigated | Auto-memory writes are per-call user-visible (Write tool calls); memory files gitignored and outside the repo PR surface; CLAUDE.md changes visible in `git diff` |
 | ASI07 | Insecure Inter-Agent Communication | ⚪ Does not apply | Single agent in single session; no inter-agent messaging or orchestration |
 | ASI08 | Cascading Agent Failures | 🟢 Mitigated | Multiple gates break cascades: `--dry-run`; CI required before scans; Zod runtime validation; no auto-merge, no auto-deploy |
-| ASI09 | Human–Agent Trust Exploitation | 🟡 Accepted risk | **R03**: single-developer judgment; sandbox prompts create friction but cannot enforce critical thinking |
+| ASI09 | Human–Agent Trust Exploitation | 🟡 Accepted risk | **GENAI-R03**: single-developer judgment; sandbox prompts create friction but cannot enforce critical thinking |
 | ASI10 | Rogue Agents | 🟢 Mitigated | Per-command approval makes goal drift visible in real time; CI catches rogue changes |
 
 ---
@@ -47,7 +47,7 @@ Attackers could manipulate Claude Code's goals by embedding adversarial instruct
 - Make commands are restricted to `--dry-run` variants only.
 - Network access is limited to `api.github.com` — the agent cannot fetch attacker-controlled payloads.
 
-**Residual risk (R01):** see Residual risk register.
+**Residual risk (GENAI-R01):** see Residual risk register.
 
 See `docs/owasp-llm.md` → LLM01 (Prompt Injection) for the LLM-specific perspective on the same attack vector.
 
@@ -102,7 +102,7 @@ Claude Code dynamically trusts MCP tool schemas, reads dependency manifests, and
 - MCP servers in `.claude/settings.local.json` are explicitly configured, not dynamically discovered.
 - Python ingest uses only the standard library (zero third-party dependencies).
 
-**Residual risk (R02):** see Residual risk register.
+**Residual risk (GENAI-R02):** see Residual risk register.
 
 See `docs/owasp-llm.md` → LLM03 (Supply Chain Vulnerabilities) for the full supply chain defence inventory including CI workflows, Dependabot, SHA-pinned actions, and Docker digest pinning.
 
@@ -185,7 +185,7 @@ Claude Code produces persuasive, well-formatted explanations with high confidenc
 - 12 CI checks provide independent validation (the human does not have to catch everything alone).
 - Session start checklist forces the developer to check CI status before proceeding.
 
-**Residual risk (R03):** see Residual risk register.
+**Residual risk (GENAI-R03):** see Residual risk register.
 
 ---
 
@@ -406,9 +406,9 @@ This project cannot red-team the Claude Code model itself — it is a third-part
 
 | ID | Category | Risk | Status | Treatment / compensating control |
 |---|---|---|---|---|
-| **R01** | ASI01 Agent Goal Hijack | Adversarial file content (dependency README, Prowler scan output, PR description) could influence the agent. Sandbox prevents silent shell exec, network exfil, and infrastructure mutation, but the agent could still write subtly malicious code into files, recommend bad changes under plausible justification, or shape commit text. Goal hijack is a model-level vulnerability that wrapper controls cannot fully prevent. | Partial mitigation | **Compensating controls:** Sandbox `autoAllowBashIfSandboxed: false` (per-command approval); network restricted to `api.github.com`; make targets `--dry-run` only; `git push` not auto-allowed; single-developer review on every commit; 12 CI gates catch known-bad code patterns. **Treatment:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context. Same treatment as `docs/owasp-llm.md` → R01. |
-| **R02** | ASI04 Agentic Supply Chain Compromise | Claude Code chose every dependency in this project. Dependency Review catches *known* CVEs; Dependabot updates *existing* deps; SHA-pinning protects Actions and Docker base images. A typosquatted npm or pip package already in `package-lock.json` from the initial AI-driven selection — that has not yet been flagged in any vulnerability database — has no current detection mechanism. | Partial mitigation | **Compensating controls:** `CLAUDE.md` hard rule blocks the agent from adding any new dep; sandbox requires explicit approval for `npm install`; all GitHub Actions and Docker base images SHA-pinned; Python ingest uses only stdlib (zero third-party). **Treatment:** Add `npm audit` to `frontend-ci.yml` and a SAST scanner (e.g., Semgrep) to CI. Same treatment as `docs/owasp-llm.md` → R02. |
-| **R03** | ASI09 Human–Agent Trust Exploitation | Claude Code produces persuasive, well-formatted explanations with high confidence. A single developer could over-rely on the agent — approving security-relevant commands without scrutiny, accepting "this change is safe" explanations rubber-stamp, or trusting claims that a CI check is unnecessary. | Accepted by design | **Compensating controls:** `autoAllowBashIfSandboxed: false` forces a deliberate approval decision on every command (friction demands attention); `git push` not auto-allowed (separate gate); 12 CI checks provide independent validation; session-start checklist requires CI status check. **Treatment:** None at the technical level — the residual is the single developer's own judgment. No control can fully prevent a human from trusting an AI agent too much. Compensate via deliberate slowdown on security-sensitive approvals and periodic re-reading of CLAUDE.md hard rules. |
+| **GENAI-R01** | ASI01 Agent Goal Hijack | Adversarial file content (dependency README, Prowler scan output, PR description) could influence the agent. Sandbox prevents silent shell exec, network exfil, and infrastructure mutation, but the agent could still write subtly malicious code into files, recommend bad changes under plausible justification, or shape commit text. Goal hijack is a model-level vulnerability that wrapper controls cannot fully prevent. | Partially mitigated | **Compensating controls:** Sandbox `autoAllowBashIfSandboxed: false` (per-command approval); network restricted to `api.github.com`; make targets `--dry-run` only; `git push` not auto-allowed; single-developer review on every commit; 12 CI gates catch known-bad code patterns. **Treatment:** Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context. Same treatment as `docs/owasp-llm.md` → LLM-R01. |
+| **GENAI-R02** | ASI04 Agentic Supply Chain Compromise | Claude Code chose every dependency in this project. Dependency Review catches *known* CVEs; Dependabot updates *existing* deps; SHA-pinning protects Actions and Docker base images. A typosquatted npm or pip package already in `package-lock.json` from the initial AI-driven selection — that has not yet been flagged in any vulnerability database — has no current detection mechanism. | Partially mitigated | **Compensating controls:** `CLAUDE.md` hard rule blocks the agent from adding any new dep; sandbox requires explicit approval for `npm install`; all GitHub Actions and Docker base images SHA-pinned; Python ingest uses only stdlib (zero third-party). **Treatment:** Add `npm audit` to `frontend-ci.yml` and a SAST scanner (e.g., Semgrep) to CI. Same treatment as `docs/owasp-llm.md` → LLM-R02. |
+| **GENAI-R03** | ASI09 Human–Agent Trust Exploitation | Claude Code produces persuasive, well-formatted explanations with high confidence. A single developer could over-rely on the agent — approving security-relevant commands without scrutiny, accepting "this change is safe" explanations rubber-stamp, or trusting claims that a CI check is unnecessary. | Accepted | **Compensating controls:** `autoAllowBashIfSandboxed: false` forces a deliberate approval decision on every command (friction demands attention); `git push` not auto-allowed (separate gate); 12 CI checks provide independent validation; session-start checklist requires CI status check. **Treatment:** None at the technical level — the residual is the single developer's own judgment. No control can fully prevent a human from trusting an AI agent too much. Compensate via deliberate slowdown on security-sensitive approvals and periodic re-reading of CLAUDE.md hard rules. |
 
 ---
 
@@ -418,7 +418,7 @@ This project cannot red-team the Claude Code model itself — it is a third-part
 
 ### RL-01 — SAST scanner added in CI
 
-Addresses the control surface under **ASI05** (Unexpected Code Execution) and part of the **R02 / ASI04** treatment. Mirrors `docs/owasp-llm.md` → Remediation log RL-01.
+Addresses the control surface under **ASI05** (Unexpected Code Execution) and part of the **GENAI-R02 / ASI04** treatment. Mirrors `docs/owasp-llm.md` → Remediation log RL-01.
 
 **Implemented:** a Semgrep SAST gate now runs on every push/PR that touches `dashboard/src/**` or `cloudflare/**`.
 
@@ -429,18 +429,18 @@ Addresses the control surface under **ASI05** (Unexpected Code Execution) and pa
 | Original item | Status now |
 |---|---|
 | ASI05 — "No `eval()`, `subprocess.call(shell=True)`, `dangerouslySetInnerHTML`… in the codebase" (point-in-time observation) | ✅ Now enforced automatically for JS/TS in CI, not just observed. |
-| ASI04 / R02 — "Add … a SAST scanner (e.g., Semgrep) to CI" | ◑ Partially done (see scope note). |
+| ASI04 / GENAI-R02 — "Add … a SAST scanner (e.g., Semgrep) to CI" | ◑ Partially done (see scope note). |
 
 **Scope clarification (for accuracy against the original wording):**
 
-- Semgrep here scans **first-party source** (`dashboard/src`, `cloudflare`), **not** `node_modules`. It does not, on its own, detect typosquatted packages or malicious post-install scripts — so that part of the R02 treatment remains **open**.
+- Semgrep here scans **first-party source** (`dashboard/src`, `cloudflare`), **not** `node_modules`. It does not, on its own, detect typosquatted packages or malicious post-install scripts — so that part of the GENAI-R02 treatment remains **open**.
 - The Python pattern cited under ASI05 (`subprocess.call(shell=True)`) was already covered by **Bandit** (`python-lint.yml`, scanning `ingest/`). Semgrep was deliberately scoped to JS/TS to avoid overlap: Bandit owns Python, Trivy owns IaC, Semgrep owns JS/TS.
 
-**R02 follow-ups:** see RL-02.
+**GENAI-R02 follow-ups:** see RL-02.
 
 ### RL-02 — Install-script execution blocked (`--ignore-scripts`)
 
-Addresses the "malicious post-install scripts" element of the **R02 / ASI04** treatment. Mirrors `docs/owasp-llm.md` → Remediation log RL-02.
+Addresses the "malicious post-install scripts" element of the **GENAI-R02 / ASI04** treatment. Mirrors `docs/owasp-llm.md` → Remediation log RL-02.
 
 **Implemented (2026-05-29):** `npm ci --ignore-scripts` is now used in both install paths — `.github/workflows/frontend-ci.yml` and `dashboard/Dockerfile` (build stage) — blocking dependency lifecycle (preinstall/install/postinstall) scripts from executing on CI runners and the Docker builder, the primary npm supply-chain RCE vector.
 
@@ -448,4 +448,4 @@ Addresses the "malicious post-install scripts" element of the **R02 / ASI04** tr
 
 **Decision — `npm audit` not adopted as a gate:** known-advisory detection that overlaps `dependency-review` (PRs) and Dependabot (weekly + security alerts), currently reports 2 moderate advisories in build-toolchain transitive deps not exploitable in a static-site bundle, and cannot detect novel typosquats. If added later it should be advisory-only (`--audit-level=high`).
 
-**R02 status:** the install-script execution path is now closed; the novel-typosquat-in-initial-selection core remains an **accepted residual** — no detection mechanism exists for an unreported typosquat.
+**GENAI-R02 status:** the install-script execution path is now closed; the novel-typosquat-in-initial-selection core remains an **accepted residual** — no detection mechanism exists for an unreported typosquat.
