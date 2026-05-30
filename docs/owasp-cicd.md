@@ -23,11 +23,11 @@ This project's CI/CD pipeline comprises 12 GitHub Actions workflows that lint, v
 
 **Status:** 🟡 Partially mitigated
 
-Flow control mechanisms prevent code from reaching production without passing required gates. This project's 12 CI workflows are advisory — nothing programmatically blocks `make deploy` if they fail. Branch protection rules are not enforced, and there are no GitHub Environment protection rules on Cloud Run deployment.
+Flow control mechanisms prevent code from reaching production without passing required gates. This project's 13 CI checks are advisory — nothing programmatically blocks `make deploy` if they fail. Branch protection rules are not enforced, and there are no GitHub Environment protection rules on Cloud Run deployment.
 
 **Controls in place:**
 
-- 12 CI workflows run on every push and PR — TypeScript strict, ESLint, Bandit, Semgrep, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate.
+- 13 CI checks run on every push and PR — TypeScript strict, ESLint, Bandit, Semgrep, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate, Socket.dev.
 - `run_scan.sh` guards require committed code and green CI before scans execute.
 - Single developer reviews all commits — no auto-merge.
 - Deployment is manual (`make deploy` from WSL2, never triggered by CI).
@@ -253,7 +253,7 @@ GitHub Actions retains run logs, and Trivy uploads SARIF results to the GitHub S
 - GitHub Actions run history retained and visible in the repository.
 - SARIF uploads from Trivy visible in the GitHub Security tab.
 - Session start checklist in `CLAUDE.md` requires checking `gh run list` for failures at the start of every session.
-- 12 independent workflows provide broad coverage — a failure in one does not silence the others.
+- 13 independent checks provide broad coverage — a failure in one does not silence the others.
 
 **Residual risk (CICD-R03):** see Residual risk register.
 
@@ -274,7 +274,7 @@ See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain). See `docs/owa
 |---|---|---|---|---|
 | **CICD-R01** | CICD-SEC-1 Insufficient Flow Control Mechanisms | `make deploy` is not programmatically blocked by failing CI; no GitHub branch protection on `main` requiring status checks | Partially mitigated | **Compensating controls:** single-developer review on every commit; manual deploy from WSL2; session-start checklist in `CLAUDE.md` requiring `gh run list` before any work. **Treatment:** add CI-status check inside `make deploy` (abort if the latest run on `main` failed); enable branch protection on `main` requiring all checks to pass before merge. |
 | **CICD-R02** | CICD-SEC-9 Improper Artifact Integrity Validation | Docker images pushed to GCP Artifact Registry without signing or SLSA provenance attestation; no verification that the deployed image matches what CI validated | Partially mitigated | **Compensating controls:** build inputs SHA-pinned (Docker base, npm via `package-lock.json`); build and deploy happen on the same machine in the same command (no untrusted artifact handoff); Artifact Registry is private. **Treatment:** sign images with cosign before push; generate and attach SLSA provenance; log image digest in deploy output for an audit trail. |
-| **CICD-R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partially mitigated | **Compensating controls:** 12 independent workflows + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check. **Treatment:** add failure-notification webhook on workflow failure; `make deploy` appends timestamp + image digest + git SHA to a local log file; aggregate SARIF findings into a single view. |
+| **CICD-R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partially mitigated | **Compensating controls:** 13 independent checks + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check. **Treatment:** add failure-notification webhook on workflow failure; `make deploy` appends timestamp + image digest + git SHA to a local log file; aggregate SARIF findings into a single view. |
 
 ---
 
@@ -315,3 +315,19 @@ Closes the **"Consider adding `--ignore-scripts` to `npm ci`"** improvement oppo
 | "Add `npm audit` to the `frontend-ci.yml` workflow…" | Not adopted as a gate — see decision above. |
 
 **Status:** the install-script execution path is now closed. The novel-typosquat-in-initial-selection residual — tracked project-wide as LLM-R02 in `docs/owasp-llm.md` and GENAI-R02 in `docs/owasp-genai.md` (distinct from this document's own CICD-R02, which concerns artifact integrity) — is not a CI/CD-framework residual here (CICD-SEC-3 is assessed as mitigated) and is unaffected by these changes.
+
+### RL-03 — Socket.dev GitHub App added (supply-chain behavioural scanning)
+
+Strengthens **CICD-SEC-3** (Dependency Chain Abuse) by adding a behavioural scanning layer alongside the existing CVE-based Dependency Review check. Mirrors `docs/owasp-llm.md` → Remediation log RL-03.
+
+**Implemented (2026-05-30):** Socket.dev installed as a GitHub App. Scans npm package manifests (package.json, package-lock.json) for malware, typosquatting, obfuscated code, and other supply-chain compromise indicators on every PR — providing detection for threats that have no CVE entry and would not be flagged by `dependency-review.yml` alone.
+
+CICD-SEC-3 status remains **🟢 Mitigated** — Socket.dev is an additive control, not a gap closure.
+
+### RL-04 — lockfile-lint added to Frontend CI (lockfile integrity validation)
+
+Strengthens **CICD-SEC-3** (Dependency Chain Abuse) by adding lockfile integrity validation to the existing Frontend CI gate. Mirrors `docs/owasp-llm.md` → Remediation log RL-04.
+
+**Implemented (2026-05-30):** lockfile-lint added as a step in `frontend-ci.yml`. Validates that `package-lock.json` resolves npm packages only from the official npm registry over HTTPS and checks package integrity hashes — blocking lockfile tampering and non-registry package substitution on every CI run.
+
+CICD-SEC-3 status remains **🟢 Mitigated** — lockfile-lint strengthens the existing Frontend CI gate; the total check count (13) is unchanged.

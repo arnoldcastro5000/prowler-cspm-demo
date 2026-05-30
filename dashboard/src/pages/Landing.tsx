@@ -38,7 +38,7 @@ export default function Landing() {
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed">
             <li><span className="text-white font-semibold">CSPM</span> — 19 of 19 misconfigurations remediated across AWS, GCP, and Azure (100% closure rate, verified by re-scan)</li>
             <li><span className="text-white font-semibold">Secure cloud architecture</span> — This dashboard deployed behind Cloudflare WAF + DDoS protection; it is accessible only through Cloudflare</li>
-            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passed 12 automated CI security gates before merge</li>
+            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passes 13 automated CI security gates before merge</li>
           </ol>
         </div>
 
@@ -97,7 +97,7 @@ export default function Landing() {
                   ['Secrets', 'GCP Secret Manager', 'All cloud credentials fetched at runtime, never stored on disk'],
                   ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
                   ['AI Development', <>Claude Code (sandboxed) + <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
-                  ['CI/CD', 'GitHub Actions + Dependabot', '12 automated checks block unsafe code before it ships + weekly dependency updates'],
+                  ['CI/CD', 'GitHub Actions + Dependabot + Socket.dev', '13 automated checks block unsafe code before it ships + weekly dependency updates'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
                   ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
                   ['Architecture diagrams', <><a href="https://github.com/vidanov/aws-architecture-diagram-skill" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">/aws-architecture-diagram</a> skill</>, 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
@@ -126,33 +126,38 @@ export default function Landing() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
-                {[
+                {([
                   ['Semgrep SAST', 'semgrep.yml', 'Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues'],
                   ['Python Lint (Ruff · Bandit)', 'python-lint.yml', 'Scans the Python ingest code for security flaws and code-quality issues before they ship'],
                   ['Secret Scan (Gitleaks)', 'secret-scan.yml', 'Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo'],
                   ['Hardcoded Config Check (custom grep)', 'hardcoded-config-check.yml', 'Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code'],
                   ['Dependency Review (GitHub)', 'dependency-review.yml', 'Flags any newly added or updated dependency with known security vulnerabilities before it merges'],
+                  ['Socket.dev', null, 'Scans npm package manifests (package.json, package-lock.json) for malware, typosquatting, obfuscated code, and other supply-chain compromise indicators before dependencies are approved for merge'],
                   ['Trivy', 'trivy.yml', 'Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure'],
                   ['Zizmor', 'zizmor.yml', 'Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions'],
                   ['Worker Lint (ESLint)', 'worker-lint.yml', 'Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge'],
-                  ['Frontend CI (TypeScript · ESLint · Vite)', 'frontend-ci.yml', 'Catches type errors, code-quality issues, and broken builds in the dashboard source before they reach the live site'],
+                  ['Frontend CI (TypeScript · ESLint · Vite · lockfile-lint)', 'frontend-ci.yml', 'Validates lockfile integrity against the official npm registry (supply-chain) and catches type errors, code-quality issues, and broken builds in the dashboard TypeScript source (.ts, .tsx) before they reach the live site'],
                   ['Shellcheck', 'shellcheck.yml', 'Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures'],
                   ['Terraform Validate', 'terraform-validate.yml', 'Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure'],
                   ['Docker Build', 'docker-build.yml', 'Catches container and Dockerfile build errors before deployment, so a broken or undeployable image never reaches the live site'],
-                ].map(([name, file, description]) => (
-                  <tr key={file} className="bg-gray-950">
+                ] as [string, string | null, string][]).map(([name, file, description]) => (
+                  <tr key={name} className="bg-gray-950">
                     <td className="px-4 py-2 text-gray-400">{name}</td>
                     <td className="px-4 py-2">
-                      <a
-                        href={`https://github.com/arnoldcastro5000/prowler-cspm-demo/actions/workflows/${file}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <img
-                          src={`https://github.com/arnoldcastro5000/prowler-cspm-demo/actions/workflows/${file}/badge.svg`}
-                          alt={`${name} status`}
-                        />
-                      </a>
+                      {file ? (
+                        <a
+                          href={`https://github.com/arnoldcastro5000/prowler-cspm-demo/actions/workflows/${file}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={`https://github.com/arnoldcastro5000/prowler-cspm-demo/actions/workflows/${file}/badge.svg`}
+                            alt={`${name} status`}
+                          />
+                        </a>
+                      ) : (
+                        <span className="text-xs text-green-400 font-medium">Active · GitHub App</span>
+                      )}
                     </td>
                     <td className="px-4 py-2 text-gray-400">{description}</td>
                   </tr>

@@ -7,7 +7,7 @@
 | Control family | Threat addressed | Primary controls | Verified by |
 |---|---|---|---|
 | **1. Credential & secrets hygiene** | Credential theft, exposure in git | GCP Secret Manager, runtime `trap` cleanup, Gitleaks (pre-commit + CI), data redaction | Two independent Gitleaks scans + redaction in published findings |
-| **2. Secure build & supply chain** | Compromised dependencies, CI takeover | 12 automated workflows, SHA-pinned actions, `persist-credentials: false`, Dependabot, Trivy, Zizmor | CI gate status on every push and PR |
+| **2. Secure build & supply chain** | Compromised dependencies, CI takeover | 13 automated security checks, SHA-pinned actions, `persist-credentials: false`, Dependabot, Socket.dev, Trivy, Zizmor | CI gate status on every push and PR |
 | **3. Defended runtime edge** | DDoS, web attacks, origin bypass | Cloudflare WAF + DDoS + Bot Fight + SSL Strict; 8 Worker rules; origin shared secret | Direct-to-origin requests return 403; Worker Lint CI |
 | **4. Hardened application surface** | XSS, clickjacking, MIME sniffing, downgrade | 6 HTTP security headers (CSP w/ nonce, HSTS, X-Frame, etc.) | OWASP ZAP baseline scan |
 | **5. AI development guardrails** | Inadvertent destructive change, data exfiltration via agent | Sandboxed Claude Code (filesystem / network / command restrictions) | Sandbox config enforced on every session |
@@ -47,9 +47,9 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ## 2. Secure Build & Supply Chain
 
-*Every change ships through 12 automated security gates. Dependencies pin to SHAs and are reviewed weekly.*
+*Every change ships through 13 automated security gates. Dependencies pin to SHAs and are reviewed weekly.*
 
-12 automated workflows run on every push and pull request. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
+13 automated security checks run on every push and pull request. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
 
 | Workflow | What it protects against |
 |---|---|
@@ -58,10 +58,11 @@ Both scans run independently — the local hook catches secrets before they leav
 | Secret Scan (Gitleaks) | Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo |
 | Hardcoded Config Check (custom grep) | Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code |
 | Dependency Review (GitHub) | Flags any newly added or updated dependency with known security vulnerabilities before it merges |
+| Socket.dev (GitHub App) | Scans npm package manifests (package.json, package-lock.json) for malware, typosquatting, obfuscated code, and other supply-chain compromise indicators before dependencies are approved for merge |
 | Trivy | Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure |
 | Zizmor | Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions |
 | Worker Lint (ESLint) | Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge |
-| Frontend CI (TypeScript · ESLint · Vite) | Catches type errors, code-quality issues, and broken builds in the dashboard source before they reach the live site |
+| Frontend CI (TypeScript · ESLint · Vite · lockfile-lint) | Validates lockfile integrity against the official npm registry (supply-chain) and catches type errors, code-quality issues, and broken builds in the dashboard TypeScript source (.ts, .tsx) before they reach the live site |
 | Shellcheck | Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures |
 | Terraform Validate | Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure |
 | Docker Build | Catches container and Dockerfile build errors before deployment, so a broken or undeployable image never reaches the live site |

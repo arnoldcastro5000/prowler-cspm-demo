@@ -7,7 +7,7 @@ This project deploys a read-only React dashboard on Cloud Run behind Cloudflare.
 | # | Category | Status | Why |
 |---|---|---|---|
 | A01 | Broken Access Control | 🟢 Mitigated | Worker enforces path + method allowlist; origin secret blocks direct Cloud Run access; no user roles to bypass |
-| A02 | Security Misconfiguration | 🟢 Mitigated | 7 nginx security headers; SHA-pinned container images; Terraform validate + Trivy in CI |
+| A02 | Security Misconfiguration | 🟢 Mitigated | 6 nginx security headers; SHA-pinned container images; Terraform validate + Trivy in CI |
 | A03 | Software Supply Chain Failures | 🟢 Mitigated | SHA-pinned deps and Actions; Dependabot + Dependency Review + Zizmor; Python ingest uses stdlib only |
 | A04 | Cryptographic Failures | 🟢 Mitigated | Cloudflare Full (Strict) TLS; HSTS one year; no custom crypto; secrets in GCP Secret Manager only |
 | A05 | Injection | ⚪ Does not apply | No input surface; React auto-escapes; Zod validates findings; CSP nonce blocks inline scripts |
@@ -205,3 +205,25 @@ The application handles error paths explicitly — no component fails open or si
 |---|---|---|---|---|
 | **WEB-R01** | A08 — Software or Data Integrity Failures | Markdown fetched at runtime from `raw.githubusercontent.com` by `ThreatModel.tsx` and `Security.tsx` has no SRI or signature verification; a compromised GitHub account could poison rendered content | Accepted | ReactMarkdown sanitizes HTML (no XSS from this vector); residual is misleading or defamatory content. Compensating control: GitHub account 2FA and audit log review — outside this project's direct control. SRI is impractical because the markdown changes on every commit. |
 | **WEB-R02** | A09 — Security Logging and Alerting Failures | No centralized log aggregation, SIEM, real-time alerting on 403/404 patterns, or external forwarding of Worker-blocked requests | Out of scope | Documented as intentional scope exclusion for a single-developer portfolio project. See `docs/threat-model.md` → Appendix B. Treatment if scope expands: forward Cloud Logging + Cloudflare events to an external SIEM (e.g., Grafana Cloud, Better Stack) and add alerting rules for blocked-request anomalies. |
+
+---
+
+## Remediation log
+
+*Added 2026-05-30. The per-category assessments and the residual risk register above are retained as the original point-in-time review. This log records remediation completed since, without altering the original findings.*
+
+### RL-01 — Socket.dev GitHub App added (supply-chain behavioural scanning)
+
+Strengthens **A03** (Software Supply Chain Failures) by adding a behavioural scanning layer alongside the existing CVE-based Dependency Review check.
+
+**Implemented (2026-05-30):** Socket.dev installed as a GitHub App. Scans npm package manifests (package.json, package-lock.json) for malware, typosquatting, obfuscated code, and other supply-chain compromise indicators on every PR. Provides detection for supply-chain threats that have no CVE entry and would not be flagged by `dependency-review.yml` alone.
+
+A03 status remains **🟢 Mitigated** — Socket.dev is an additive control, not a gap closure.
+
+### RL-02 — lockfile-lint added to Frontend CI (lockfile integrity validation)
+
+Strengthens **A03** (Software Supply Chain Failures) by adding lockfile integrity validation to the existing Frontend CI gate.
+
+**Implemented (2026-05-30):** lockfile-lint added as a step in `frontend-ci.yml`. Validates that `package-lock.json` resolves npm packages only from the official npm registry over HTTPS and checks package integrity hashes — blocking lockfile tampering and non-registry package substitution on every CI run.
+
+A03 status remains **🟢 Mitigated** — lockfile-lint strengthens the existing Frontend CI gate; the total check count (13) is unchanged.
