@@ -143,6 +143,31 @@ deploy:
 	    echo "Run: gh run list --branch main --limit 5" >&2 && \
 	    exit 1; \
 	fi
+	@SHA=$$(git rev-parse HEAD) && \
+	echo "=== Waiting for Docker Build CI ($$SHA) ===" && \
+	while true; do \
+	    LINE=$$(gh run list --workflow docker-build.yml --branch main --limit 10 \
+	        --json headSha,status,conclusion \
+	        --jq '.[] | select(.headSha == "'"$$SHA"'") | "\(.status) \(.conclusion)"' \
+	        | head -1) ; \
+	    if [ -z "$$LINE" ]; then \
+	        echo "  No Docker Build run found for current commit — skipping wait" ; \
+	        break ; \
+	    fi ; \
+	    STATUS=$$(echo "$$LINE" | awk '{print $$1}') ; \
+	    CONCLUSION=$$(echo "$$LINE" | awk '{print $$2}') ; \
+	    if [ "$$STATUS" = "completed" ]; then \
+	        if [ "$$CONCLUSION" = "success" ]; then \
+	            echo "=== Docker Build CI: PASSED ===" ; \
+	            break ; \
+	        else \
+	            echo "ERROR: Docker Build CI: FAILED ($$CONCLUSION). Fix before deploying." >&2 && exit 1 ; \
+	        fi ; \
+	    else \
+	        echo "  Docker Build CI: $$STATUS — retrying in 15s..." ; \
+	        sleep 15 ; \
+	    fi ; \
+	done
 	@echo "=== Building Docker image ==="
 	docker build -t $(IMAGE) dashboard/
 	@echo "=== Pushing to Artifact Registry ===" && \
