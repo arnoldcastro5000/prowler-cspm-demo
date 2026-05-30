@@ -54,6 +54,7 @@ Thumbs.db
 # Local working docs — never commit
 findings.md
 lesson.md
+docs/dockerhardening.md
 
 # Deploy audit log — local only
 deploy.log
