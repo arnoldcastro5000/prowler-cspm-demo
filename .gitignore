@@ -54,3 +54,6 @@ Thumbs.db
 # Local working docs — never commit
 findings.md
 lesson.md
+
+# Deploy audit log — local only
+deploy.log

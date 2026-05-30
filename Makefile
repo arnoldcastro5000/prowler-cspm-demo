@@ -7,6 +7,7 @@ AR_REPO        := prowler-cspm
 IMAGE          := $(REGION)-docker.pkg.dev/$(PROJECT_ID)/$(AR_REPO)/dashboard
 SERVICE        := prowler-cspm-dashboard
 CF_SECRET_NAME        := prowler-cf-access-secret
+DEPLOY_LOG            := deploy.log
 
 ENV_DIR    := iac/environments
 OUTPUT_DIR := /var/tmp/prowler-output
@@ -133,16 +134,40 @@ deploy:
 		|| (echo "ERROR: findings_before.json missing. Run 'make scan' first." && exit 1)
 	@test -f dashboard/public/findings_after.json \
 		|| (echo "ERROR: findings_after.json missing. Run 'make rescan' first." && exit 1)
+	@CONCLUSION=$$(gh run list --branch main --limit 1 \
+	    --json conclusion --jq '.[0].conclusion') && \
+	if [ "$$CONCLUSION" = "success" ]; then \
+	    echo "=== CI status: PASSING ($$CONCLUSION) — proceeding ===" ; \
+	else \
+	    echo "=== CI status: FAILING ($$CONCLUSION) — aborting ===" >&2 && \
+	    echo "Run: gh run list --branch main --limit 5" >&2 && \
+	    exit 1; \
+	fi
 	@echo "=== Building Docker image ==="
 	docker build -t $(IMAGE) dashboard/
-	@echo "=== Pushing to Artifact Registry ==="
-	docker push $(IMAGE)
-	@echo "=== Deploying to Cloud Run ==="
-	gcloud run deploy $(SERVICE) \
-		--image $(IMAGE) \
+	@echo "=== Pushing to Artifact Registry ===" && \
+	docker push $(IMAGE) && \
+	DIGEST_SHA=$$(docker inspect --format='{{index .RepoDigests 0}}' $(IMAGE) | awk -F@ '{print $$2}') && \
+	if [ -z "$$DIGEST_SHA" ]; then \
+	    echo "ERROR: Failed to capture image digest after push." >&2 && exit 1; \
+	fi && \
+	DIGEST=$(IMAGE)@$$DIGEST_SHA && \
+	echo "=== Image digest captured: $$DIGEST ===" && \
+	echo "=== Deploying to Cloud Run ===" && \
+	if gcloud run deploy $(SERVICE) \
+		--image $$DIGEST \
 		--region $(REGION) \
 		--project $(PROJECT_ID) \
 		--set-env-vars "CF_ACCESS_SECRET=$$(gcloud secrets versions access latest \
 			--secret=$(CF_SECRET_NAME) \
-			--project=$(PROJECT_ID))"
-	@echo "=== Deploy complete ==="
+			--project=$(PROJECT_ID))"; then \
+	    printf "%s\t%s\t%s\n" \
+	        "$$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+	        "$$(git rev-parse HEAD)" \
+	        "$$DIGEST" \
+	        >> $(DEPLOY_LOG) && \
+	    echo "=== Deploy complete: $$DIGEST ===" && \
+	    echo "=== Logged to $(DEPLOY_LOG) ===" ; \
+	else \
+	    echo "ERROR: gcloud run deploy failed." >&2 && exit 1; \
+	fi
