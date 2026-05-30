@@ -53,17 +53,18 @@ Both scans run independently — the local hook catches secrets before they leav
 
 | Workflow | What it protects against |
 |---|---|
-| Frontend CI | Catches code errors and broken builds before they reach the live site |
-| Docker Build | Verifies the application container builds correctly before deployment |
-| Terraform Validate | Ensures infrastructure configuration is valid before applying to cloud environments |
-| Python Lint | Detects code quality issues and common security mistakes in the scan pipeline |
-| Shellcheck | Catches scripting errors in the scan automation that could cause silent failures |
-| Secret Scan | Prevents credentials, API keys, and tokens from being accidentally committed to the repository |
-| Trivy | Scans infrastructure code for known security misconfigurations before deployment |
-| Zizmor | Audits the CI pipelines themselves for supply chain vulnerabilities |
-| Hardcoded Config Check | Blocks cloud account IDs and resource identifiers from being exposed in source code |
-| Dependency Review | Flags third-party libraries with known security vulnerabilities before they are added |
-| Worker Lint | Validates the Cloudflare edge security rules that protect the live dashboard |
+| Semgrep SAST | Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues |
+| Python Lint (Ruff · Bandit) | Scans the Python ingest code for security flaws and code-quality issues before they ship |
+| Secret Scan (Gitleaks) | Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo |
+| Hardcoded Config Check (custom grep) | Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code |
+| Dependency Review (GitHub) | Flags any newly added or updated dependency with known security vulnerabilities before it merges |
+| Trivy | Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure |
+| Zizmor | Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions |
+| Worker Lint (ESLint) | Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge |
+| Frontend CI (TypeScript · ESLint · Vite) | Catches type errors, code-quality issues, and broken builds in the dashboard source before they reach the live site |
+| Shellcheck | Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures |
+| Terraform Validate | Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure |
+| Docker Build | Catches container and Dockerfile build errors before deployment, so a broken or undeployable image never reaches the live site |
 
 Additional notes:
 
@@ -130,7 +131,7 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 
 ### DAST — Dynamic Application Security Testing
 
-OWASP ZAP baseline scan is run manually against the local development server (`http://localhost:5173/`). The scan covers passive checks across all discovered URLs.
+OWASP ZAP baseline scan is run manually against the deployed application. The scan covers passive checks across all discovered URLs.
 
 ---
 

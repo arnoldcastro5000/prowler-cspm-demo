@@ -30,7 +30,7 @@
 
 ## 2. Build & Supply Chain Threats
 
-*The build is the new perimeter. Every dependency pins, every change passes 11 gates, and the CI runner carries no credentials to steal.*
+*The build is the new perimeter. Every dependency pins, every change passes 12 gates, and the CI runner carries no credentials to steal.*
 
 | Scenario | What happens | How it is addressed |
 |---|---|---|
@@ -131,6 +131,8 @@ This project intentionally creates security vulnerabilities in real cloud enviro
 | Remote login open to the internet | AWS | Server accepts SSH connections from any IP address | Unauthorized access attempts against the server |
 | Storage bucket public access enabled | AWS | Bucket contents readable by anyone on the internet | Data theft if files were present |
 | Weak password policy | AWS | Minimum password length set below 14 characters | Brute-force attacks against console login |
+| Multi-region audit logging disabled | AWS | AWS API activity outside the primary region is not recorded in CloudTrail | An attacker operating in a non-logged region could act without leaving an audit trail |
+| S3 bucket default encryption disabled | AWS | Objects uploaded to the bucket are not encrypted at rest unless explicitly specified | Data stored in the bucket is readable if the underlying storage is compromised |
 | Storage bucket public access enabled | Google Cloud | Bucket contents readable by anyone on the internet | Data theft if files were present |
 | Firewall allows remote login from any source | Google Cloud | SSH connections accepted from any IP address | Unauthorized access to any server using this firewall rule |
 | Service account has administrative access | Google Cloud | A service account can perform any action in the project | Full project takeover if the service account key is compromised |
