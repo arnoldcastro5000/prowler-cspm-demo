@@ -274,7 +274,7 @@ See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain). See `docs/owa
 |---|---|---|---|---|
 | **CICD-R01** | CICD-SEC-1 Insufficient Flow Control Mechanisms | `make deploy` is not programmatically blocked by failing CI; no GitHub branch protection on `main` requiring status checks | Partially mitigated | **Compensating controls:** single-developer review on every commit; manual deploy from WSL2; session-start checklist in `CLAUDE.md` requiring `gh run list` before any work. **Treatment:** add CI-status check inside `make deploy` (abort if the latest run on `main` failed); enable branch protection on `main` requiring all checks to pass before merge. |
 | **CICD-R02** | CICD-SEC-9 Improper Artifact Integrity Validation | Docker images pushed to GCP Artifact Registry without signing or SLSA provenance attestation; no verification that the deployed image matches what CI validated | Partially mitigated | **Compensating controls:** build inputs SHA-pinned (Docker base, npm via `package-lock.json`); build and deploy happen on the same machine in the same command (no untrusted artifact handoff); Artifact Registry is private. **Treatment:** sign images with cosign before push; generate and attach SLSA provenance; log image digest in deploy output for an audit trail. |
-| **CICD-R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partially mitigated | **Compensating controls:** 13 independent checks + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check. **Treatment:** add failure-notification webhook on workflow failure; `make deploy` appends timestamp + image digest + git SHA to a local log file; aggregate SARIF findings into a single view. |
+| **CICD-R03** | CICD-SEC-10 Insufficient Logging and Visibility | No alerting on CI failures; no audit trail for `make deploy` operations from WSL2; no aggregated view of SARIF findings across workflows | Partially mitigated | **Compensating controls:** 13 independent checks + GitHub run history + SARIF in Security tab; session-start checklist requires `gh run list` check; Harden Runner (audit mode) records runner egress connections in the Frontend CI job summary (RL-05). **Treatment:** add failure-notification webhook on workflow failure; `make deploy` appends timestamp + image digest + git SHA to a local log file; aggregate SARIF findings into a single view. |
 
 ---
 
@@ -331,3 +331,15 @@ Strengthens **CICD-SEC-3** (Dependency Chain Abuse) by adding lockfile integrity
 **Implemented (2026-05-30):** lockfile-lint added as a step in `frontend-ci.yml`. Validates that `package-lock.json` resolves npm packages only from the official npm registry over HTTPS and checks package integrity hashes — blocking lockfile tampering and non-registry package substitution on every CI run.
 
 CICD-SEC-3 status remains **🟢 Mitigated** — lockfile-lint strengthens the existing Frontend CI gate; the total check count (13) is unchanged.
+
+### RL-05 — Harden Runner added to Frontend CI (runner egress auditing)
+
+Partially addresses **CICD-SEC-10** (Insufficient Logging and Visibility) by adding runner egress visibility to the Frontend CI job summary. Also strengthens **CICD-SEC-7** (Insecure System Configuration) as a runner hardening measure.
+
+**Implemented (2026-05-30):** `step-security/harden-runner` (v2.19.4, SHA-pinned) added to `frontend-ci.yml` with `egress-policy: audit`. Records all outbound network connections the runner makes during the workflow and surfaces them in the GitHub Actions job summary — establishing a verified egress baseline and enabling detection of unexpected network calls (e.g., a compromised action or dependency exfiltrating data during CI).
+
+**Current mode: audit only.** No connections are blocked. The audit log is the prerequisite for switching to `egress-policy: block` with an explicit allowed-hosts list once the baseline is stable.
+
+**Scope:** `frontend-ci.yml` only. Other workflows do not yet have Harden Runner.
+
+CICD-SEC-10 status remains **🟡 Partially mitigated** — CICD-R03 (no CI failure alerting, no deploy audit trail) is unaffected. Harden Runner audit adds a new visibility layer but does not close those gaps.
