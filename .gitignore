@@ -55,6 +55,7 @@ Thumbs.db
 findings.md
 lesson.md
 docs/dockerhardening.md
+docs/stride.md
 
 # Deploy audit log — local only
 deploy.log
