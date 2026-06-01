@@ -57,6 +57,7 @@ lesson.md
 docs/dockerhardening.md
 docs/stride.md
 docs/stride-handoff.md
+docs/stride-v2.md
 
 # Deploy audit log — local only
 deploy.log
