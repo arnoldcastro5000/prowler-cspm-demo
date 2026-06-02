@@ -1,0 +1,12 @@
+{
+    "build": { "dockerfile": "Dockerfile" },
+    "features": {
+      "ghcr.io/devcontainers/features/node:1": {},
+      "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
+    },
+    "remoteUser": "vscode",
+    "containerEnv": {
+      "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+      "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1"
+    }
+}

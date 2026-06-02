@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+WORKSPACE="$(cd "$(dirname "$0")" && pwd)"
+
+# Start container if not already running
+devcontainer up --workspace-folder "$WORKSPACE"
+
+# Drop into bash — auth persists in ~/.claude.json inside the container
+devcontainer exec --workspace-folder "$WORKSPACE" bash
