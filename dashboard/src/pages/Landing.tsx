@@ -38,7 +38,7 @@ export default function Landing() {
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed">
             <li><span className="text-white font-semibold">CSPM</span> — 19 of 19 misconfigurations remediated across AWS, GCP, and Azure (100% closure rate, verified by re-scan)</li>
             <li><span className="text-white font-semibold">Secure cloud architecture</span> — This dashboard deployed behind Cloudflare WAF + DDoS protection; it is accessible only through Cloudflare</li>
-            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — This POC built with an isolated AI agent; every change passes 14 automated CI security gates before merge</li>
+            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — This POC built with an isolated AI agent; every change passes 15 automated CI security gates before merge</li>
           </ol>
         </div>
 
@@ -100,7 +100,7 @@ export default function Landing() {
                   ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
                   ['AI Development', <>Claude Code +<a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
                   ['AI Dev Sandbox', <><a href="https://code.claude.com/docs/en/devcontainer" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">DevContainer</a> — workspace mount, iptables egress firewall, bubblewrap process sandbox</>, 'Three-layer isolation: filesystem scoped to project root, network restricted to allowlist, subprocess sandboxed'],
-                  ['CI/CD', 'GitHub Actions + Dependabot + Socket.dev', '14 automated checks block unsafe code before it ships + weekly dependency updates'],
+                  ['CI/CD', 'GitHub Actions + Dependabot + Socket.dev', '15 automated checks block unsafe code before it ships + weekly dependency updates'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
                   ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
                   ['Architecture diagrams', <><a href="https://github.com/vidanov/aws-architecture-diagram-skill" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">/aws-architecture-diagram</a> skill</>, 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
