@@ -13,6 +13,7 @@ import OWASPTop10 from './pages/OWASPTop10'
 import OWASPCICD from './pages/OWASPCICD'
 import OWASPLLM from './pages/OWASPLLM'
 import OWASPGenAI from './pages/OWASPGenAI'
+import SecuritySummary from './pages/SecuritySummary'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<Landing />} />
         <Route path="/before" element={<Before />} />
         <Route path="/after" element={<After />} />
+        <Route path="/security-summary" element={<SecuritySummary />} />
         <Route path="/security" element={<Security />} />
         <Route path="/threat-model" element={<ThreatModel />} />
         <Route path="/architecture" element={<Architecture />} />
