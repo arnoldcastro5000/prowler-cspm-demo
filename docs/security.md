@@ -21,7 +21,7 @@
 ### Credential handling
 
 - All cloud credentials (AWS, GCP, Azure) are stored in **GCP Secret Manager** — never on disk, never in environment files, never committed to git.
-- Credentials are fetched at runtime by WSL2 using `gcloud auth` ADC. See `prowler/run_scan.sh` and `Makefile`.
+- Credentials are fetched at runtime by the **developer on WSL2** (outside the DevContainer) using `gcloud auth` ADC. The AI agent running inside the DevContainer has no access to these credentials — the DevContainer does not mount the host credential directories and does not have `gcloud` installed. See `prowler/run_scan.sh` and `Makefile`.
 - `run_scan.sh` uses a `trap cleanup EXIT` to unset all exported credential environment variables on exit, whether the scan succeeds or fails.
 - The Cloudflare origin validation secret is fetched from Secret Manager at deploy time and set as a Cloud Run environment variable — it is never stored in the image or repository.
 
