@@ -7,7 +7,7 @@
 | Control family | Threat addressed | Primary controls | Verified by |
 |---|---|---|---|
 | **1. Credential & secrets hygiene** | Credential theft, exposure in git | GCP Secret Manager, runtime `trap` cleanup, Gitleaks (pre-commit + CI), data redaction | Two independent Gitleaks scans + redaction in published findings |
-| **2. Secure build & supply chain** | Compromised dependencies, CI takeover | 13 automated security checks, SHA-pinned actions, `persist-credentials: false`, Dependabot, Socket.dev, Trivy, Zizmor | CI gate status on every push and PR |
+| **2. Secure build & supply chain** | Compromised dependencies, CI takeover | 14 automated security checks, SHA-pinned actions, `persist-credentials: false`, Socket.dev, Trivy, Zizmor | CI gate status on every push and PR |
 | **3. Defended runtime edge** | DDoS, web attacks, origin bypass | Cloudflare WAF + DDoS + Bot Fight + SSL Strict; 8 Worker rules; origin shared secret | Direct-to-origin requests return 403; Worker Lint CI |
 | **4. Hardened application surface** | XSS, clickjacking, MIME sniffing, downgrade | 6 HTTP security headers (CSP w/ nonce, HSTS, X-Frame, etc.) | OWASP ZAP baseline scan |
 | **5. AI development guardrails** | Inadvertent destructive change, data exfiltration via agent | Sandboxed Claude Code (filesystem / network / command restrictions) | Sandbox config enforced on every session |
@@ -57,7 +57,8 @@ Both scans run independently — the local hook catches secrets before they leav
 | Python Lint (Ruff · Bandit) | Scans the Python ingest code for security flaws and code-quality issues before they ship |
 | Secret Scan (Gitleaks) | Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo |
 | Hardcoded Config Check (custom grep) | Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code |
-| Dependency Review (GitHub) | Flags any newly added or updated dependency with known security vulnerabilities before it merges |
+| Dependabot | Monitors committed dependency files (`package-lock.json`, `requirements.txt`, GitHub Actions) on a weekly schedule; opens automated fix PRs when a known CVE is found in an *already-installed* version. Catches vulnerabilities that landed before CI ran. |
+| Dependency Review (GitHub) | Runs on every pull request and diffs the before/after dependency graph; blocks merge if the *incoming change* introduces a known CVE. Catches vulnerabilities at the point they are introduced. |
 | Socket.dev (GitHub App) | Scans npm package manifests (package.json, package-lock.json) for malware, typosquatting, obfuscated code, and other supply-chain compromise indicators before dependencies are approved for merge |
 | Trivy | Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure |
 | Zizmor | Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions |
@@ -70,7 +71,6 @@ Both scans run independently — the local hook catches secrets before they leav
 Additional notes:
 
 - The intentional misconfigurations in `iac/modules/` are expected Trivy findings — they represent the before-state infrastructure this project is designed to demonstrate.
-- **Dependabot** opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
 - For a full risk analysis of the CI/CD pipeline against the **OWASP Top 10 CI/CD Security Risks**, see `docs/owasp-cicd.md`.
 
 **Accepted risk — scan output chain of custody.** Prowler writes findings JSON to `/var/tmp/prowler-output/` (mode 0755) and `dashboard/public/` before `make deploy`. Neither path is signature-protected. Tampering between scan and ingest is possible but requires an interactive session on the same WSL2 machine during the narrow window between `make scan` and `make deploy`. In a single-operator PoC context with no adversarial local access, this risk is accepted. Production deployment would require output signing and signature verification at ingest.

@@ -38,7 +38,7 @@ export default function Landing() {
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed">
             <li><span className="text-white font-semibold">CSPM</span> — 19 of 19 misconfigurations remediated across AWS, GCP, and Azure (100% closure rate, verified by re-scan)</li>
             <li><span className="text-white font-semibold">Secure cloud architecture</span> — This dashboard deployed behind Cloudflare WAF + DDoS protection; it is accessible only through Cloudflare</li>
-            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passes 13 automated CI security gates before merge</li>
+            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passes 14 automated CI security gates before merge</li>
           </ol>
         </div>
 
@@ -46,7 +46,7 @@ export default function Landing() {
         <div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">What makes it real</h2>
           <ul className="space-y-3 text-gray-300">
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Claude Code runs in a locked-down devcontainer — network access restricted to an allowlist, filesystem writes scoped to the project</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span><span>Claude Code runs in a locked-down <a href="https://code.claude.com/docs/en/devcontainer" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">devcontainer</a> — network access restricted to an allowlist, filesystem writes scoped to the project</span></li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Dashboard container hardened — runs as non-root, CVE-scanned on every CI build, deployed to Cloud Run by immutable digest</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>All cloud credentials stored in GCP Secret Manager — fetched at runtime, never on disk</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Every code change is automatically checked for security issues before it ships</li>
@@ -98,8 +98,9 @@ export default function Landing() {
                   ['Edge', 'Cloudflare | CDN, WAF, DDoS protection, DNS', 'Full edge security layer; origin access blocked without shared secret'],
                   ['Secrets', 'GCP Secret Manager', 'All cloud credentials fetched at runtime, never stored on disk'],
                   ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
-                  ['AI Development', <>Claude Code (sandboxed) + <a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
-                  ['CI/CD', 'GitHub Actions + Dependabot + Socket.dev', '13 automated checks block unsafe code before it ships + weekly dependency updates'],
+                  ['AI Development', <>Claude Code +<a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
+                  ['AI Dev Sandbox', 'DevContainer — workspace mount, iptables egress firewall, bubblewrap process sandbox', 'Three-layer isolation: filesystem scoped to project root, network restricted to allowlist, subprocess sandboxed'],
+                  ['CI/CD', 'GitHub Actions + Dependabot + Socket.dev', '14 automated checks block unsafe code before it ships + weekly dependency updates'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
                   ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
                   ['Architecture diagrams', <><a href="https://github.com/vidanov/aws-architecture-diagram-skill" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">/aws-architecture-diagram</a> skill</>, 'Generates validated draw.io architecture diagrams using official AWS4 icon libraries'],
@@ -124,17 +125,18 @@ export default function Landing() {
                 <tr>
                   <th className="w-1/5 px-4 py-2 text-left text-xs text-gray-500 uppercase">Workflow</th>
                   <th className="w-2/5 px-4 py-2 text-left text-xs text-gray-500 uppercase">Status</th>
-                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">What it protects against</th>
+                  <th className="px-4 py-2 text-left text-xs text-gray-500 uppercase">Rationale</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {([
+                  ['Dependabot', null, 'Monitors committed dependency files; opens fix PRs when a CVE is found in an already-installed version. Software Composition Analysis (SCA) on post-merge, scheduled daily.'],
+                  ['Dependency Review (GitHub)', 'dependency-review.yml', 'Runs on every pull request and blocks merge if the incoming change introduces a known CVE. SCA on pre-merge, on every PR.'],
+                  ['Socket.dev', null, 'Scans npm package manifests before dependencies are approved for merge. SCA focused on supply-chain threats (malware, typosquatting) rather than CVEs.'],
                   ['Semgrep SAST', 'semgrep.yml', 'Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues'],
                   ['Python Lint (Ruff · Bandit)', 'python-lint.yml', 'Scans the Python ingest code for security flaws and code-quality issues before they ship'],
                   ['Secret Scan (Gitleaks)', 'secret-scan.yml', 'Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo'],
                   ['Hardcoded Config Check (custom grep)', 'hardcoded-config-check.yml', 'Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code'],
-                  ['Dependency Review (GitHub)', 'dependency-review.yml', 'Flags any newly added or updated dependency with known security vulnerabilities before it merges'],
-                  ['Socket.dev', null, 'Scans npm package manifests (package.json, package-lock.json) for malware, typosquatting, obfuscated code, and other supply-chain compromise indicators before dependencies are approved for merge'],
                   ['Trivy', 'trivy.yml', 'Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure'],
                   ['Zizmor', 'zizmor.yml', 'Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions'],
                   ['Worker Lint (ESLint)', 'worker-lint.yml', 'Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge'],
@@ -157,6 +159,8 @@ export default function Landing() {
                             alt={`${name} status`}
                           />
                         </a>
+                      ) : name === 'Dependabot' ? (
+                        <span className="text-xs text-green-400 font-medium">Active · GitHub Bot</span>
                       ) : (
                         <span className="text-xs text-green-400 font-medium">Active · GitHub App</span>
                       )}
