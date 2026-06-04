@@ -1,14 +1,14 @@
-# Security Controls — prowler-cspm
+# Security Controls — Executive Summary
 
 **Date:** June 2026  
-**Companion document:** `docs/threat-model2.md` — risk assessment this document responds to  
 **Technical detail:** `docs/security.md` — full control specifications
+**Companion document:** `docs/threat-model.md` — risk assessment this document responds to  
 
 ---
 
 ## Security Posture at a Glance
 
-Five defence-in-depth control layers protect the prowler-cspm pipeline from the public internet to the developer workstation. Every risk identified in the companion risk assessment maps to a named, implemented control — verified in production or confirmed at container startup. Three residual risks — scan output integrity, single-session credential exposure, and cache poisoning — have been assessed and accepted as appropriate for a single-operator proof-of-concept; the rationale for each is documented below. The remaining open gaps in the AI agent sandbox are noted with the controls that partially address them.
+Five defence-in-depth control layers protect this proof-of-concept and the prowler-cspm pipeline from the public internet to the developer workstation. Every risk identified in the companion risk assessment maps to a named, implemented control — verified in production or confirmed at container startup. Three residual risks — scan output integrity, single-session credential exposure, and cache poisoning — have been assessed and accepted as appropriate for a single-operator proof-of-concept; the rationale for each is documented below. The remaining open gaps in the AI agent sandbox are noted with the controls that partially address them.
 
 | Control | Threat it addresses | Verification | Gaps |
 |---|---|---|---|
