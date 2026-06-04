@@ -15,7 +15,7 @@ Five defence-in-depth control layers protect the prowler-cspm pipeline from the 
 | **1. Edge & Network Defence** | Unauthorized access, volumetric attacks, direct origin bypass | Direct-to-origin requests return 403 in production | Cache poisoning via origin headers — accepted |
 | **2. Application Hardening** | Cross-site scripting, clickjacking, content injection | OWASP ZAP scan against deployed application | None identified — static app with no backend API |
 | **3. Secrets & Credential Hygiene** | Credentials stolen or leaked into code | Two independent secret scans on every commit | Single-session credential exposure — accepted |
-| **4. Build Pipeline & Supply Chain** | Compromised dependencies, CI pipeline takeover | 13 automated gates on every push and pull request | Scan output chain of custody — accepted |
+| **4. Build Pipeline & Supply Chain** | Compromised dependencies, CI pipeline takeover | 15 automated security checks (14 CI gates + pre-commit hook) on every push and pull request | Scan output chain of custody — accepted |
 | **5. AI Agent Sandbox** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Firewall self-test on every container startup | Firewall can be disabled by any container process; install scripts unverified; credential isolation applies inside the container only |
 
 ---
@@ -64,7 +64,7 @@ Two independent checks scan every code change for accidentally included credenti
 
 All cloud account identifiers are removed from scan results before they are included in the application. The raw, unredacted scan output is never published.
 
-**Verified by:** Two independent credential scans on every commit (pre-commit hook + CI workflow). Gitleaks runs on both the new changes and the full git history.
+**Verified by:** Two independent credential scans on every commit (Gitleaks pre-commit hook + Betterleaks CI workflow). Both scan the new changes and the full git history.
 
 **Accepted risk:** All three cloud providers' credentials are fetched in a single session. A session compromised while credentials are in memory exposes access to all three simultaneously. Isolating credentials per provider would require significant pipeline redesign. In a single-operator PoC where the scan runs interactively and credentials are held in memory only for the duration of the scan, this risk is accepted.
 
@@ -74,11 +74,11 @@ All cloud account identifiers are removed from scan results before they are incl
 
 **Threat addressed:** A compromised software package entering the codebase, a malicious change bypassing review, or the automated build process being manipulated to produce a tampered output.
 
-Thirteen automated security checks run on every code change before it can be merged or deployed. No change reaches production without passing all of them. The checks cover: scanning the source code for injection vulnerabilities, verifying that no dependency added to the project has a known security issue at the time of merge, checking the container image for known vulnerabilities before it ships, auditing the build pipeline configuration itself for weaknesses that could allow it to be hijacked, and validating the infrastructure definitions before they touch live cloud resources.
+Fifteen automated security checks cover every code change before it can be merged or deployed — 14 CI gates on every push and pull request, plus a pre-commit hook that runs before changes leave the developer's machine. No change reaches production without passing all of them. The checks cover: scanning the source code for injection vulnerabilities, verifying that no dependency added to the project has a known security issue at the time of merge, checking the container image for known vulnerabilities before it ships, auditing the build pipeline configuration itself for weaknesses that could allow it to be hijacked, and validating the infrastructure definitions before they touch live cloud resources.
 
 Every external tool used in the build pipeline is locked to a specific verified version at the time it was reviewed and approved. A tool that is later compromised cannot silently substitute itself into the pipeline — the pipeline will reject it because the version no longer matches. An automated service reviews all dependencies weekly and opens a change request when updates are available, so version locks stay current without manual tracking.
 
-**Verified by:** CI gate status on every push and pull request. All 13 checks must pass for a change to merge.
+**Verified by:** CI gate status on every push and pull request. All 15 checks must pass for a change to merge.
 
 **Accepted risk — scan output chain of custody.** After the security scanner runs, it writes its findings to a folder on the local machine. That folder can be modified before the output is packaged into the application image, and there is no signature or verification step in between. Exploiting this requires an adversary with an interactive session on the developer's machine during the narrow window between the scan completing and the image being built. In a single-operator PoC with no adversarial local access, this risk is accepted. A production deployment would require output signing and signature verification at packaging time.
 
