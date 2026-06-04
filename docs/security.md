@@ -228,7 +228,7 @@ Additional domains can be allowlisted without modifying `init-firewall.sh` by ad
 
 **Shell history isolation** — bash history is stored in a named Docker volume (`claude-code-bashhistory-<devcontainerId>`), scoped per container instance and not written to the host filesystem.
 
-**WebFetch requires confirmation** — all outbound web fetches by Claude Code prompt for user approval (`"ask": ["WebFetch(*)"]`); `api.github.com` is pre-approved.
+**WebFetch restricted by egress firewall** — outbound web fetches are restricted by the egress firewall; only allowlisted destinations are reachable. `api.github.com` is pre-approved in both the firewall and Claude Code permissions (`"allow": ["WebFetch(domain:api.github.com)"]`). All other WebFetch calls are configured to prompt for approval (`"ask": ["WebFetch(*)"]`) and are blocked at the network level if the destination is not on the firewall allowlist.
 
 For the full configuration reference including rebuild instructions and a validation script, see `docs/devcontainer.md`.
 
