@@ -51,22 +51,23 @@ Both scans run independently — the local hook catches secrets before they leav
 
 15 automated security checks cover every push and pull request (14 CI gates) plus a pre-commit hook that runs before changes leave the developer's machine. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
 
-| Workflow | What it protects against |
-|---|---|
-| Semgrep SAST | Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues |
-| Python Lint (Ruff · Bandit) | Scans the Python ingest code for security flaws and code-quality issues before they ship |
-| Secret Scan (Betterleaks) | Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo (CI); pre-commit hook (Gitleaks) catches secrets before they leave the developer's machine |
-| Hardcoded Config Check (custom grep) | Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code |
-| Dependabot | Monitors committed dependency files (`package-lock.json`, `requirements.txt`, GitHub Actions) on a weekly schedule; opens automated fix PRs when a known CVE is found in an *already-installed* version. Catches vulnerabilities that landed before CI ran. |
-| Dependency Review (GitHub) | Runs on every pull request and diffs the before/after dependency graph; blocks merge if the *incoming change* introduces a known CVE. Catches vulnerabilities at the point they are introduced. |
-| Socket.dev (GitHub App) | Scans npm package manifests (package.json, package-lock.json) for malware, typosquatting, obfuscated code, and other supply-chain compromise indicators before dependencies are approved for merge |
-| Trivy | Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure |
-| Zizmor | Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions |
-| Worker Lint (ESLint) | Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge |
-| Frontend CI (TypeScript · ESLint · Vite · lockfile-lint) | Validates lockfile integrity against the official npm registry (supply-chain) and catches type errors, code-quality issues, and broken builds in the dashboard TypeScript source (.ts, .tsx) before they reach the live site |
-| Shellcheck | Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures |
-| Terraform Validate | Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure |
-| Docker Build | Builds the image and scans it with Trivy for CRITICAL and HIGH CVEs (fixable only); SARIF results go to the GitHub Security tab. nginx Stage 2 runs as `USER nginx` (non-root, CIS Docker 4.1). Catches build errors and known vulnerabilities before deployment. |
+| Workflow | Status | Rationale |
+|---|---|---|
+| Dependabot | Active · GitHub Bot | Monitors committed dependency files; opens fix PRs when a CVE is found in an already-installed version. Software Composition Analysis (SCA) on post-merge, scheduled daily. |
+| Dependency Review (GitHub) | `dependency-review.yml` | Runs on every pull request and blocks merge if the incoming change introduces a known CVE. SCA on pre-merge, on every PR. |
+| Socket.dev | Active · GitHub App | Scans npm package manifests before dependencies are approved for merge. SCA focused on supply-chain threats (malware, typosquatting) rather than CVEs. |
+| Semgrep SAST | `semgrep.yml` | Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues |
+| Python Lint (Ruff · Bandit) | `python-lint.yml` | Scans the Python ingest code for security flaws and code-quality issues before they ship |
+| Secret Scan (Betterleaks) | `secret-scan.yml` | Scans every commit and the full git history for leaked credentials, API keys, and tokens |
+| Secret Scan (Gitleaks) | Active · Pre-commit | Pre-commit hook — catches leaked credentials, API keys, and tokens before they leave the developer's machine |
+| Hardcoded Config Check (custom grep) | `hardcoded-config-check.yml` | Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code |
+| Trivy | `trivy.yml` | Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure |
+| Zizmor | `zizmor.yml` | Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions |
+| Worker Lint (ESLint) | `worker-lint.yml` | Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge |
+| Frontend CI (TypeScript · ESLint · Vite · lockfile-lint) | `frontend-ci.yml` | Validates lockfile integrity against the official npm registry (supply-chain) and catches type errors, code-quality issues, and broken builds in the dashboard TypeScript source (.ts, .tsx) before they reach the live site |
+| Shellcheck | `shellcheck.yml` | Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures |
+| Terraform Validate | `terraform-validate.yml` | Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure |
+| Docker Build | `docker-build.yml` | Builds the image and scans it with Trivy for CRITICAL and HIGH CVEs (fixable only); SARIF results go to the GitHub Security tab. Catches build errors and known vulnerabilities before deployment. |
 
 Additional notes:
 
