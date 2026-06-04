@@ -46,7 +46,8 @@ export default function Landing() {
         <div>
           <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest mb-4">What makes it real</h2>
           <ul className="space-y-3 text-gray-300">
-            <li className="flex gap-3"><span className="text-blue-400">→</span>Container image hardened — runs as non-root, CVE-scanned on every CI build, deployed by immutable digest</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Claude Code runs in a locked-down devcontainer — network access restricted to an allowlist, filesystem writes scoped to the project</li>
+            <li className="flex gap-3"><span className="text-blue-400">→</span>Dashboard container hardened — runs as non-root, CVE-scanned on every CI build, deployed to Cloud Run by immutable digest</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>All cloud credentials stored in GCP Secret Manager — fetched at runtime, never on disk</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Every code change is automatically checked for security issues before it ships</li>
             <li className="flex gap-3"><span className="text-blue-400">→</span>Terraform-provisioned infrastructure toggled between misconfigured and hardened states via <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">before.tfvars</code> / <code className="text-xs bg-gray-800 px-1 py-0.5 rounded">after.tfvars</code></li>
