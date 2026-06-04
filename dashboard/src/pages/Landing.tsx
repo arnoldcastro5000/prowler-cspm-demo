@@ -38,7 +38,7 @@ export default function Landing() {
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed">
             <li><span className="text-white font-semibold">CSPM</span> — 19 of 19 misconfigurations remediated across AWS, GCP, and Azure (100% closure rate, verified by re-scan)</li>
             <li><span className="text-white font-semibold">Secure cloud architecture</span> — This dashboard deployed behind Cloudflare WAF + DDoS protection; it is accessible only through Cloudflare</li>
-            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — POC built with a sandboxed AI agent; every change passes 14 automated CI security gates before merge</li>
+            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — This POC built with an isolated AI agent; every change passes 14 automated CI security gates before merge</li>
           </ol>
         </div>
 
@@ -99,7 +99,7 @@ export default function Landing() {
                   ['Secrets', 'GCP Secret Manager', 'All cloud credentials fetched at runtime, never stored on disk'],
                   ['Registry', 'GCP Artifact Registry', 'Docker image storage, GCP-native'],
                   ['AI Development', <>Claude Code +<a href="https://github.com/multica-ai/andrej-karpathy-skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">andrej-karpathy-skills</a> + <a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">mattpocock/skills</a></>, 'Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails'],
-                  ['AI Dev Sandbox', 'DevContainer — workspace mount, iptables egress firewall, bubblewrap process sandbox', 'Three-layer isolation: filesystem scoped to project root, network restricted to allowlist, subprocess sandboxed'],
+                  ['AI Dev Sandbox', <><a href="https://code.claude.com/docs/en/devcontainer" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">DevContainer</a> — workspace mount, iptables egress firewall, bubblewrap process sandbox</>, 'Three-layer isolation: filesystem scoped to project root, network restricted to allowlist, subprocess sandboxed'],
                   ['CI/CD', 'GitHub Actions + Dependabot + Socket.dev', '14 automated checks block unsafe code before it ships + weekly dependency updates'],
                   ['Frontend', 'React 18 + Vite + TypeScript (strict) + Tailwind + zod', 'Static bundle with runtime schema validation, containerises cleanly'],
                   ['Development environment', 'WSL2 (Windows Subsystem for Linux)', 'Local Linux environment for Terraform, Prowler, and Docker'],
@@ -130,23 +130,23 @@ export default function Landing() {
               </thead>
               <tbody className="divide-y divide-gray-800">
                 {([
-                  ['Dependabot', null, 'Monitors committed dependency files; opens fix PRs when a CVE is found in an already-installed version. Software Composition Analysis (SCA) on post-merge, scheduled daily.'],
-                  ['Dependency Review (GitHub)', 'dependency-review.yml', 'Runs on every pull request and blocks merge if the incoming change introduces a known CVE. SCA on pre-merge, on every PR.'],
-                  ['Socket.dev', null, 'Scans npm package manifests before dependencies are approved for merge. SCA focused on supply-chain threats (malware, typosquatting) rather than CVEs.'],
-                  ['Semgrep SAST', 'semgrep.yml', 'Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues'],
-                  ['Python Lint (Ruff · Bandit)', 'python-lint.yml', 'Scans the Python ingest code for security flaws and code-quality issues before they ship'],
-                  ['Secret Scan (Gitleaks)', 'secret-scan.yml', 'Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo'],
+                  ['Dependabot', null, 'Monitors committed dependency files; opens fix PRs when a CVE is found in an already-installed version. Software Composition Analysis (SCA) on post-merge, scheduled daily.', <a href="https://github.com/dependabot" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Dependabot</a>],
+                  ['Dependency Review (GitHub)', 'dependency-review.yml', 'Runs on every pull request and blocks merge if the incoming change introduces a known CVE. SCA on pre-merge, on every PR.', <a href="https://docs.github.com/en/code-security/concepts/supply-chain-security/about-dependency-review" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Dependency Review (GitHub)</a>],
+                  ['Socket.dev', null, 'Scans npm package manifests before dependencies are approved for merge. SCA focused on supply-chain threats (malware, typosquatting) rather than CVEs.', <a href="https://socket.dev/" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Socket.dev</a>],
+                  ['Semgrep SAST', 'semgrep.yml', 'Scans the dashboard and Cloudflare Worker source files (.ts, .tsx, .js) for injection and cross-site scripting (XSS) issues', <a href="https://github.com/semgrep/semgrep" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Semgrep SAST</a>],
+                  ['Python Lint (Ruff · Bandit)', 'python-lint.yml', 'Scans the Python ingest code for security flaws and code-quality issues before they ship', <>Python Lint (<a href="https://github.com/astral-sh/ruff" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Ruff</a> · <a href="https://github.com/PyCQA/bandit" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Bandit</a>)</>],
+                  ['Secret Scan (Gitleaks)', 'secret-scan.yml', 'Scans every commit and the full git history for leaked credentials, API keys, and tokens before they reach the public repo', <>Secret Scan (<a href="https://github.com/gitleaks/gitleaks" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Gitleaks</a>)</>],
                   ['Hardcoded Config Check (custom grep)', 'hardcoded-config-check.yml', 'Blocks cloud account IDs, resource identifiers, regions, and personal emails from being hardcoded in source code'],
-                  ['Trivy', 'trivy.yml', 'Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure'],
-                  ['Zizmor', 'zizmor.yml', 'Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions'],
-                  ['Worker Lint (ESLint)', 'worker-lint.yml', 'Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge'],
+                  ['Trivy', 'trivy.yml', 'Scans the Terraform for insecure infrastructure patterns — public exposure, missing encryption, weak access — before it reaches live infrastructure', <a href="https://github.com/aquasecurity/trivy" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Trivy</a>],
+                  ['Zizmor', 'zizmor.yml', 'Audits the GitHub Actions workflows for CI/CD security flaws — script injection, over-broad permissions, unpinned actions', <a href="https://github.com/zizmorcore/zizmor" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">Zizmor</a>],
+                  ['Worker Lint (ESLint)', 'worker-lint.yml', 'Lints the Cloudflare Worker — the edge security layer — catching JavaScript errors before it ships to the edge', <>Worker Lint (<a href="https://github.com/eslint/eslint" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline hover:text-blue-300">ESLint</a>)</>],
                   ['Frontend CI (TypeScript · ESLint · Vite · lockfile-lint)', 'frontend-ci.yml', 'Validates lockfile integrity against the official npm registry (supply-chain) and catches type errors, code-quality issues, and broken builds in the dashboard TypeScript source (.ts, .tsx) before they reach the live site'],
                   ['Shellcheck', 'shellcheck.yml', 'Catches shell-scripting bugs and unsafe quoting in the scan automation before they cause silent failures'],
                   ['Terraform Validate', 'terraform-validate.yml', 'Catches malformed Terraform — invalid syntax, type errors, and broken references — before an apply touches live cloud infrastructure'],
                   ['Docker Build', 'docker-build.yml', 'Builds the image and scans it with Trivy for CRITICAL and HIGH CVEs (fixable only); SARIF results go to the GitHub Security tab. Catches build errors and known vulnerabilities before deployment.'],
-                ] as [string, string | null, string][]).map(([name, file, description]) => (
+                ] as [string, string | null, string, React.ReactNode?][]).map(([name, file, description, displayName]) => (
                   <tr key={name} className="bg-gray-950">
-                    <td className="px-4 py-2 text-gray-400">{name}</td>
+                    <td className="px-4 py-2 text-gray-400">{displayName ?? name}</td>
                     <td className="px-4 py-2">
                       {file ? (
                         <a
