@@ -62,7 +62,7 @@ continuous monitoring — all findings are point-in-time scan snapshots.
 | Layer | Technology | Notes |
 |---|---|---|
 | IaC | Terraform ≥ 1.6 | HCL only, no CDK. State stored locally — do not use GCS backend |
-| Scanner | Prowler (latest stable) | CLI, not SDK. Runs locally on WSL2 |
+| Scanner | Prowler 5.27.0 | CLI, not SDK. Runs locally on WSL2 |
 | Ingest | Python 3.11 | ingest_prowler.py only — writes findings JSON directly to dashboard/public/ |
 | Backend | GCP Cloud Run | Serves the React app as a container |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind CSS | No other UI frameworks |
