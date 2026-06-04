@@ -42,6 +42,7 @@ export default function Security() {
               components={{
                 h1: ({ children }) => <h1 className="text-2xl font-bold text-gray-100 mb-4 pb-2 border-b border-gray-700">{children}</h1>,
                 h2: ({ children }) => <h2 className="text-lg font-semibold text-gray-100 mt-8 mb-3">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-base font-semibold text-gray-200 mt-6 mb-2">{children}</h3>,
                 p: ({ children }) => <p className="text-gray-300 text-sm leading-relaxed mb-3">{children}</p>,
                 ul: ({ children }) => <ul className="list-disc list-inside space-y-1 mb-3 text-sm text-gray-300">{children}</ul>,
                 li: ({ children }) => <li className="leading-relaxed">{children}</li>,
