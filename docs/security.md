@@ -73,6 +73,8 @@ Additional notes:
 - **Dependabot** opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
 - For a full risk analysis of the CI/CD pipeline against the **OWASP Top 10 CI/CD Security Risks**, see `docs/owasp-cicd.md`.
 
+**Accepted risk — scan output chain of custody.** Prowler writes findings JSON to `/var/tmp/prowler-output/` (mode 0755) and `dashboard/public/` before `make deploy`. Neither path is signature-protected. Tampering between scan and ingest is possible but requires an interactive session on the same WSL2 machine during the narrow window between `make scan` and `make deploy`. In a single-operator PoC context with no adversarial local access, this risk is accepted. Production deployment would require output signing and signature verification at ingest.
+
 ---
 
 ## 3. Defended Runtime Edge
@@ -138,15 +140,96 @@ OWASP ZAP baseline scan is run manually against the deployed application. The sc
 
 ## 5. AI Development Guardrails
 
-*AI-assisted development runs under least privilege — bounded filesystem, network, and command access.*
+*Claude Code runs inside a DevContainer with three independent isolation controls: workspace bind-mount scoped to the project root only, a network egress firewall, and a bubblewrap process sandbox. The sandbox policy is enforced by the container image — not the user session.*
 
-Claude Code was used throughout this project with sandboxed execution enabled. The sandbox enforces:
+### DevContainer architecture
 
-- **Filesystem restrictions** — write access is limited to the project directory and designated temporary paths. System directories, shell configuration files, and Claude Code settings are read-only.
-- **Network restrictions** — outbound network access is restricted to an explicit allowlist of permitted hosts. Arbitrary external requests are blocked.
-- **Command restrictions** — destructive shell operations are subject to permission prompts requiring explicit user approval before execution.
+| File | Purpose |
+|---|---|
+| `.devcontainer/Dockerfile` | Image — `node:20` base, dev tools, `bubblewrap`, `iptables`/`ipset`, native Claude Code install, Gitleaks, managed settings |
+| `.devcontainer/devcontainer.json` | Container config — workspace mount, named volumes, `NET_ADMIN`/`NET_RAW` capabilities, firewall activation |
+| `.devcontainer/init-firewall.sh` | iptables egress firewall — runs on every container start via `postStartCommand` |
+| `.devcontainer/managed-settings.json` | Claude Code org policy — baked into image at `/etc/claude-code/managed-settings.json`; cannot be overridden from inside the container |
+| `.devcontainer/firewall-extra-domains.txt` | Optional extra egress allowlist — bind-mounted read-only |
+| `.claude/settings.local.json` | Project-level Claude Code config — tool permissions, credential path denials, sandbox exclusions |
 
-This ensures that AI-assisted development cannot inadvertently write to sensitive system paths, exfiltrate data to arbitrary endpoints, or execute destructive operations without human confirmation — maintaining the same security posture as a principle of least privilege applied to the development toolchain itself.
+### Control 1 — Workspace bind-mount scoped to project root
+
+The container mounts only the project root directory:
+
+```
+workspaceMount: source=${localWorkspaceFolder}, target=/workspace
+```
+
+The host home directory is not mounted. Cloud credential directories (`~/.aws`, `~/.ssh`, `~/.azure`, `~/.config/gcloud`) do not exist inside the container. The `gcloud` binary is not installed in the image. Claude Code cannot reach host credentials through the filesystem regardless of sandbox state.
+
+As a second line of defence, `.claude/settings.local.json` adds explicit deny rules for those paths and the sandbox `filesystem.denyRead` list mirrors them:
+
+```json
+"permissions": {
+  "deny": ["Read(**/.aws/**)", "Read(**/.ssh/**)", "Read(**/.azure/**)", "Read(**/.config/gcloud/**)"]
+},
+"sandbox": {
+  "filesystem": {
+    "denyRead": ["~/.aws", "~/.ssh", "~/.azure", "~/.config/gcloud"]
+  }
+}
+```
+
+### Control 2 — Network egress firewall
+
+`init-firewall.sh` runs as root at every container startup. It flushes all existing rules, sets a default DROP policy on INPUT, OUTPUT, and FORWARD, and rebuilds an IP allowlist from:
+
+| Destination | Source | Purpose |
+|---|---|---|
+| GitHub IP ranges | Live fetch from `api.github.com/meta` (web + api + git, CIDR-aggregated) | `git`, `gh` CLI |
+| `api.anthropic.com` | DNS resolution at startup | Claude Code inference |
+| `downloads.claude.ai` | DNS resolution at startup | Claude Code binary updates |
+| `registry.npmjs.org` | DNS resolution at startup | npm |
+| `marketplace.visualstudio.com`, `vscode.blob.core.windows.net`, `update.code.visualstudio.com` | DNS resolution at startup | VS Code extensions |
+| Host network subnet | Detected from default route | Docker host communication |
+| DNS (UDP 53), SSH (TCP 22), loopback | Static | Infrastructure |
+
+On completion, the script self-verifies: it confirms `https://example.com` is unreachable and `https://api.github.com/zen` is reachable. The container does not finish starting (`waitFor: postStartCommand`) if either check fails.
+
+The `node` user's sudo access is scoped to this script only — no other root operation is available (`/etc/sudoers.d/node-firewall`).
+
+Additional domains can be allowlisted without modifying `init-firewall.sh` by adding them to `firewall-extra-domains.txt` (bind-mounted read-only from the host).
+
+### Control 3 — Bubblewrap process sandbox
+
+`bubblewrap` is installed in the image. Claude Code uses it for sub-process isolation. The sandbox is enforced by `managed-settings.json`, copied into the image at build time at the highest-precedence config path:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "enableWeakerNestedSandbox": true,
+    "failIfUnavailable": false,
+    "allowUnsandboxedCommands": false
+  }
+}
+```
+
+`enableWeakerNestedSandbox: true` allows bubblewrap to operate inside Docker using unprivileged user namespaces. `allowUnsandboxedCommands: false` blocks the `dangerouslyDisableSandbox` escape hatch. The project-level config mirrors this:
+
+```json
+"sandbox": { "enabled": true, "autoAllowBashIfSandboxed": false, "allowUnsandboxedCommands": false }
+```
+
+`gh` and `git` are excluded from the bubblewrap sandbox (`excludedCommands`) because both require network and filesystem access that the sandbox blocks — they remain subject to the network firewall and workspace mount scope.
+
+**Note:** `failIfUnavailable: false` means Claude Code degrades to unsandboxed operation without warning if `bubblewrap` is absent. This is a known residual risk — see `docs/stride.md` T-123.
+
+### Additional controls
+
+**Gitleaks inside the container** — installed at `/usr/local/bin/gitleaks`. The repository's pre-commit hook runs inside the container on every `git commit`.
+
+**Shell history isolation** — bash history is stored in a named Docker volume (`claude-code-bashhistory-<devcontainerId>`), scoped per container instance and not written to the host filesystem.
+
+**WebFetch requires confirmation** — all outbound web fetches by Claude Code prompt for user approval (`"ask": ["WebFetch(*)"]`); `api.github.com` is pre-approved.
+
+For the full configuration reference including rebuild instructions and a validation script, see `docs/devcontainer.md`.
 
 ---
 
@@ -154,6 +237,6 @@ This ensures that AI-assisted development cannot inadvertently write to sensitiv
 
 - No hardcoded cloud account IDs, project IDs, subscription IDs, or tenant IDs anywhere in code or configuration.
 - No hardcoded cloud regions inline in scripts or Terraform — defined as named variables only.
-- No hardcoded AWS resource IDs (security group IDs, instance IDs, VPC IDs).
+- No hardcoded resource IDs (security group IDs, instance IDs, VPC IDs, subnet IDs, AMI IDs) — applies to all providers.
 - No credentials, keys, or secrets in any file tracked by git.
 - No personal email addresses or usernames in source code.
