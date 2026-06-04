@@ -40,7 +40,7 @@ Eight additional rules run inside Cloudflare before any request reaches the appl
 
 **Threat addressed:** An attacker injecting malicious scripts into the page, embedding the application in a deceptive frame, or exploiting browser behaviour to execute code in a visitor's browser.
 
-Six security instructions are sent to every visitor's browser with each page load. These instructions tell the browser where it is allowed to load resources from (same-origin only, plus a small set of explicitly named exceptions), that the page must never be embedded inside another site, that the browser must never guess at the content type of a file it receives, and that the connection must always use an encrypted channel. Unused browser features — camera, microphone, location — are disabled at the browser level, not just hidden.
+Six security instructions are sent to every visitor's browser with each page load. These instructions tell the browser where it is allowed to load resources from (same-origin only, plus a small set of explicitly named exceptions), that the page must never be embedded inside another site, that referrer information must not be leaked to external sites on navigation, that the browser must never guess at the content type of a file it receives, and that the connection must always use an encrypted channel. Unused browser features — camera, microphone, location — are disabled at the browser level, not just hidden.
 
 The script loading policy uses a value that changes with every single request, which allows a third-party security script from Cloudflare to run while still blocking any other inline script that an attacker might try to inject. This is one of the stronger configurations available for preventing cross-site scripting.
 
