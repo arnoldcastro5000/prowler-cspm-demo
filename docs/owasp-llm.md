@@ -39,7 +39,7 @@ Claude Code reads `CLAUDE.md`, project files, and scan output as context during 
 
 - Add a `.claudeignore` file to exclude `prowler/output/`, `node_modules/`, and `*.tfstate` from the agent's context entirely, reducing the surface area for indirect prompt injection through attacker-influenced file content.
 
-See `docs/security.md` → Pillar 5 (AI Development Guardrails).
+See `docs/security.md` → §5 — AI Development Guardrails.
 
 ---
 
@@ -58,7 +58,7 @@ Claude Code has read access to the entire project directory during development. 
 - CI: `secret-scan.yml` runs Gitleaks on every push and PR to catch exposed credentials.
 - Sandbox: network restricted to `api.github.com` — the agent cannot send project data to arbitrary external endpoints.
 
-See `docs/security.md` → Pillar 1 (Credential & Secrets Hygiene).
+See `docs/security.md` → §3 — Credential & Secrets Hygiene.
 
 ---
 
@@ -71,7 +71,7 @@ Claude Code selected every dependency in this project — npm packages, pip pack
 **Controls in place:**
 
 - CI: `dependency-review.yml` scans npm and pip dependencies for *known* vulnerabilities on every PR that modifies package files. (Does not detect novel typosquats.)
-- Dependabot opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
+- Dependabot opens automated PRs daily for outdated npm, pip, and GitHub Actions dependencies (`.github/dependabot.yml`).
 - All GitHub Actions in CI are pinned to exact commit SHAs, not mutable version tags — immune to namespace hijack on the Actions registry.
 - Docker base images in `dashboard/Dockerfile` are pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.30-alpine@sha256:...`) — immune to image namespace hijack. Base image upgraded from 1.27 to 1.30 (latest stable) to clear unfixed HIGH CVEs; see RL-06 in `docs/owasp-cicd.md`.
 - CI: `zizmor.yml` audits GitHub Actions workflows for supply chain risks.
@@ -87,7 +87,7 @@ Claude Code selected every dependency in this project — npm packages, pip pack
 - ~~Add a SAST scanner (e.g., Semgrep) to CI~~ — implemented: `semgrep.yml` scans `.ts`, `.tsx`, and `.js` source files on every push and PR (RL-01 in `docs/owasp-cicd.md`).
 - ~~Consider adding `--ignore-scripts` to `npm ci` in CI~~ — implemented: `npm ci --ignore-scripts` in `frontend-ci.yml` and `dashboard/Dockerfile` Stage 1.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → §4 — Secure Build & Supply Chain.
 
 ---
 
@@ -122,7 +122,7 @@ AI-generated code goes directly into a production codebase. If Claude Code intro
 
 - A SAST scanner in CI would automatically flag `dangerouslySetInnerHTML`, `eval()`, `document.write`, `subprocess.call(shell=True)`, and similar unsafe output patterns if the AI introduces them in future changes — turning a point-in-time observation into automated enforcement. (Same SAST scanner addresses LLM-R02 — see Residual risk register.)
 
-See `docs/security.md` → Pillar 4 (Hardened Application Surface) → HTTP security headers; Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → §2 — Hardened Application Surface → HTTP security headers; §4 — Secure Build & Supply Chain.
 
 ---
 
@@ -142,7 +142,7 @@ Claude Code can execute shell commands, modify files, and commit to git. Without
 - Deployment (`make deploy`) is not in the auto-allow list and requires human approval.
 - `run_scan.sh` guards require committed code and green CI before executing scans.
 
-See `docs/security.md` → Pillar 5 (AI Development Guardrails).
+See `docs/security.md` → §5 — AI Development Guardrails.
 
 ---
 
@@ -186,7 +186,7 @@ Claude Code could generate code that appears correct but contains subtle logical
 - Human reviews all commits — single-developer project with no auto-merge.
 - Zod schema validation catches malformed data at runtime, preventing silently corrupt findings from rendering.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain); Pillar 4 (Hardened Application Surface) → DAST.
+See `docs/security.md` → §4 — Secure Build & Supply Chain; §2 — Hardened Application Surface → DAST.
 
 ---
 
@@ -209,7 +209,7 @@ On the development side, Claude Code could generate unbounded output, run long-r
 - Cloud Run scales to zero when idle — no baseline cost.
 - No backend API, no database, no per-request LLM cost — the entire application is static files served from a container. The only variable cost is Cloud Run instances.
 
-See `docs/security.md` → Pillar 3 (Defended Runtime Edge); Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → §1 — Defended Runtime Edge; §4 — Secure Build & Supply Chain.
 
 ---
 

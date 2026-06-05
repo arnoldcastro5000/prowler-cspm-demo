@@ -138,6 +138,9 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 │   │   ├── issue-tracker.md          # GitHub issue tracker conventions
 │   │   └── triage-labels.md          # Issue label vocabulary
 │   ├── owasp-cicd.md                 # OWASP Top 10 CI/CD risk assessment for this project
+│   ├── owasp-genai.md                # OWASP GenAI security frameworks
+│   ├── owasp-llm.md                  # OWASP Top 10 for LLM Applications
+│   ├── owasp-top10.md                # OWASP Top 10 web application security
 │   ├── security.md                   # Full security controls technical specification
 │   ├── securitysummary.md            # Executive security summary
 │   ├── stride.md                     # STRIDE threat model with DREAD scoring

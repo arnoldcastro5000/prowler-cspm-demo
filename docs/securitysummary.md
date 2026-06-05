@@ -52,7 +52,7 @@ The deployed application is scanned manually using an automated tool that simula
 
 **Verified by:** OWASP ZAP baseline scan against the deployed application at `prowler.cloudsecuritypractice.com`.
 
-**Accepted risk (WEB-R01):** Findings data is baked into the container image at build time — no runtime API, no database, no user input processing. Eight pages fetch markdown at runtime from `raw.githubusercontent.com`; ReactMarkdown sanitizes all HTML output (no XSS vector). This fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could poison rendered content. This is accepted as WEB-R01 in `docs/owasp-top10.md §A08`. No open gaps have been identified in the core hardening controls (CSP, HSTS, headers, DAST scan) at the current application scope.
+**Accepted risk (WEB-R01):** Eight documentation pages load their content from GitHub at runtime. A compromised GitHub account could tamper with that rendered content. Because the dashboard holds no user data and the affected pages display reference documentation only, this risk is accepted. No open gaps have been identified in the core hardening controls at the current application scope.
 
 ---
 
