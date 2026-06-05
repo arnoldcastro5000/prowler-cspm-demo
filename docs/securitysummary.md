@@ -76,7 +76,7 @@ All cloud account identifiers are removed from scan results before they are incl
 
 Fifteen automated security checks cover every code change before it can be merged or deployed — 14 CI gates on every push and pull request, plus a pre-commit hook that runs before changes leave the developer's machine. No change reaches production without passing all of them. The checks cover: scanning the source code for injection vulnerabilities, verifying that no dependency added to the project has a known security issue at the time of merge, checking the container image for known vulnerabilities before it ships, auditing the build pipeline configuration itself for weaknesses that could allow it to be hijacked, and validating the infrastructure definitions before they touch live cloud resources.
 
-Every external tool used in the build pipeline is locked to a specific verified version at the time it was reviewed and approved. A tool that is later compromised cannot silently substitute itself into the pipeline — the pipeline will reject it because the version no longer matches. An automated service reviews all dependencies weekly and opens a change request when updates are available, so version locks stay current without manual tracking.
+Every external tool used in the build pipeline is locked to a specific verified version at the time it was reviewed and approved. A tool that is later compromised cannot silently substitute itself into the pipeline — the pipeline will reject it because the version no longer matches. An automated service reviews all dependencies daily and opens a change request when updates are available, so version locks stay current without manual tracking.
 
 **Verified by:** CI gate status on every push and pull request. All 15 checks must pass for a change to merge.
 
@@ -94,7 +94,7 @@ Every time the container starts, a firewall is configured that blocks all outbou
 
 Within the container, the AI assistant runs inside a second layer of isolation — a process-level sandbox that limits which files it can write to, which commands it can run without explicit human approval, and where it can send data. This sandbox is enforced by a policy file baked into the container image itself. A developer cannot weaken or disable it from inside the container. The policy requires explicit human confirmation before the assistant can perform destructive or irreversible operations.
 
-Credential scanning is also built into the development environment. The same tool that scans code commits for accidentally included secrets runs as a pre-commit check inside the container, so secrets are caught before they leave the workstation even when working inside the isolated environment.
+Credential scanning is also built into the development environment. Gitleaks runs as a pre-commit hook inside the container, catching accidentally included secrets before they leave the workstation. The CI pipeline runs a separate scan using Betterleaks on every push and pull request, providing a second independent check against the full git history.
 
 The developer account inside the container has elevated permissions for exactly one operation: running the firewall setup script at startup. No other administrative action is available to it.
 
