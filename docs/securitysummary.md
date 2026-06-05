@@ -12,11 +12,11 @@ Five defence-in-depth control layers protect this proof-of-concept and the prowl
 
 | Control | Threat it addresses | Verification | Gaps |
 |---|---|---|---|
-| **1. Edge & Network Defence** | Unauthorized access, volumetric attacks, direct origin bypass | Direct-to-origin requests return 403 in production | Cache poisoning via origin headers — accepted |
+| **1. Edge and Network Defence** | Unauthorized access, volumetric attacks, direct origin bypass | Direct-to-origin requests return 403 in production | Cache poisoning via origin headers — accepted |
 | **2. Application Hardening** | Cross-site scripting, clickjacking, content injection | OWASP ZAP scan against deployed application | WEB-R01: runtime markdown fetch without SRI — accepted (see §2) |
-| **3. Secrets & Credential Hygiene** | Credentials stolen or leaked into code | Two independent secret scans on every commit | Single-session credential exposure — accepted |
-| **4. Build Pipeline & Supply Chain** | Compromised dependencies, CI pipeline takeover | 15 automated security checks (14 CI gates + pre-commit hook) on every push and pull request | Scan output chain of custody — accepted |
-| **5. AI Agent Sandbox** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Firewall self-test on every container startup | Firewall can be disabled by any container process; base image and install scripts not integrity-verified; sandbox degrades silently if bubblewrap absent (`failIfUnavailable: false`, T-123); no structured audit trail for agent session actions (T-050) |
+| **3. Secrets and Credential Hygiene** | Credentials stolen or leaked into code | Two independent secret scans on every commit | Single-session credential exposure — accepted |
+| **4. Build Pipeline and Supply Chain** | Compromised dependencies, CI pipeline takeover | 15 automated security checks (14 CI gates + pre-commit hook) on every push and pull request | Scan output chain of custody — accepted |
+| **5. AI Agent Sandbox** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Firewall self-test on every container startup | Firewall can be disabled by any container process; base image and install scripts not integrity-verified; sandbox degrades silently if bubblewrap absent (T-123); no structured audit trail for agent session actions (T-050) |
 
 ---
 
@@ -52,7 +52,7 @@ The deployed application is scanned manually using an automated tool that simula
 
 **Verified by:** OWASP ZAP baseline scan against the deployed application at `prowler.cloudsecuritypractice.com`.
 
-**Residual risk:** Findings data is baked into the container image at build time — no runtime API, no database, no user input processing. Two pages (`ThreatModel` and `Security`) fetch markdown at runtime from `raw.githubusercontent.com`; ReactMarkdown sanitizes all HTML output (no XSS vector). This fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could poison rendered content. This is accepted as WEB-R01 in `docs/owasp-top10.md §A08`. No open gaps have been identified in the core hardening controls (CSP, HSTS, headers, DAST scan) at the current application scope.
+**Accepted risk (WEB-R01):** Findings data is baked into the container image at build time — no runtime API, no database, no user input processing. Two pages (`ThreatModel` and `Security`) fetch markdown at runtime from `raw.githubusercontent.com`; ReactMarkdown sanitizes all HTML output (no XSS vector). This fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could poison rendered content. This is accepted as WEB-R01 in `docs/owasp-top10.md §A08`. No open gaps have been identified in the core hardening controls (CSP, HSTS, headers, DAST scan) at the current application scope.
 
 ---
 
@@ -60,7 +60,7 @@ The deployed application is scanned manually using an automated tool that simula
 
 **Threat addressed:** Cloud credentials being stored on disk, committed to the repository, or exposed in logs and error output — any of which would give an attacker the same access to cloud infrastructure as the operator.
 
-All cloud credentials — for AWS, GCP, and Azure — are stored in a managed secrets vault, not on the developer's machine or in any file. They are fetched from the vault at the moment they are needed and held only in memory for the duration of the scan. When the scan ends, whether it succeeds or fails, a cleanup step explicitly removes the credentials from memory before the process exits. Exception: the raw `AZURE_CREDS` JSON blob is not unset by the cleanup trap — only the four parsed Azure variables are cleared; the source blob persists in shell memory post-exit (T-113 in `docs/stride.md`).
+All cloud credentials — for AWS, GCP, and Azure — are stored in a managed secrets vault, not on the developer's machine or in any file. They are fetched from the vault at the moment they are needed and held only in memory for the duration of the scan. When the scan ends, whether it succeeds or fails, a cleanup step explicitly removes the credentials from memory before the process exits. Exception: one component of the Azure credential set is not fully cleared from process memory when the scan completes — it persists in the running session until the process exits (T-113 in `docs/stride.md`).
 
 The secret that allows Cloudflare to authenticate to the application server is fetched from the same vault at deployment time and injected directly into the running application. It is never written to the container image or stored in the repository.
 
