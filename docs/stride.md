@@ -1,4 +1,4 @@
-# STRIDE Threat Model v2 — prowler-cspm
+# STRIDE Threat Model with DREAD Scoring
 
 **Scope:** All components, outside-in from the public internet. Every trust boundary and element in the system is analysed. This document does not link mitigations — mitigation tracking is in a separate file.
 
