@@ -72,7 +72,7 @@ Terraform state is stored locally on the WSL2 machine and excluded from the repo
 
 **Verified by:** Two independent credential scans on every commit (Gitleaks pre-commit hook + Betterleaks CI workflow). Both scan the new changes and the full git history.
 
-**Accepted risk:** All three cloud providers' credentials are fetched in a single session. A session compromised while credentials are in memory exposes access to all three simultaneously. Isolating credentials per provider would require significant pipeline redesign. In a single-operator PoC where the scan runs interactively and credentials are held in memory only for the duration of the scan, this risk is accepted.
+**Accepted risk — single-session credential exposure.** All three cloud providers' credentials are fetched in a single session. A session compromised while credentials are in memory exposes access to all three simultaneously. Isolating credentials per provider would require significant pipeline redesign. In a single-operator PoC where the scan runs interactively and credentials are held in memory only for the duration of the scan, this risk is accepted.
 
 ---
 
