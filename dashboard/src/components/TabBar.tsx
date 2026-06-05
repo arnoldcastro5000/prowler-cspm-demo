@@ -7,7 +7,7 @@ export default function TabBar() {
 
   const { pathname } = useLocation()
   const cspmActive = pathname === '/before' || pathname === '/after'
-  const securityActive = pathname === '/security-summary' || pathname === '/security' || pathname === '/threat-model'
+  const securityActive = pathname === '/security-summary' || pathname === '/security' || pathname === '/threat-model' || pathname === '/stride'
   const complianceActive = pathname === '/owasp-top-10' || pathname === '/owasp-cicd' || pathname === '/owasp-llm' || pathname === '/owasp-genai'
 
   return (
@@ -77,6 +77,14 @@ export default function TabBar() {
               }
             >
               Threat Model
+            </NavLink>
+            <NavLink
+              to="/stride"
+              className={({ isActive }) =>
+                `block px-4 py-2 text-sm ${isActive ? 'text-blue-400 bg-blue-950' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`
+              }
+            >
+              STRIDE
             </NavLink>
           </div>
         </div>
