@@ -48,7 +48,7 @@ export default function TabBar() {
         </div>
         <div className="relative group flex">
           <NavLink
-            to="/security"
+            to="/security-summary"
             className={`${base} ${securityActive ? active : inactive}`}
           >
             Posture
