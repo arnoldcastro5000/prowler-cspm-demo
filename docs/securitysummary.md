@@ -8,7 +8,7 @@
 
 ## Security Posture at a Glance
 
-Five defence-in-depth control layers protect this proof-of-concept and the prowler-cspm pipeline from the public internet to the developer workstation. Every risk identified in the companion risk assessment has been analysed — risks with implemented controls are verified in production or confirmed at container startup; risks without controls have been formally accepted with documented rationale. Four residual risks — scan output integrity, single-session credential exposure, cache poisoning, and runtime markdown integrity (WEB-R01) — have been assessed and accepted as appropriate for a single-operator proof-of-concept; the rationale for each is documented below. The remaining open gaps in the AI agent sandbox are noted with the controls that partially address them.
+Five defence-in-depth control layers protect this proof-of-concept and the prowler-cspm pipeline from the public internet to the developer workstation. Every risk identified in the companion risk assessment has been analysed — risks with implemented controls are verified in production or confirmed at container startup; risks without controls have been formally accepted with documented rationale. Four residual risks — scan output chain of custody, single-session credential exposure, cache poisoning, and runtime markdown integrity (WEB-R01) — have been assessed and accepted as appropriate for a single-operator proof-of-concept; the rationale for each is documented below. The remaining open gaps in the AI agent sandbox are noted with the controls that partially address them.
 
 | Control | Threat it addresses | Verification | Gaps |
 |---|---|---|---|
@@ -52,7 +52,7 @@ The deployed application is scanned manually using an automated tool that simula
 
 **Verified by:** OWASP ZAP baseline scan against the deployed application at `prowler.cloudsecuritypractice.com`.
 
-**Accepted risk (WEB-R01):** Findings data is baked into the container image at build time — no runtime API, no database, no user input processing. Two pages (`ThreatModel` and `Security`) fetch markdown at runtime from `raw.githubusercontent.com`; ReactMarkdown sanitizes all HTML output (no XSS vector). This fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could poison rendered content. This is accepted as WEB-R01 in `docs/owasp-top10.md §A08`. No open gaps have been identified in the core hardening controls (CSP, HSTS, headers, DAST scan) at the current application scope.
+**Accepted risk (WEB-R01):** Findings data is baked into the container image at build time — no runtime API, no database, no user input processing. Eight pages fetch markdown at runtime from `raw.githubusercontent.com`; ReactMarkdown sanitizes all HTML output (no XSS vector). This fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could poison rendered content. This is accepted as WEB-R01 in `docs/owasp-top10.md §A08`. No open gaps have been identified in the core hardening controls (CSP, HSTS, headers, DAST scan) at the current application scope.
 
 ---
 

@@ -80,7 +80,7 @@ OWASP ZAP baseline scan is run manually against the deployed application. The sc
 
 ### Runtime content fetch
 
-`ThreatModel.tsx` and `Security.tsx` fetch markdown at runtime from `raw.githubusercontent.com`. ReactMarkdown sanitizes HTML output (no XSS vector from this path). The fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could alter rendered content. This is documented as an accepted residual risk (WEB-R01) in `docs/owasp-top10.md §A08`.
+Eight pages fetch markdown at runtime from `raw.githubusercontent.com`. ReactMarkdown sanitizes HTML output (no XSS vector from this path). The fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could alter rendered content. This is documented as an accepted residual risk (WEB-R01) in `docs/owasp-top10.md §A08`.
 
 ---
 
