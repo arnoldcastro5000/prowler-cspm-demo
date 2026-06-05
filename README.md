@@ -81,7 +81,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 ```
 /
 ├── .github/
-│   ├── dependabot.yml               # Weekly updates: npm (dashboard) and pip (ingest)
+│   ├── dependabot.yml               # Daily updates: npm (dashboard), pip (ingest), and GitHub Actions
 │   └── workflows/
 │       ├── dependency-review.yml    # Blocks merge if the incoming change introduces a known CVE
 │       ├── docker-build.yml         # Builds dashboard image; Trivy-scans for CRITICAL/HIGH CVEs
@@ -177,7 +177,7 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 | Secrets | GCP Secret Manager | All cloud credentials fetched at runtime, never stored on disk |
 | Registry | GCP Artifact Registry | Docker image storage, GCP-native |
 | AI Development | Claude Code (sandboxed) + [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) + [mattpocock/skills](https://github.com/mattpocock/skills) | Agentic workflows (TDD, domain grilling, issue breakdown) with LLM coding guardrails |
-| CI/CD | GitHub Actions + Dependabot + Socket.dev | 15 automated checks block unsafe code before it ships + weekly dependency updates |
+| CI/CD | GitHub Actions + Dependabot + Socket.dev | 15 automated checks block unsafe code before it ships + daily dependency updates |
 | Frontend | React 18 + Vite + TypeScript (strict) + Tailwind + zod | Static bundle with runtime schema validation, containerises cleanly |
 | Development environment | WSL2 (Windows Subsystem for Linux) | Local Linux environment for Terraform, Prowler, and Docker |
 | Architecture diagrams | [/aws-architecture-diagram](https://github.com/vidanov/aws-architecture-diagram-skill) skill | Generates validated draw.io architecture diagrams using official AWS4 icon libraries |
