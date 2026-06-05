@@ -8,15 +8,15 @@
 
 ## Security Posture at a Glance
 
-Five defence-in-depth control layers protect this proof-of-concept and the prowler-cspm pipeline from the public internet to the developer workstation. Every risk identified in the companion risk assessment maps to a named, implemented control — verified in production or confirmed at container startup. Three residual risks — scan output integrity, single-session credential exposure, and cache poisoning — have been assessed and accepted as appropriate for a single-operator proof-of-concept; the rationale for each is documented below. The remaining open gaps in the AI agent sandbox are noted with the controls that partially address them.
+Five defence-in-depth control layers protect this proof-of-concept and the prowler-cspm pipeline from the public internet to the developer workstation. Every risk identified in the companion risk assessment has been analysed — risks with implemented controls are verified in production or confirmed at container startup; risks without controls have been formally accepted with documented rationale. Four residual risks — scan output integrity, single-session credential exposure, cache poisoning, and runtime markdown integrity (WEB-R01) — have been assessed and accepted as appropriate for a single-operator proof-of-concept; the rationale for each is documented below. The remaining open gaps in the AI agent sandbox are noted with the controls that partially address them.
 
 | Control | Threat it addresses | Verification | Gaps |
 |---|---|---|---|
 | **1. Edge & Network Defence** | Unauthorized access, volumetric attacks, direct origin bypass | Direct-to-origin requests return 403 in production | Cache poisoning via origin headers — accepted |
-| **2. Application Hardening** | Cross-site scripting, clickjacking, content injection | OWASP ZAP scan against deployed application | None identified — static app with no backend API |
+| **2. Application Hardening** | Cross-site scripting, clickjacking, content injection | OWASP ZAP scan against deployed application | WEB-R01: runtime markdown fetch without SRI — accepted (see §2) |
 | **3. Secrets & Credential Hygiene** | Credentials stolen or leaked into code | Two independent secret scans on every commit | Single-session credential exposure — accepted |
 | **4. Build Pipeline & Supply Chain** | Compromised dependencies, CI pipeline takeover | 15 automated security checks (14 CI gates + pre-commit hook) on every push and pull request | Scan output chain of custody — accepted |
-| **5. AI Agent Sandbox** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Firewall self-test on every container startup | Firewall can be disabled by any container process; base image and install scripts not integrity-verified; sandbox degrades silently if bubblewrap absent (`failIfUnavailable: false`) |
+| **5. AI Agent Sandbox** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Firewall self-test on every container startup | Firewall can be disabled by any container process; base image and install scripts not integrity-verified; sandbox degrades silently if bubblewrap absent (`failIfUnavailable: false`, T-123); no structured audit trail for agent session actions (T-050) |
 
 ---
 
@@ -52,7 +52,7 @@ The deployed application is scanned manually using an automated tool that simula
 
 **Verified by:** OWASP ZAP baseline scan against the deployed application at `prowler.cloudsecuritypractice.com`.
 
-**Residual risk:** The application serves only static content with no backend API, no user input processing, and no database. This significantly limits the attack surface. No open gaps have been identified in this control family at the current application scope.
+**Residual risk:** Findings data is baked into the container image at build time — no runtime API, no database, no user input processing. Two pages (`ThreatModel` and `Security`) fetch markdown at runtime from `raw.githubusercontent.com`; ReactMarkdown sanitizes all HTML output (no XSS vector). This fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could poison rendered content. This is accepted as WEB-R01 in `docs/owasp-top10.md §A08`. No open gaps have been identified in the core hardening controls (CSP, HSTS, headers, DAST scan) at the current application scope.
 
 ---
 
@@ -68,6 +68,8 @@ Two independent checks scan every code change for accidentally included credenti
 
 All cloud account identifiers are removed from scan results before they are included in the application. The raw, unredacted scan output is never published.
 
+Terraform state is stored locally on the WSL2 machine and excluded from the repository via `.gitignore`. No remote backend is used — state files contain sensitive resource metadata and cloud credentials and never leave the developer workstation.
+
 **Verified by:** Two independent credential scans on every commit (Gitleaks pre-commit hook + Betterleaks CI workflow). Both scan the new changes and the full git history.
 
 **Accepted risk:** All three cloud providers' credentials are fetched in a single session. A session compromised while credentials are in memory exposes access to all three simultaneously. Isolating credentials per provider would require significant pipeline redesign. In a single-operator PoC where the scan runs interactively and credentials are held in memory only for the duration of the scan, this risk is accepted.
@@ -80,9 +82,9 @@ All cloud account identifiers are removed from scan results before they are incl
 
 Fifteen automated security checks cover every code change before it can be merged or deployed — 14 CI gates on every push and pull request, plus a pre-commit hook that runs before changes leave the developer's machine. No change reaches production without passing all of them. The checks cover: scanning the source code for injection vulnerabilities, verifying that no dependency added to the project has a known security issue at the time of merge, checking the container image for known vulnerabilities before it ships, auditing the build pipeline configuration itself for weaknesses that could allow it to be hijacked, and validating the infrastructure definitions before they touch live cloud resources.
 
-Every external tool used in the build pipeline is locked to a specific verified version at the time it was reviewed and approved. A tool that is later compromised cannot silently substitute itself into the pipeline — the pipeline will reject it because the version no longer matches. An automated service reviews all dependencies daily and opens a change request when updates are available, so version locks stay current without manual tracking.
+Every external tool in the CI/CD build pipeline is locked to a specific verified version at the time it was reviewed and approved, and all checkout actions set `persist-credentials: false` so the GitHub token is not available to downstream steps. A tool that is later compromised cannot silently substitute itself into the pipeline — the pipeline will reject it because the version no longer matches. An automated service reviews all dependencies daily and opens a change request when updates are available, so version locks stay current without manual tracking. Note: development environment toolchain integrity (DevContainer base image, install scripts) is a separate open gap documented in §5.
 
-**Verified by:** CI gate status on every push and pull request. All 15 checks must pass for a change to merge.
+**Verified by:** CI gate status on every push and pull request. All 15 checks must pass for a change to merge. For a full risk analysis of the CI/CD pipeline against the OWASP Top 10 CI/CD Security Risks, see `docs/owasp-cicd.md`.
 
 **Accepted risk — scan output chain of custody.** After the security scanner runs, it writes its findings to a folder on the local machine. That folder can be modified before the output is packaged into the application image, and there is no signature or verification step in between. Exploiting this requires an adversary with an interactive session on the developer's machine during the narrow window between the scan completing and the image being built. In a single-operator PoC with no adversarial local access, this risk is accepted. A production deployment would require output signing and signature verification at packaging time.
 
@@ -113,9 +115,9 @@ The developer account inside the container has elevated permissions for exactly 
 | Credential scanning | Pre-commit hook runs inside the container on every commit |
 | Policy enforcement | Policy baked into container image — not configurable by the user session |
 
-**Residual risk:** Three gaps remain in this control family.
+**Residual risk:** Four gaps remain in this control family.
 
-First, the base container image is not locked to a specific verified version. If the image source were substituted between builds, malicious code could enter the container before any of the above controls are active. Second, the firewall requires a system-level network permission to function. Any process that achieves code execution inside the container holds that same permission and could use it to reconfigure or disable the firewall without exploiting any software vulnerability. Third, the process sandbox is configured to continue running — without restrictions and without alerting the user — if the isolation layer is unavailable. A container that starts without the isolation layer would give the AI assistant unrestricted access with no visible indication that the protection is absent.
+First, the base container image is not locked to a specific verified version. If the image source were substituted between builds, malicious code could enter the container before any of the above controls are active. Second, the firewall requires a system-level network permission to function. Any process that achieves code execution inside the container holds that same permission and could use it to reconfigure or disable the firewall without exploiting any software vulnerability. Third, the process sandbox is configured to continue running — without restrictions and without alerting the user — if the isolation layer is unavailable. A container that starts without the isolation layer would give the AI assistant unrestricted access with no visible indication that the protection is absent (T-123 in `docs/stride.md`). Fourth, agent actions inside the container leave no structured audit trail beyond shell history — there is no per-session log of which commands were run or which files were modified by the assistant (T-050 in `docs/stride.md`).
 
 ---
 
@@ -125,6 +127,6 @@ The following constraints are enforced in the project's AI working context and v
 
 - No cloud account identifiers (account IDs, project IDs, subscription IDs, tenant IDs) anywhere in code or configuration — all must be derived at runtime
 - No cloud regions hardcoded inline in scripts or infrastructure definitions — defined as named variables only
-- No infrastructure resource identifiers (security group IDs, instance IDs, VPC IDs) in any committed file
+- No infrastructure resource identifiers (security group IDs, instance IDs, VPC IDs, subnet IDs, AMI IDs) in any committed file
 - No credentials, keys, or secrets in any file tracked by version control
 - No personal email addresses or usernames in source code

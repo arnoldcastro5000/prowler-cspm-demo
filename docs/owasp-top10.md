@@ -8,12 +8,12 @@ This project deploys a read-only React dashboard on Cloud Run behind Cloudflare.
 |---|---|---|---|
 | A01 | Broken Access Control | 🟢 Mitigated | Worker enforces path + method allowlist; origin secret blocks direct Cloud Run access; no user roles to bypass |
 | A02 | Security Misconfiguration | 🟢 Mitigated | 6 nginx security headers; SHA-pinned container images; Terraform validate + Trivy in CI |
-| A03 | Software Supply Chain Failures | 🟢 Mitigated | SHA-pinned deps and Actions; Dependabot + Dependency Review + Zizmor; Python ingest uses stdlib only |
+| A03 | Software Supply Chain Failures | 🟢 Mitigated | SHA-pinned deps and Actions; Dependabot + Dependency Review + Zizmor + Socket.dev + lockfile-lint; Python ingest uses stdlib only |
 | A04 | Cryptographic Failures | 🟢 Mitigated | Cloudflare Full (Strict) TLS; HSTS one year; no custom crypto; secrets in GCP Secret Manager only |
 | A05 | Injection | ⚪ Does not apply | No input surface; React auto-escapes; Zod validates findings; CSP nonce blocks inline scripts |
 | A06 | Insecure Design | 🟢 Mitigated | Threat model + ADR predate deployment; minimal architecture (no API); defence-in-depth at every layer |
 | A07 | Authentication Failures | ⚪ Does not apply | No user accounts, login, sessions, cookies, JWTs, or password storage |
-| A08 | Software or Data Integrity Failures | 🟡 Accepted risk | Build artifacts and findings integrity strong; **WEB-R01**: runtime markdown fetch from GitHub lacks SRI |
+| A08 | Software or Data Integrity Failures | 🟡 Accepted risk | Build pipeline and runtime artifacts integrity strong; pre-bake scan output chain of custody — accepted risk (see `security.md` § 4); **WEB-R01**: runtime markdown fetch from GitHub lacks SRI |
 | A09 | Security Logging and Alerting Failures | 🟡 Partially mitigated | Cloud Logging + Cloudflare analytics in place; **WEB-R02**: no SIEM or real-time alerting (intentionally out of scope) |
 | A10 | Mishandling of Exceptional Conditions | 🟢 Mitigated | Explicit error codes at every layer; nginx fails closed without origin secret; `trap cleanup EXIT` in scan pipeline |
 
@@ -33,7 +33,7 @@ The dashboard is a public read-only site with no user roles, no multi-user acces
 - Origin protected by `X-CF-Secret` header — direct Cloud Run access without the header returns 403.
 - No user roles, no privilege levels, no authorization logic to bypass.
 
-See `docs/security.md` → Pillar 3 (Defended Runtime Edge). See `docs/threat-model.md` → Pillar 3 → Worker security rules. For infrastructure access control (Secret Manager IAM, Terraform credentials, scan pipeline guards), see `docs/security.md` → Pillar 1 (Credential & Secrets Hygiene) and `docs/owasp-genai.md` → ASI03 (Identity & Privilege Abuse).
+See `docs/security.md` → 1. Defended Runtime Edge. For infrastructure access control (Secret Manager IAM, Terraform credentials, scan pipeline guards), see `docs/security.md` → 3. Credential & Secrets Hygiene and `docs/owasp-genai.md` → ASI03 (Identity & Privilege Abuse).
 
 ---
 
@@ -52,7 +52,7 @@ Security headers, container images, and infrastructure configuration are all exp
 - Cloudflare Worker blocks path traversal attempts (`%2e%2e`, null bytes, encoded sequences).
 - nginx error pages do not expose version information or stack details.
 
-See `docs/security.md` → Pillar 4 (Hardened Application Surface) → HTTP security headers; Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → 2. Hardened Application Surface → HTTP security headers; 4. Secure Build & Supply Chain.
 
 ---
 
@@ -65,15 +65,17 @@ Every dependency — npm packages, Docker base images, GitHub Actions, Terraform
 **Controls in place:**
 
 - CI: `dependency-review.yml` scans npm and pip dependencies for known vulnerabilities on every PR that modifies package files.
-- Dependabot opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies.
+- Dependabot opens automated PRs daily for outdated npm, pip, and GitHub Actions dependencies.
 - All GitHub Actions pinned to exact commit SHAs, not mutable version tags.
 - Docker base images pinned to SHA digests — updates are explicit and reviewed.
 - CI: `zizmor.yml` audits GitHub Actions workflows for supply chain risks.
 - CI: `secret-scan.yml` and `hardcoded-config-check.yml` detect unauthorized modifications to source.
+- Socket.dev scans npm package manifests for malware, typosquatting, and obfuscated code on every PR — supply-chain threats with no CVE entry.
+- CI: lockfile-lint validates `package-lock.json` resolves packages only from the official npm registry over HTTPS, blocking lockfile tampering and non-registry substitution.
 - Python ingest uses only the standard library (zero third-party dependencies).
 - `CLAUDE.md` hard rule: do not add npm packages, pip packages, or Terraform providers not already in the stack.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → 4. Secure Build & Supply Chain.
 
 ---
 
@@ -91,7 +93,7 @@ No custom cryptography exists in this project. TLS is handled entirely by Cloudf
 - No password storage, no session tokens, no key derivation, no hashing (no user accounts).
 - All credentials for cloud providers stored in GCP Secret Manager — fetched at runtime, never written to disk.
 
-See `docs/security.md` → Pillar 4 (Hardened Application Surface) → HTTP security headers; Pillar 1 (Credential & Secrets Hygiene).
+See `docs/security.md` → 2. Hardened Application Surface → HTTP security headers; 3. Credential & Secrets Hygiene.
 
 ---
 
@@ -147,10 +149,12 @@ Most integrity controls are strong. The residual risk is the remote markdown fet
 **Controls in place:**
 
 - All GitHub Actions pinned to exact commit SHAs — not mutable tags that could be poisoned.
-- Docker base images pinned to SHA digests.
+- Dashboard Docker base images pinned to SHA digests (`node:20-alpine@sha256:...`, `nginx:1.30-alpine@sha256:...`). Note: the DevContainer base image (development environment) is *not* locked to a verified version — this is a separate residual risk documented in `securitysummary.md §5` and `threat-model.md §2` (score 5.8).
 - Findings JSON baked into the container at build time — no remote fetch, no runtime integrity risk.
-- CI: `secret-scan.yml` (Gitleaks) detects unauthorized modifications that introduce credentials.
+- CI: `secret-scan.yml` (Betterleaks) detects unauthorized modifications that introduce credentials.
 - CI: `hardcoded-config-check.yml` detects cloud account IDs or resource identifiers introduced into source.
+
+**Accepted risk — scan output chain of custody:** Prowler writes findings JSON to the local machine before `make deploy`. That folder has no signature protection — tampering between scan completion and image build is possible. Requires an adversary with an interactive session on the developer's machine during that narrow window; accepted for this single-operator PoC. See `docs/security.md` § 4 and `docs/securitysummary.md` § 4 for the full rationale.
 
 **Residual risk (WEB-R01):**
 
@@ -179,7 +183,7 @@ Logging exists at the infrastructure level but no centralized alerting is config
 - Blocked requests in the Cloudflare Worker return appropriate error codes but are not logged to an external alerting system.
 - No real-time notification for security events.
 
-See `docs/threat-model.md` → Appendix B — Out-of-scope threats (continuous monitoring, SIEM, and notifications are explicitly listed as out of scope).
+This is an intentional scope exclusion for a single-developer proof-of-concept. See `docs/threat-model.md` → Scope and Methodology for the system boundary this analysis covers.
 
 ---
 
@@ -195,7 +199,7 @@ The application handles error paths explicitly — no component fails open or si
 - nginx returns 403 when the `X-CF-Secret` header is missing — does not fall through to serving content without origin validation.
 - Zod schema validation rejects malformed findings JSON at parse time — the dashboard renders a loading state rather than displaying corrupt data.
 - `ThreatModel.tsx` and `Security.tsx` catch fetch errors and display an error state rather than crashing or rendering partial content.
-- `run_scan.sh` uses `trap cleanup EXIT` to ensure credential environment variables are unset on both success and failure — no credentials leak on unexpected script termination.
+- `run_scan.sh` uses `trap cleanup EXIT` to ensure credential environment variables are unset on both success and failure. Exception: the raw `AZURE_CREDS` JSON blob is not unset by the cleanup trap — only the four parsed Azure variables are cleared; the source blob persists in shell memory post-exit (T-113 in `docs/stride.md`).
 
 ---
 
@@ -204,7 +208,7 @@ The application handles error paths explicitly — no component fails open or si
 | ID | Category | Risk | Status | Treatment / compensating control |
 |---|---|---|---|---|
 | **WEB-R01** | A08 — Software or Data Integrity Failures | Markdown fetched at runtime from `raw.githubusercontent.com` by `ThreatModel.tsx` and `Security.tsx` has no SRI or signature verification; a compromised GitHub account could poison rendered content | Accepted | ReactMarkdown sanitizes HTML (no XSS from this vector); residual is misleading or defamatory content. Compensating control: GitHub account 2FA and audit log review — outside this project's direct control. SRI is impractical because the markdown changes on every commit. |
-| **WEB-R02** | A09 — Security Logging and Alerting Failures | No centralized log aggregation, SIEM, real-time alerting on 403/404 patterns, or external forwarding of Worker-blocked requests | Out of scope | Documented as intentional scope exclusion for a single-developer portfolio project. See `docs/threat-model.md` → Appendix B. Treatment if scope expands: forward Cloud Logging + Cloudflare events to an external SIEM (e.g., Grafana Cloud, Better Stack) and add alerting rules for blocked-request anomalies. |
+| **WEB-R02** | A09 — Security Logging and Alerting Failures | No centralized log aggregation, SIEM, real-time alerting on 403/404 patterns, or external forwarding of Worker-blocked requests | Out of scope | Documented as an intentional scope exclusion for a single-developer proof-of-concept. Treatment if scope expands: forward Cloud Logging + Cloudflare events to an external SIEM (e.g., Grafana Cloud, Better Stack) and add alerting rules for blocked-request anomalies. |
 
 ---
 
@@ -226,4 +230,4 @@ Strengthens **A03** (Software Supply Chain Failures) by adding lockfile integrit
 
 **Implemented (2026-05-30):** lockfile-lint added as a step in `frontend-ci.yml`. Validates that `package-lock.json` resolves npm packages only from the official npm registry over HTTPS and checks package integrity hashes — blocking lockfile tampering and non-registry package substitution on every CI run.
 
-A03 status remains **🟢 Mitigated** — lockfile-lint strengthens the existing Frontend CI gate; the total check count (13) is unchanged.
+A03 status remains **🟢 Mitigated** — lockfile-lint strengthens the existing Frontend CI gate; the total check count (14) is unchanged.

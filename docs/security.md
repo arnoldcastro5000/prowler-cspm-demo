@@ -1,5 +1,8 @@
 # Security Controls Technical Details
 
+**Executive summary:** `docs/securitysummary.md` — non-technical overview and accepted risk rationale  
+**Risk assessment:** `docs/threat-model.md` — threat scoring and priority actions  
+
 **Security posture: defence-in-depth applied to every stage of the lifecycle.** Secrets are never on disk; every code change passes through automated gates; the runtime surface is reduced to a single hardened path; the application enforces modern browser controls; and the AI development environment runs sandboxed.
 
 ## At a glance
@@ -10,7 +13,7 @@
 | **2. Hardened application surface** | XSS, clickjacking, MIME sniffing, downgrade | 6 HTTP security headers (CSP w/ nonce, HSTS, X-Frame, etc.) | OWASP ZAP baseline scan |
 | **3. Credential & secrets hygiene** | Credential theft, exposure in git | GCP Secret Manager, runtime `trap` cleanup, Betterleaks (CI) + Gitleaks (pre-commit), data redaction | Two independent secret scans + redaction in published findings |
 | **4. Secure build & supply chain** | Compromised dependencies, CI takeover | 15 automated security checks, SHA-pinned actions, `persist-credentials: false`, Socket.dev, Trivy, Zizmor | CI gate status on every push and PR |
-| **5. AI development guardrails** | Inadvertent destructive change, data exfiltration via agent | Sandboxed Claude Code (filesystem / network / command restrictions) | Sandbox config enforced on every session |
+| **5. AI development guardrails** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Sandboxed Claude Code (filesystem / network / command restrictions) | Firewall self-test on every container startup; sandbox policy baked into image |
 
 ---
 
@@ -50,6 +53,8 @@ The Cloudflare free plan does not include custom WAF rules, method filtering, or
 | **7. Host header validation** | Validates the Host header against the expected domain (case-insensitive, allows `:443` variant). Returns 421 for mismatches, blocking cache poisoning and DNS rebinding. |
 | **8. Error cache prevention** | All error responses include `Cache-Control: no-store` so blocked requests are never cached by Cloudflare's CDN. |
 
+**Accepted risk — cache poisoning.** Worker rule 7 blocks host-header cache poisoning (DNS rebinding, request smuggling). A separate origin-level variant — where an attacker who has already compromised Cloud Run manipulates what Cloudflare caches — requires prior server compromise and is accepted without additional mitigation. See `docs/securitysummary.md §1` for the full rationale.
+
 ---
 
 ## 2. Hardened Application Surface
@@ -72,6 +77,10 @@ Applied in `dashboard/nginx.conf` — active on the deployed Cloud Run container
 ### DAST — Dynamic Application Security Testing
 
 OWASP ZAP baseline scan is run manually against the deployed application. The scan covers passive checks across all discovered URLs.
+
+### Runtime content fetch
+
+`ThreatModel.tsx` and `Security.tsx` fetch markdown at runtime from `raw.githubusercontent.com`. ReactMarkdown sanitizes HTML output (no XSS vector from this path). The fetch carries no subresource integrity (SRI) protection — a compromised GitHub account could alter rendered content. This is documented as an accepted residual risk (WEB-R01) in `docs/owasp-top10.md §A08`.
 
 ---
 
@@ -102,7 +111,11 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ### Terraform state
 
-- **Terraform state** is stored locally on the WSL2 machine and excluded from git via `.gitignore`. No remote backend — state files contain sensitive values and never leave the developer workstation.
+- **Terraform state** is stored locally on the WSL2 machine and excluded from git via `.gitignore`. No remote backend — state files contain sensitive resource metadata and cloud credentials and never leave the developer workstation.
+
+### Accepted risk — single-session credential exposure
+
+All three cloud providers' credentials (AWS, GCP, Azure) are fetched in a single scan session. A session compromised while credentials are in memory exposes access to all three simultaneously. Isolating credentials per provider would require significant pipeline redesign. In a single-operator PoC where the scan runs interactively and credentials are held in memory only for the duration of the scan, this risk is accepted.
 
 ---
 
@@ -222,6 +235,8 @@ Additional domains can be allowlisted without modifying `init-firewall.sh` by ad
 
 **Note:** `failIfUnavailable: false` means Claude Code degrades to unsandboxed operation without warning if `bubblewrap` is absent. This is a known residual risk — see `docs/stride.md` T-123.
 
+**Session attribution gap** — agent actions inside the container leave no structured audit trail beyond shell history. There is no per-session log of which commands were run or which files were modified by the assistant — see `docs/stride.md` T-050.
+
 ### Additional controls
 
 **Gitleaks inside the container** — installed at `/usr/local/bin/gitleaks`. The repository's pre-commit hook runs inside the container on every `git commit`.
@@ -236,7 +251,7 @@ For the full configuration reference including rebuild instructions and a valida
 
 ## Appendix — Hard rules (enforced in CLAUDE.md)
 
-- No hardcoded cloud account IDs, project IDs, subscription IDs, or tenant IDs anywhere in code or configuration.
+- No hardcoded cloud account IDs, project IDs, subscription IDs, or tenant IDs anywhere in code or configuration — all must be derived at runtime.
 - No hardcoded cloud regions inline in scripts or Terraform — defined as named variables only.
 - No hardcoded resource IDs (security group IDs, instance IDs, VPC IDs, subnet IDs, AMI IDs) — applies to all providers.
 - No credentials, keys, or secrets in any file tracked by git.
