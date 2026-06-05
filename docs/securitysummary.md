@@ -1,7 +1,7 @@
 # Security Controls — Executive Summary
 
 **Date:** June 2026  
-**Technical detail:** `docs/security.md` — full control specifications
+**Technical detail:** `docs/security.md` — full control specifications  
 **Companion document:** `docs/threat-model.md` — risk assessment this document responds to  
 
 ---
@@ -16,7 +16,7 @@ Five defence-in-depth control layers protect this proof-of-concept and the prowl
 | **2. Application Hardening** | Cross-site scripting, clickjacking, content injection | OWASP ZAP scan against deployed application | None identified — static app with no backend API |
 | **3. Secrets & Credential Hygiene** | Credentials stolen or leaked into code | Two independent secret scans on every commit | Single-session credential exposure — accepted |
 | **4. Build Pipeline & Supply Chain** | Compromised dependencies, CI pipeline takeover | 15 automated security checks (14 CI gates + pre-commit hook) on every push and pull request | Scan output chain of custody — accepted |
-| **5. AI Agent Sandbox** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Firewall self-test on every container startup | Firewall can be disabled by any container process; install scripts unverified; credential isolation applies inside the container only |
+| **5. AI Agent Sandbox** | AI assistant hijacked, credentials exfiltrated, unauthorized cloud actions | Firewall self-test on every container startup | Firewall can be disabled by any container process; base image and install scripts not integrity-verified; sandbox degrades silently if bubblewrap absent (`failIfUnavailable: false`) |
 
 ---
 
@@ -32,7 +32,11 @@ Eight additional rules run inside Cloudflare before any request reaches the appl
 
 **Verified by:** Direct requests to the application server URL return 403 in the production environment. All traffic reaches the application through `prowler.cloudsecuritypractice.com` only.
 
-**Accepted risk:** If the application server returns a response with headers that instruct Cloudflare to cache it, an attacker who can influence that response could cause manipulated content to be served to all users from the cache. Exploiting this path requires prior compromise of the Cloud Run container — a precondition that already represents full system compromise. This risk is accepted for the PoC context.
+**Accepted risk — cache poisoning.** Cloudflare speeds up the site by storing copies of pages at servers around the world and serving those stored copies to visitors, rather than fetching fresh content from the application server on every request. Cache poisoning is an attack where an adversary manipulates what gets stored in that cache, so that visitors are served tampered or malicious content instead of the real page.
+
+For this attack to succeed, an adversary would first need to gain control of the application server itself — the Google Cloud container where the site originates. Only from that position could they influence what Cloudflare stores and serves. An adversary who has already taken control of the application server has effectively compromised the entire system; poisoning the cache is one additional step they could take from that position, not an independent or lower-bar threat.
+
+Because this risk can only be reached after a more serious breach has already occurred, and because this project holds no user data and runs as a single-operator proof-of-concept, this risk is accepted without additional mitigation.
 
 ---
 
@@ -56,7 +60,7 @@ The deployed application is scanned manually using an automated tool that simula
 
 **Threat addressed:** Cloud credentials being stored on disk, committed to the repository, or exposed in logs and error output — any of which would give an attacker the same access to cloud infrastructure as the operator.
 
-All cloud credentials — for AWS, GCP, and Azure — are stored in a managed secrets vault, not on the developer's machine or in any file. They are fetched from the vault at the moment they are needed and held only in memory for the duration of the scan. When the scan ends, whether it succeeds or fails, a cleanup step explicitly removes the credentials from memory before the process exits.
+All cloud credentials — for AWS, GCP, and Azure — are stored in a managed secrets vault, not on the developer's machine or in any file. They are fetched from the vault at the moment they are needed and held only in memory for the duration of the scan. When the scan ends, whether it succeeds or fails, a cleanup step explicitly removes the credentials from memory before the process exits. Exception: the raw `AZURE_CREDS` JSON blob is not unset by the cleanup trap — only the four parsed Azure variables are cleared; the source blob persists in shell memory post-exit (T-113 in `docs/stride.md`).
 
 The secret that allows Cloudflare to authenticate to the application server is fetched from the same vault at deployment time and injected directly into the running application. It is never written to the container image or stored in the repository.
 

@@ -248,7 +248,7 @@
 | T-048 | Spoofing | Prompt injection via GitHub issues, PR titles, or review comments hijacks agent behavior — the attack class is confirmed exploitable against this agent platform | ❌ |
 | T-049 | Tampering | Hijacked agent modifies workflow YAMLs, Terraform, or ingest script before committing — write access to full project directory | ⚠️ |
 | T-050 | Repudiation | Actions taken by AI agent cannot be cleanly attributed — intermediate file writes and shell commands during a session leave no structured audit trail beyond shell history | ⚠️ |
-| T-051 | Info Disclosure | Agent reads credentials or env vars and exfiltrates via network calls — confirmed exploit pattern: agent holds credential → executes action → authenticates to production | ❌ |
+| T-051 | Info Disclosure | Agent reads credentials or env vars and exfiltrates via network calls — confirmed exploit pattern: agent holds credential → executes action → authenticates to production | ⚠️ |
 | T-052 | Info Disclosure | AI-generated code in this repo may contain exploitable vulnerabilities undetectable by traditional SAST scanning — Semgrep cannot detect novel logic flaws introduced by code generation | ❌ |
 | T-053 | Denial of Service | Agent exhausts API budget, runs infinite loops, or deletes critical files during a runaway or hijacked session | ⚠️ |
 | T-054 | EoP | Prompt-injected agent bypasses permission prompts (user-fatigue or pre-approved tool classes) and executes `gcloud`, `terraform`, `docker` with operator-level IAM rights | ⚠️ |
@@ -472,7 +472,7 @@
 | Threat ID | Category | Threat | Status |
 |---|---|---|---|
 | T-107 | Tampering | Prompt-injected agent writes malicious code to source files or modifies workflow YAMLs before a commit — agent has write access to the full project directory | ⚠️ |
-| T-108 | Info Disclosure | Agent reads GCP ADC credentials from filesystem or environment and transmits them via network calls permitted by the sandbox — same attack pattern as confirmed exploits across major AI coding agents | ❌ |
+| T-108 | Info Disclosure | Agent reads GCP ADC credentials from filesystem or environment and transmits them via network calls permitted by the sandbox — same attack pattern as confirmed exploits across major AI coding agents | ⚠️ |
 | T-109 | Denial of Service | Runaway agent session (infinite loop or large file operation) locks the terminal during a deployment window | ⚠️ |
 
 ---
@@ -577,7 +577,7 @@
 | T-048 | 4.7 AI Agent | Spoofing | Prompt injection via GitHub issues/PRs | ❌ | 7.0 | High | [→ EV-048] |
 | T-049 | 4.7 AI Agent | Tampering | Hijacked agent modifies source/workflow files | ⚠️ | 6.6 | High | — |
 | T-050 | 4.7 AI Agent | Repudiation | Agent actions lack structured audit trail | ⚠️ | 6.2 | High | — |
-| T-051 | 4.7 AI Agent | Info Disclosure | Agent exfiltrates credentials via network | ❌ | 7.2 | High | [→ EV-051] |
+| T-051 | 4.7 AI Agent | Info Disclosure | Agent exfiltrates credentials via network | ⚠️ | 7.2 | High | [→ EV-051] |
 | T-052 | 4.7 AI Agent | Info Disclosure | AI-generated code contains exploitable vulns | ❌ | 6.0 | High | [→ EV-052] |
 | T-053 | 4.7 AI Agent | Denial of Service | Runaway agent exhausts budget or locks terminal | ⚠️ | 5.0 | Medium | — |
 | T-054 | 4.7 AI Agent | EoP | Injected agent runs with operator-level IAM | ⚠️ | 6.8 | High | — |
@@ -634,7 +634,7 @@
 | T-105 | TB-10 Output → Docker Build | Info Disclosure | Unexpected files baked via Vite public/ | ❌ | 5.2 | Medium | — |
 | T-106 | TB-10 Output → Docker Build | Denial of Service | Existence-only gate → stale findings baked | ❌ | 5.6 | Medium | — |
 | T-107 | TB-11 AI Agent → Workstation | Tampering | Injected agent modifies source/workflow files | ⚠️ | 6.6 | High | — |
-| T-108 | TB-11 AI Agent → Workstation | Info Disclosure | Agent reads and exfiltrates credentials | ❌ | 6.8 | High | [→ EV-051] |
+| T-108 | TB-11 AI Agent → Workstation | Info Disclosure | Agent reads and exfiltrates credentials | ⚠️ | 6.8 | High | [→ EV-051] |
 | T-109 | TB-11 AI Agent → Workstation | Denial of Service | Runaway agent locks terminal | ⚠️ | 5.0 | Medium | — |
 | T-110 | TB-12 Internet → Repo | Tampering | Malicious PR with workflow/code changes | ⚠️ | 6.4 | High | — |
 | T-111 | TB-12 Internet → Repo | Info Disclosure | Security docs disclose trust boundaries to AI tools | ❌ | 8.4 | Critical | [→ EV-068] |
@@ -676,12 +676,12 @@
 | 1 | T-069 | 8.6 | ❌ | Public Repository | Info Disclosure | Automated AI tooling scans public code for exploitable vulnerabilities in seconds, without human direction |
 | 2 | T-068 | 8.4 | ❌ | Public Repository | Info Disclosure | Published stride.md / threat-model.md as attack roadmap for automated vulnerability discovery |
 | 3 | T-111 | 8.4 | ❌ | TB-12 Internet → Repo | Info Disclosure | Security docs disclose trust boundaries and gaps to any internet actor |
-| 4 | T-051 | 7.2 | ❌ | AI Agent | Info Disclosure | Agent reads credentials and exfiltrates via network calls — confirmed exploit pattern |
+| 4 | T-051 | 7.2 | ⚠️ | AI Agent | Info Disclosure | Agent reads credentials and exfiltrates via network calls — confirmed exploit pattern |
 | 5 | T-048 | 7.0 | ❌ | AI Agent | Spoofing | Prompt injection via GitHub issues, PR titles, or review comments hijacks Claude Code |
 | 6 | T-070 | 7.0 | ❌ | Public Repository | Info Disclosure | Repo reveals dependency patterns enabling AI-driven package confusion attack on PyPI |
 | 7 | T-054 | 6.8 | ⚠️ | AI Agent | EoP | Prompt-injected agent executes gcloud/terraform/docker with operator-level IAM |
 | 8 | T-067 | 6.8 | ⚠️ | Public Repository | Repudiation | AI-assisted attacks blend with legitimate CI traffic — indistinguishable in audit logs |
-| 9 | T-108 | 6.8 | ❌ | TB-11 AI Agent → Workstation | Info Disclosure | Agent reads GCP ADC credentials and transmits via allowed network calls |
+| 9 | T-108 | 6.8 | ⚠️ | TB-11 AI Agent → Workstation | Info Disclosure | Agent reads GCP ADC credentials and transmits via allowed network calls |
 | 10 | T-116 | 6.8 | ❌ | 4.1 Cloudflare Worker | Tampering | Origin response headers unmodified — cacheable responses cached at CF edge; cache poisoning vector |
 | 11 | T-038 | 6.6 | ❌ | Prowler Scanner | Info Disclosure | GCP SA key in /var/tmp (mode 0600) — path discoverable; persists if process killed before cleanup trap |
 | 12 | T-122 | 6.6 | ❌ | 4.12 DevContainer | EoP | NET_ADMIN + passwordless sudo on init-firewall.sh — node user can nullify all egress controls |

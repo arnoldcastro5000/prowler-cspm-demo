@@ -1,4 +1,4 @@
-# Security Controls
+# Security Controls Technical Details
 
 **Security posture: defence-in-depth applied to every stage of the lifecycle.** Secrets are never on disk; every code change passes through automated gates; the runtime surface is reduced to a single hardened path; the application enforces modern browser controls; and the AI development environment runs sandboxed.
 
@@ -83,7 +83,7 @@ OWASP ZAP baseline scan is run manually against the deployed application. The sc
 
 - All cloud credentials (AWS, GCP, Azure) are stored in **GCP Secret Manager** — never on disk, never in environment files, never committed to git.
 - Credentials are fetched at runtime by the **developer on WSL2** (outside the DevContainer) using `gcloud auth` ADC. The AI agent running inside the DevContainer has no access to these credentials — the DevContainer does not mount the host credential directories and does not have `gcloud` installed. See `prowler/run_scan.sh` and `Makefile`.
-- `run_scan.sh` uses a `trap cleanup EXIT` to unset all exported credential environment variables on exit, whether the scan succeeds or fails.
+- `run_scan.sh` uses a `trap cleanup EXIT` to unset all exported credential environment variables on exit, whether the scan succeeds or fails. **Exception:** the raw `AZURE_CREDS` JSON blob fetched from Secret Manager is not unset by the trap — the four parsed Azure variables are cleared but `AZURE_CREDS` itself persists in shell memory post-exit, accessible via core dump, shell inspection, or any subprocess spawned after script exit. See T-113 in `docs/stride.md`.
 - The Cloudflare origin validation secret is fetched from Secret Manager at deploy time and set as a Cloud Run environment variable — it is never stored in the image or repository.
 
 ### Secret scanning

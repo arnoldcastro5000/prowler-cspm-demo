@@ -38,7 +38,7 @@ export default function Landing() {
           <ol className="list-decimal list-inside space-y-2 text-xl text-gray-300 leading-relaxed">
             <li><span className="text-white font-semibold">CSPM</span> — 15 of 15 Prowler checks remediated across AWS, GCP, and Azure (19 findings resolved, 100% closure rate, verified by re-scan)</li>
             <li><span className="text-white font-semibold">Secure cloud architecture</span> — This dashboard deployed behind Cloudflare WAF + DDoS protection; it is accessible only through Cloudflare</li>
-            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — This POC built with an isolated AI agent; every change passes 15 automated CI security gates before merge</li>
+            <li><span className="text-white font-semibold">Secure AI-assisted development</span> — This POC built with an isolated AI agent; every change passes 15 automated security checks (14 CI gates + pre-commit hook)</li>
           </ol>
         </div>
 

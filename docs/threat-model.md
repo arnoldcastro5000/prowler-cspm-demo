@@ -1,4 +1,4 @@
-# Executive Security Assessment — prowler-cspm
+# Threat Model - Executive Summary
 
 **Date:** June 2026  
 **Full technical register:** `docs/stride.md`
@@ -31,11 +31,11 @@ This risk was identified, scored, and formally accepted. In a production deploym
 
 ### 1. The AI Coding Assistant Can Be Directed to Act on an Attacker's Behalf
 
-The AI coding assistant in this pipeline holds the cloud credentials it needs to read secrets, deploy code, and reconfigure infrastructure. It reads instructions from GitHub — issues, pull requests, and code comments. There is currently no verification that those instructions originate from an authorized person.
+An AI coding assistant that holds live cloud credentials can be directed to read secrets, deploy code, and reconfigure infrastructure on an attacker's behalf. It reads instructions from GitHub — issues, pull requests, and code comments. There is currently no verification that those instructions originate from an authorized person.
 
 An attacker who posts a crafted message in a public GitHub issue can cause the assistant to execute cloud commands without any human reviewing or approving the action. This is not a theoretical concern: this exact pattern was confirmed against four major AI coding platforms in 2026, with multiple documented cases of the assistant reading credentials from the workstation and transmitting them over its allowed network connection. If that happens, the attacker gains the same level of access to cloud infrastructure as the engineer running the tool.
 
-The assistant has no access to cloud credentials (credential directories are not mounted and gcloud is not installed in the image), outbound network connections are restricted to an explicit allowlist by an egress firewall, and destructive operations require explicit human approval via the process sandbox. Three paths remain unmitigated: any process inside the container can disable the firewall using a built-in system permission; there is no audit log of what the assistant did in a given session; and the base container image and install scripts are not cryptographically verified before execution.
+The assistant has no access to cloud credentials (credential directories are not mounted and gcloud is not installed in the image), outbound network connections are restricted to an explicit allowlist by an egress firewall, and destructive operations require explicit human approval via the process sandbox. Three paths remain unmitigated: any process inside the container can disable the firewall using a built-in system permission; the base container image and install scripts are not cryptographically verified before execution; and the process sandbox degrades to unrestricted execution without warning if bubblewrap is unavailable. A partial gap also exists in session attribution — agent actions leave no structured audit trail beyond shell history (T-050 in `docs/stride.md`).
 
 **What an attacker gains:** Cloud credentials, the ability to deploy arbitrary code to the running application, and the ability to modify or delete infrastructure — triggered by a single message in a GitHub issue, with no human in the loop.
 
@@ -86,12 +86,12 @@ There is no cryptographic signature on the findings. There is no checksum verifi
 | Severity | Total | Fully Controlled | Partial Controls | No Controls |
 |---|---|---|---|---|
 | Critical (8.0–10) | 5 | 2 | 0 | 3 |
-| High (6.0–7.9) | 60 | 6 | 23 | 31 |
+| High (6.0–7.9) | 60 | 6 | 25 | 29 |
 | Medium (4.0–5.9) | 66 | 7 | 38 | 21 |
 | Low (1.0–3.9) | 4 | 0 | 4 | 0 |
-| **Total** | **135** | **15** | **65** | **55** |
+| **Total** | **135** | **15** | **67** | **53** |
 
-*The 3 unmitigated Critical findings are the accepted PoC design tradeoffs documented above. Of the 55 fully uncontrolled risks, 31 are High severity — the majority concentrated in the three actionable areas described in this report.*
+*The 3 unmitigated Critical findings are the accepted PoC design tradeoffs documented above. Of the 53 fully uncontrolled risks, 29 are High severity — the majority concentrated in the three actionable areas described in this report.*
 
 ---
 
