@@ -47,7 +47,7 @@ Both scans run independently — the local hook catches secrets before they leav
 
 ## 2. Secure Build & Supply Chain
 
-*Every change ships through 15 automated security checks (14 CI gates + pre-commit hook). Dependencies pin to SHAs and are reviewed weekly.*
+*Every change ships through 15 automated security checks (14 CI gates + pre-commit hook). Dependencies pin to SHAs and are reviewed daily.*
 
 15 automated security checks cover every push and pull request (14 CI gates) plus a pre-commit hook that runs before changes leave the developer's machine. All GitHub Actions steps pin dependencies to exact commit SHAs, not mutable version tags. `persist-credentials: false` is set on all checkout actions.
 

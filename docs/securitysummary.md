@@ -86,7 +86,7 @@ Every external tool used in the build pipeline is locked to a specific verified 
 
 ## 5. AI Agent Sandbox
 
-**Threat addressed** *(from companion risk assessment, scores 7.2 / 7.0 / 6.6):* The AI coding assistant being directed by a malicious instruction — delivered through a GitHub issue or pull request comment — to execute cloud commands, read credentials, or exfiltrate data. This is the highest-scored unmitigated threat class in the risk assessment, with confirmed real-world exploits across major AI coding platforms in 2026.
+**Threat addressed** *(from companion risk assessment, scores 7.2 / 7.0 / 6.8):* The AI coding assistant being directed by a malicious instruction — delivered through a GitHub issue or pull request comment — to execute cloud commands, read credentials, or exfiltrate data. This is the highest-scored unmitigated threat class in the risk assessment, with confirmed real-world exploits across major AI coding platforms in 2026.
 
 The development environment runs inside an isolated container. The container is given access to only one location on the developer's machine: the project directory. The rest of the host filesystem — including the folders where cloud credentials are stored — is not mounted into the container and is not visible to anything running inside it. The cloud credential management tool is not installed in the container at all. This means the AI assistant has no path to cloud credentials through the filesystem, regardless of its other capabilities.
 
