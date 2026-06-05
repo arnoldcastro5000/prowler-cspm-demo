@@ -76,6 +76,95 @@ User → Cloudflare edge (WAF · CDN · DDoS) → Cloudflare Worker (injects X-C
 
 ---
 
+## Repository Structure
+
+```
+/
+├── .github/
+│   ├── dependabot.yml               # Weekly updates: npm (dashboard) and pip (ingest)
+│   └── workflows/
+│       ├── dependency-review.yml    # Blocks merge if the incoming change introduces a known CVE
+│       ├── docker-build.yml         # Builds dashboard image; Trivy-scans for CRITICAL/HIGH CVEs
+│       ├── frontend-ci.yml          # Lockfile integrity + tsc + ESLint + Vite build on dashboard/
+│       ├── hardcoded-config-check.yml  # Blocks hardcoded cloud IDs, resource identifiers, and regions
+│       ├── python-lint.yml          # Ruff lint + Bandit security scan on ingest/
+│       ├── secret-scan.yml          # Full git history scan for leaked credentials (Betterleaks)
+│       ├── semgrep.yml              # SAST scan of dashboard and Cloudflare Worker source
+│       ├── shellcheck.yml           # Shellcheck on prowler/run_scan.sh
+│       ├── terraform-validate.yml   # Format-checks and validates Terraform HCL in iac/
+│       ├── trivy.yml                # Trivy IaC scan of iac/ for insecure infrastructure patterns
+│       ├── worker-lint.yml          # ESLints the Cloudflare Worker
+│       └── zizmor.yml               # Audits GitHub Actions workflows for CI/CD security flaws
+├── .pre-commit-config.yaml           # Pre-commit hook — scans commits for leaked credentials (Gitleaks)
+├── cloudflare/
+│   ├── eslint.config.js             # ESLint rules for worker.js
+│   ├── worker.js                    # Injects X-CF-Secret header on every request to Cloud Run
+│   └── wrangler.toml                # Worker deployment config (prowler.cloudsecuritypractice.com)
+├── dashboard/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── FindingRow.tsx        # Expandable row for one security finding
+│   │   │   ├── FindingsTable.tsx     # Findings table, composed of FindingRow
+│   │   │   ├── MarkdownDocPage.tsx   # Reusable markdown renderer used by doc pages
+│   │   │   ├── Scorecard.tsx         # Summary card — finding counts by severity
+│   │   │   └── TabBar.tsx            # Top navigation bar
+│   │   ├── pages/
+│   │   │   ├── After.tsx             # After-scan findings dashboard
+│   │   │   ├── Architecture.tsx      # Architecture diagram page
+│   │   │   ├── Before.tsx            # Before-scan findings dashboard
+│   │   │   ├── Landing.tsx           # Home page
+│   │   │   ├── OWASPCICD.tsx         # OWASP Top 10 CI/CD Risks
+│   │   │   ├── OWASPGenAI.tsx        # OWASP GenAI Security
+│   │   │   ├── OWASPLLM.tsx          # OWASP LLM Top 10
+│   │   │   ├── OWASPTop10.tsx        # OWASP Top 10 Web Security
+│   │   │   ├── Security.tsx          # Security controls detail
+│   │   │   ├── SecuritySummary.tsx   # Security executive summary
+│   │   │   ├── STRIDE.tsx            # STRIDE/DREAD threat model
+│   │   │   └── ThreatModel.tsx       # Threat model executive summary
+│   │   ├── types/
+│   │   │   └── finding.ts            # Zod schema + inferred Finding type
+│   │   ├── index.css                 # Tailwind CSS entry point
+│   │   ├── main.tsx                  # App entry point — route definitions
+│   │   └── zod-config.ts             # Zod global config (disables JIT)
+│   ├── Dockerfile                    # Multi-stage: Node 20 builder → Nginx 1.30, port 8080
+│   ├── package.json
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   └── vite.config.ts
+├── docs/
+│   ├── adr/                          # Architecture Decision Records (in progress)
+│   ├── agents/
+│   │   ├── domain.md                 # How AI agents should navigate this repo's docs
+│   │   ├── issue-tracker.md          # GitHub issue tracker conventions
+│   │   └── triage-labels.md          # Issue label vocabulary
+│   ├── owasp-cicd.md                 # OWASP Top 10 CI/CD risk assessment for this project
+│   ├── security.md                   # Full security controls technical specification
+│   ├── securitysummary.md            # Executive security summary
+│   ├── stride.md                     # STRIDE threat model with DREAD scoring
+│   └── threat-model.md               # Threat model executive summary
+├── iac/
+│   ├── environments/
+│   │   ├── after.tfvars              # All 15 misconfig variables = false; EC2 stopped
+│   │   ├── before.tfvars             # All 15 misconfig variables = true; EC2 running
+│   │   └── main.tf                   # Single Terraform config for all three cloud providers
+│   └── modules/
+│       ├── aws/main.tf               # AWS: S3, EC2, CloudTrail, IAM, security group
+│       ├── azure/main.tf             # Azure: Storage, NSG, IAM, activity log alert
+│       └── gcp/main.tf               # GCP: GCS, Compute, IAM, KMS, Cloud Logging
+├── ingest/
+│   └── ingest_prowler.py             # Normalises Prowler OCSF JSON → findings_{before,after}.json
+├── prowler/
+│   └── run_scan.sh                   # Orchestrates Prowler scans across AWS, GCP, and Azure
+├── CLAUDE.md                         # AI session context — working rules and stack decisions
+├── CONTEXT.md                        # Domain glossary for AI agents (Check, Finding, Provider)
+├── LICENSE.txt
+├── Makefile                          # All operational commands: setup · before · scan · after · rescan · deploy
+├── README.md
+└── SETUP.md                          # Full reproduction instructions and prerequisites
+```
+
+---
+
 ## Tech Stack
 
 | Layer | Technology | Rationale |
@@ -216,4 +305,4 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE.txt).
