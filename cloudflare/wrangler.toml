@@ -1,6 +1,6 @@
 name = "sparkling-disk-de2a"
 main = "worker.js"
-compatibility_date = "2026-05-27"
+compatibility_date = "2026-06-04"
 
 [[routes]]
 pattern = "prowler.cloudsecuritypractice.com/*"
