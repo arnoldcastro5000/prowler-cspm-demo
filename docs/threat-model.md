@@ -1,7 +1,8 @@
 # Threat Model - Executive Summary
 
 **Date:** June 2026  
-**Full technical register:** `docs/stride.md`
+**Full technical register:** `docs/stride.md`  
+**Controls response:** `docs/securitysummary.md` — implemented controls and accepted risk rationale
 
 ---
 

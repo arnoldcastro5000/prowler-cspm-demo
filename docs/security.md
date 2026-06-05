@@ -210,6 +210,8 @@ The `node` user's sudo access is scoped to this script only — no other root op
 
 Additional domains can be allowlisted without modifying `init-firewall.sh` by adding them to `firewall-extra-domains.txt` (bind-mounted read-only from the host).
 
+**Residual risk — firewall bypass.** The `NET_ADMIN` and `NET_RAW` capabilities granted to the container for firewall setup are available to every process running inside it. Any process that achieves code execution inside the container can modify or remove iptables rules using these capabilities without exploiting a software vulnerability — see Priority 4 in `docs/threat-model.md`.
+
 ### Control 3 — Bubblewrap process sandbox
 
 `bubblewrap` is installed in the image. Claude Code uses it for sub-process isolation. The sandbox is enforced by `managed-settings.json`, copied into the image at build time at the highest-precedence config path:
