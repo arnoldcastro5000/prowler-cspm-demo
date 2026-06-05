@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sparkling-disk-de2a",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-06-04",
+  "routes": [
+    {
+      "pattern": "prowler.cloudsecuritypractice.com/*",
+      "zone_name": "cloudsecuritypractice.com"
+    },
+    {
+      "pattern": "cloudsecuritypractice.com/*",
+      "zone_name": "cloudsecuritypractice.com"
+    }
+  ]
+}
