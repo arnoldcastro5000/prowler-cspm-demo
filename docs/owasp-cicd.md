@@ -28,6 +28,7 @@ Flow control mechanisms prevent code from reaching production without passing re
 **Controls in place:**
 
 - 13 CI checks run on every push and PR — TypeScript strict, ESLint, Bandit, Semgrep, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate, Socket.dev.
+- `make deploy` checks the latest CI run on `main` via `gh run list` before building; aborts if the conclusion is not `success` (RL-07).
 - `run_scan.sh` guards require committed code and green CI before scans execute.
 - Single developer reviews all commits — no auto-merge.
 - Deployment is manual (`make deploy` from WSL2, never triggered by CI).
@@ -35,11 +36,11 @@ Flow control mechanisms prevent code from reaching production without passing re
 
 **Improvement opportunities:**
 
-- Add a CI status check in the `make deploy` target — query `gh run list` and abort if the latest run on `main` failed.
+- ~~Add a CI status check in the `make deploy` target — query `gh run list` and abort if the latest run on `main` failed.~~ — implemented; see RL-07.
 - Enable GitHub branch protection on `main` requiring status checks to pass before merge.
 - Add a pre-deploy verification step that validates both findings JSON files exist and pass Zod schema validation.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → §4 (Secure Build & Supply Chain).
 
 ---
 
@@ -62,7 +63,7 @@ Single-developer project with no shared credentials. GitHub account security (2F
 - Document the GitHub account's 2FA status and review personal access token scopes.
 - Audit which GitHub Apps have repository access (if any).
 
-See `docs/security.md` → Pillar 1 (Credential & Secrets Hygiene).
+See `docs/security.md` → §3 (Credential & Secrets Hygiene).
 
 ---
 
@@ -90,7 +91,7 @@ This is the most relevant CI/CD risk for this project. The pipeline consumes npm
 - ~~Add container image scanning (Trivy) on the built Docker image, not just IaC~~ — implemented: Trivy image scan added to `docker-build.yml`, gates on CRITICAL/HIGH CVEs with available fixes (RL-06).
 - Consider generating an SBOM (Software Bill of Materials) during Docker build.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain). See `docs/owasp-top10.md` → A03 (Software Supply Chain Failures).
+See `docs/security.md` → §4 (Secure Build & Supply Chain). See `docs/owasp-top10.md` → A03 (Software Supply Chain Failures).
 
 ---
 
@@ -114,7 +115,7 @@ PPE occurs when an attacker modifies CI pipeline definitions or injects code int
 - If the repository becomes public, add a `CODEOWNERS` file requiring approval for `.github/workflows/` changes.
 - If the repository becomes public, avoid `pull_request_target` triggers or ensure they do not check out the PR's head ref.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → §4 (Secure Build & Supply Chain).
 
 ---
 
@@ -137,7 +138,7 @@ PBAC controls limit what resources and environments a pipeline can access. In th
 - Document this separation explicitly in `docs/security.md` — CI has no deployment capability by design.
 - If deployment is ever automated in CI, use GitHub Environments with required reviewers and OIDC workload identity federation (not long-lived access keys).
 
-See `docs/security.md` → Pillar 1 (Credential & Secrets Hygiene).
+See `docs/security.md` → §3 (Credential & Secrets Hygiene).
 
 ---
 
@@ -161,7 +162,7 @@ Credentials are not stored in the CI system at all. All cloud credentials live i
 - Document a credential rotation schedule (when cloud provider keys were last rotated).
 - Consider migrating from long-lived access keys to short-lived credentials via OIDC workload identity federation for AWS and Azure.
 
-See `docs/security.md` → Pillar 1 (Credential & Secrets Hygiene).
+See `docs/security.md` → §3 (Credential & Secrets Hygiene).
 
 ---
 
@@ -185,7 +186,7 @@ The project uses GitHub-hosted runners exclusively. These are managed by GitHub,
 - Pin `runs-on: ubuntu-24.04` instead of `ubuntu-latest` for build reproducibility.
 - Enable GitHub's secret scanning push protection at the repository level.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → §4 (Secure Build & Supply Chain).
 
 ---
 
@@ -211,7 +212,7 @@ The project integrates several third-party GitHub Actions and uses Cloudflare fo
 - Maintain an inventory of all third-party actions with their purposes and last review date.
 - Consider forking critical third-party actions into the org to eliminate upstream supply chain risk.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain).
+See `docs/security.md` → §4 (Secure Build & Supply Chain).
 
 ---
 
@@ -228,6 +229,7 @@ Docker images are pushed to GCP Artifact Registry without signing or provenance 
 - `make deploy` verifies both findings JSON files exist before building.
 - GCP Artifact Registry is private — not publicly writable.
 - Build and deploy happen on the same machine in the same command — no artifact handoff between systems.
+- `make deploy` deploys by immutable image digest (`REGISTRY@sha256:...`), not mutable tag (RL-07).
 
 **Residual risk (CICD-R02):** see Residual risk register.
 
@@ -236,9 +238,8 @@ Docker images are pushed to GCP Artifact Registry without signing or provenance 
 - Sign images with cosign before pushing to Artifact Registry.
 - Add image digest verification after push — compare local digest to registry digest.
 - Generate and attach SLSA provenance attestations to Docker images.
-- Log the image digest in deploy output for an audit trail.
+- ~~Log the image digest in deploy output for an audit trail.~~ — implemented; see RL-07.
 
-See `docs/threat-model.md` → Appendix B (container image scanning listed as intentional scope exclusion).
 
 ---
 
@@ -246,7 +247,7 @@ See `docs/threat-model.md` → Appendix B (container image scanning listed as in
 
 **Status:** 🟡 Partially mitigated
 
-GitHub Actions retains run logs, and Trivy uploads SARIF results to the GitHub Security tab. However, there is no alerting on CI failures, no centralized view of security findings across workflows, and no audit trail for `make deploy` operations from WSL2.
+GitHub Actions retains run logs, and Trivy uploads SARIF results to the GitHub Security tab. However, there is no alerting on CI failures and no centralized view of security findings across workflows.
 
 **Controls in place:**
 
@@ -254,17 +255,18 @@ GitHub Actions retains run logs, and Trivy uploads SARIF results to the GitHub S
 - SARIF uploads from Trivy visible in the GitHub Security tab.
 - Session start checklist in `CLAUDE.md` requires checking `gh run list` for failures at the start of every session.
 - 13 independent checks provide broad coverage — a failure in one does not silence the others.
+- `make deploy` appends timestamp, git SHA, and image digest to `deploy.log` after every successful deploy (RL-07).
 
 **Residual risk (CICD-R03):** see Residual risk register.
 
 **Improvement opportunities:**
 
 - Set up GitHub Actions failure notifications via email or a webhook on workflow failure.
-- Add a deploy log — `make deploy` appends timestamp, image digest, and git SHA to a local log file.
+- ~~Add a deploy log — `make deploy` appends timestamp, image digest, and git SHA to a local log file.~~ — implemented; see RL-07.
 - Consider GitHub's audit log API for tracking repository setting changes.
 - Aggregate SARIF findings from all security workflows into a single view.
 
-See `docs/security.md` → Pillar 2 (Secure Build & Supply Chain). See `docs/owasp-top10.md` → A09 (Security Logging and Alerting Failures).
+See `docs/security.md` → §4 (Secure Build & Supply Chain). See `docs/owasp-top10.md` → A09 (Security Logging and Alerting Failures).
 
 ---
 
