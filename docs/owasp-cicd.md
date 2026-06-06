@@ -1,6 +1,6 @@
 # OWASP Top 10 CI/CD Security Risks
 
-This project's CI/CD pipeline comprises 12 GitHub Actions workflows that lint, validate, and scan on every push and PR; a manual `make deploy` from WSL2 that builds and pushes the dashboard container to GCP Artifact Registry; and a Cloudflare Worker deployed from GitHub via wrangler. Infrastructure across AWS, GCP, and Azure is managed with Terraform, and all cloud credentials live in GCP Secret Manager. Mapped against the OWASP Top 10 CI/CD Security Risks: **seven categories are mitigated and three carry documented residual risk** (CICD-R01: no branch protection on `main` requiring status checks; CICD-R02: no image signing or provenance attestation; CICD-R03: no CI failure alerting). Each risk is detailed below with controls in place and improvement opportunities; the **residual risk register** at the end consolidates the three open items with proposed treatments.
+This project's CI/CD pipeline comprises 15 automated security checks (12 CI workflows + Dependabot + Socket.dev + Gitleaks pre-commit) that lint, validate, and scan on every push and PR; a manual `make deploy` from WSL2 that builds and pushes the dashboard container to GCP Artifact Registry; and a Cloudflare Worker deployed from GitHub via wrangler. Infrastructure across AWS, GCP, and Azure is managed with Terraform, and all cloud credentials live in GCP Secret Manager. Mapped against the OWASP Top 10 CI/CD Security Risks: **seven categories are mitigated and three carry documented residual risk** (CICD-R01: no branch protection on `main` requiring status checks; CICD-R02: no image signing or provenance attestation; CICD-R03: no CI failure alerting). Each risk is detailed below with controls in place and improvement opportunities; the **residual risk register** at the end consolidates the three open items with proposed treatments.
 
 ## Status at a glance
 
@@ -23,11 +23,11 @@ This project's CI/CD pipeline comprises 12 GitHub Actions workflows that lint, v
 
 **Status:** 🟡 Partially mitigated
 
-Flow control mechanisms prevent code from reaching production without passing required gates. This project's 13 CI checks are advisory — nothing programmatically blocks `make deploy` if they fail. Branch protection rules are not enforced, and there are no GitHub Environment protection rules on Cloud Run deployment.
+Flow control mechanisms prevent code from reaching production without passing required gates. This project runs 15 automated security checks on every push and PR; `make deploy` aborts if the latest CI run on `main` is not success (RL-07). The gap is at the merge gate — no GitHub branch protection requires checks to pass before merging, so failing code could land on `main`, at which point `make deploy` would refuse to proceed. There are also no GitHub Environment protection rules on Cloud Run deployment.
 
 **Controls in place:**
 
-- 13 CI checks run on every push and PR — TypeScript strict, ESLint, Bandit, Semgrep, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate, Socket.dev.
+- 15 automated security checks (12 CI workflows + Dependabot + Socket.dev + Gitleaks pre-commit) — TypeScript strict, ESLint, Bandit, Semgrep, Trivy, shellcheck, secret scan, hardcoded config check, dependency review, Zizmor, Docker build, Terraform validate, Socket.dev, Dependabot daily dependency updates, Gitleaks pre-commit credential scan.
 - `make deploy` checks the latest CI run on `main` via `gh run list` before building; aborts if the conclusion is not `success` (RL-07).
 - `run_scan.sh` guards require committed code and green CI before scans execute.
 - Single developer reviews all commits — no auto-merge.

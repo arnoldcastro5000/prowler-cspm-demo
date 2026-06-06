@@ -158,7 +158,7 @@ Most integrity controls are strong. The residual risk is the remote markdown fet
 
 **Residual risk (WEB-R01):**
 
-- Eight pages fetch markdown at runtime from `raw.githubusercontent.com` with no subresource integrity (SRI) or signature verification. If the GitHub account were compromised, poisoned markdown would render on the dashboard. ReactMarkdown sanitizes HTML (no XSS from this vector), but the content itself could be misleading or defamatory.
+- Eight pages fetch markdown at runtime from `raw.githubusercontent.com` with no subresource integrity (SRI) or signature verification. If the GitHub account were compromised, poisoned markdown would render on the dashboard. ReactMarkdown sanitizes HTML (no XSS from this vector), but fetched markdown could be altered to display false or harmful content to visitors.
 - SRI is not practical for dynamic markdown content (the hash changes on every commit). The mitigation is GitHub account security (2FA, audit log) — outside this project's direct control.
 
 ---
@@ -207,7 +207,7 @@ The application handles error paths explicitly — no component fails open or si
 
 | ID | Category | Risk | Status | Treatment / compensating control |
 |---|---|---|---|---|
-| **WEB-R01** | A08 — Software or Data Integrity Failures | Markdown fetched at runtime from `raw.githubusercontent.com` by eight pages has no SRI or signature verification; a compromised GitHub account could poison rendered content | Accepted | ReactMarkdown sanitizes HTML (no XSS from this vector); residual is misleading or defamatory content. Compensating control: GitHub account 2FA and audit log review — outside this project's direct control. SRI is impractical because the markdown changes on every commit. |
+| **WEB-R01** | A08 — Software or Data Integrity Failures | Markdown fetched at runtime from `raw.githubusercontent.com` by eight pages has no SRI or signature verification; a compromised GitHub account could poison rendered content | Accepted | ReactMarkdown sanitizes HTML (no XSS from this vector); residual is content manipulation — fetched markdown could be altered to display false or harmful content to visitors. Compensating control: GitHub account 2FA and audit log review — outside this project's direct control. SRI is impractical because the markdown changes on every commit. |
 | **WEB-R02** | A09 — Security Logging and Alerting Failures | No centralized log aggregation, SIEM, real-time alerting on 403/404 patterns, or external forwarding of Worker-blocked requests | Out of scope | Documented as an intentional scope exclusion for a single-developer proof-of-concept. Treatment if scope expands: forward Cloud Logging + Cloudflare events to an external SIEM (e.g., Grafana Cloud, Better Stack) and add alerting rules for blocked-request anomalies. |
 
 ---
