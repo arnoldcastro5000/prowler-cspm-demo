@@ -8,12 +8,12 @@ This project's CI/CD pipeline comprises 15 automated security checks (12 CI work
 |---|---|---|---|
 | CICD-SEC-1 | Insufficient Flow Control Mechanisms | 🟡 Partially mitigated | `make deploy` aborts on non-success CI (RL-07); **CICD-R01**: no branch protection on `main` |
 | CICD-SEC-2 | Inadequate Identity and Access Management | 🟢 Mitigated | Minimal `permissions:` blocks; `persist-credentials: false`; no shared CI service accounts |
-| CICD-SEC-3 | Dependency Chain Abuse | 🟢 Mitigated | All Actions and base images SHA-pinned; Dependabot weekly; zero Python 3rd-party — **highest-relevance risk for this project** |
+| CICD-SEC-3 | Dependency Chain Abuse | 🟢 Mitigated | All Actions and base images SHA-pinned; Dependabot daily; zero Python 3rd-party — **highest-relevance risk for this project** |
 | CICD-SEC-4 | Poisoned Pipeline Execution (PPE) | 🟢 Mitigated | Single-dev (no fork PRs); Zizmor audit; `contents: read`; no `pull_request_target` |
 | CICD-SEC-5 | Insufficient PBAC | 🟢 Mitigated | CI has zero cloud credentials; deploy is manual and local-only |
 | CICD-SEC-6 | Insufficient Credential Hygiene | 🟢 Mitigated | All creds in GCP Secret Manager; Gitleaks pre-commit + CI; `trap cleanup EXIT` in scan pipeline |
 | CICD-SEC-7 | Insecure System Configuration | 🟢 Mitigated | GitHub-hosted runners only (ephemeral, patched); no self-hosted runners |
-| CICD-SEC-8 | Ungoverned Usage of Third-Party Services | 🟢 Mitigated | All Actions SHA-pinned; Dependabot weekly; Zizmor audit |
+| CICD-SEC-8 | Ungoverned Usage of Third-Party Services | 🟢 Mitigated | All Actions SHA-pinned; Dependabot daily; Zizmor audit |
 | CICD-SEC-9 | Improper Artifact Integrity Validation | 🟡 Partially mitigated | Build inputs SHA-pinned; Trivy image scan gates CRITICAL/HIGH CVEs (RL-06); deploy by immutable digest (RL-07); **CICD-R02**: no image signing or provenance |
 | CICD-SEC-10 | Insufficient Logging and Visibility | 🟡 Partially mitigated | GH run history + SARIF in Security tab; `make deploy` writes audit log (RL-07); **CICD-R03**: no CI failure alerting |
 
@@ -77,7 +77,7 @@ This is the most relevant CI/CD risk for this project. The pipeline consumes npm
 
 - All GitHub Actions pinned to exact commit SHAs — not mutable version tags.
 - Docker base images pinned to SHA digests in `dashboard/Dockerfile`.
-- Dependabot opens automated PRs weekly for outdated npm, pip, and GitHub Actions dependencies.
+- Dependabot opens automated PRs daily for outdated npm, pip, and GitHub Actions dependencies.
 - CI: `dependency-review.yml` scans npm and pip dependency changes for known vulnerabilities on every PR.
 - CI: `zizmor.yml` audits GitHub Actions workflows for supply chain risks.
 - Python ingest uses only the standard library (zero third-party dependencies).
@@ -203,7 +203,7 @@ The project integrates several third-party GitHub Actions and uses Cloudflare fo
   - Vendor official: `hashicorp/setup-terraform`, `aquasecurity/trivy-action`
   - Security-focused: `zizmorcore/zizmor-action`, `zricethezav/gitleaks-action`
   - Community: `ludeeus/action-shellcheck`
-- Dependabot monitors and proposes updates for all GitHub Actions weekly.
+- Dependabot monitors and proposes updates for all GitHub Actions daily.
 - CI: `zizmor.yml` audits workflows for third-party action risks.
 - Cloudflare Worker deployed via `wrangler.toml` — Cloudflare pulls source from GitHub, no CI-driven push.
 
@@ -309,7 +309,7 @@ Closes the **"Consider adding `--ignore-scripts` to `npm ci`"** improvement oppo
 
 - Verified safe: only `esbuild` (binary delivered by an optional dependency, not its postinstall) and macOS-only `fsevents` declare install scripts; a clean `npm ci --ignore-scripts` produced a byte-identical build, and Frontend CI + Docker Build passed on commit `11b9a30`.
 
-**Decision — `npm audit` not adopted as a gate:** supersedes the **"Add `npm audit` to the `frontend-ci.yml` workflow"** improvement opportunity under CICD-SEC-3. It is known-advisory detection that overlaps the existing `dependency-review` action (PRs) and Dependabot (weekly + security alerts), currently reports 2 moderate advisories in build-toolchain transitive deps not exploitable in a static-site bundle (so a default gate would fail CI on non-issues), and cannot detect novel typosquats. If added later it should be advisory-only (`--audit-level=high`).
+**Decision — `npm audit` not adopted as a gate:** supersedes the **"Add `npm audit` to the `frontend-ci.yml` workflow"** improvement opportunity under CICD-SEC-3. It is known-advisory detection that overlaps the existing `dependency-review` action (PRs) and Dependabot (daily + security alerts), currently reports 2 moderate advisories in build-toolchain transitive deps not exploitable in a static-site bundle (so a default gate would fail CI on non-issues), and cannot detect novel typosquats. If added later it should be advisory-only (`--audit-level=high`).
 
 | Original improvement opportunity (CICD-SEC-3) | Status now |
 |---|---|
