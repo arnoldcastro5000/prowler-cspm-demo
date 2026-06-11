@@ -250,18 +250,18 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 
 | Service | Provider | Cost |
 |---|---|---|
-| Cloud Run (dashboard hosting) | GCP | Up to 2M requests/month |
-| Artifact Registry (image storage) | GCP | Up to 0.5 GB |
-| Secret Manager (credentials) | GCP | Up to 6 secret versions / 10K access ops per month |
-| Cloudflare (CDN, WAF, DDoS, DNS, Workers) | Cloudflare | 100k Workers requests/day |
+| Cloud Run (dashboard hosting) | GCP | Free - Up to 2M requests/month |
+| Artifact Registry (image storage) | GCP | Free - Up to 0.5 GB |
+| Secret Manager (credentials) | GCP | Free - Up to 6 secret versions / 10K access ops per month |
+| Cloudflare (CDN, WAF, DDoS, DNS, Workers) | Cloudflare | Free - 100k Workers requests/day |
 | Prowler | Open source | Free |
 
 ### AWS resources (scanned by Prowler)
 
 | Service | Cost |
 |---|---|
-| S3 bucket | Free tier — 5 GB storage, 20K GET, 2K PUT/month |
-| EC2 instance (t2.micro) | Free tier — 750 hrs/month (stopped in after state) |
+| S3 bucket | Free — 5 GB storage, 20K GET, 2K PUT/month |
+| EC2 instance (t2.micro) | Free — 750 hrs/month (stopped in after state) |
 | CloudTrail | First trail free |
 | IAM | Free |
 
@@ -269,7 +269,7 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 
 | Service | Cost |
 |---|---|
-| Cloud Storage bucket | Free tier — 5 GB, 50K read ops/month |
+| Cloud Storage bucket | Free — 5 GB, 50K read ops/month |
 | Compute Engine firewall rules | Free |
 | IAM service account | Free |
 | KMS key | ~$0.06/month per active key version |
