@@ -26,7 +26,7 @@
 | Feature | Status | What it does |
 |---|---|---|
 | **DDoS Protection** | Always on | Blocks volumetric and application-layer attacks automatically |
-| **WAF (Managed Rules)** | Always on | Blocks common attacks — SQLi, XSS, etc. |
+| **WAF (Managed+Custom Rules)** | Always on | Blocks web attacks |
 | **Bot Fight Mode** | Enabled | Challenges automated bots and scrapers |
 | **Browser Integrity Check** | Enabled (default) | Blocks requests with suspicious or spoofed browser headers |
 | **SSL Full (Strict)** | Enabled | End-to-end encrypted, validates origin certificate |
@@ -40,7 +40,7 @@
 
 ### Cloudflare Worker security rules
 
-The Cloudflare free plan does not include custom WAF rules, method filtering, or path filtering. The Worker fills that gap with 8 rules enforced before any request reaches Cloud Run. Rule numbers match the implementation order in `cloudflare/worker.js`.
+The Cloudflare free plan include limited custom WAF rules, method filtering, or path filtering. The Worker fills that gap with 8 rules enforced before any request reaches Cloud Run. Rule numbers match the implementation order in `cloudflare/worker.js`.
 
 | Rule | What it does |
 |---|---|
@@ -200,7 +200,6 @@ As a second line of defence, `.claude/settings.local.json` adds explicit deny ru
 | `api.anthropic.com` | DNS resolution at startup | Claude Code inference |
 | `downloads.claude.ai` | DNS resolution at startup | Claude Code binary updates |
 | `registry.npmjs.org` | DNS resolution at startup | npm |
-| `marketplace.visualstudio.com`, `vscode.blob.core.windows.net`, `update.code.visualstudio.com` | DNS resolution at startup | VS Code extensions |
 | Host network subnet | Detected from default route | Docker host communication |
 | DNS (UDP 53), SSH (TCP 22), loopback | Static | Infrastructure |
 
