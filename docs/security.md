@@ -201,7 +201,7 @@ As a second line of defence, `.claude/settings.local.json` adds explicit deny ru
 | `downloads.claude.ai` | DNS resolution at startup | Claude Code binary updates |
 | `registry.npmjs.org` | DNS resolution at startup | npm |
 | Host network subnet | Detected from default route | Docker host communication |
-| DNS (UDP 53), SSH (TCP 22), loopback | Static | Infrastructure |
+| DNS (UDP 53), loopback | Static | Infrastructure |
 
 On completion, the script self-verifies: it confirms `https://example.com` is unreachable and `https://api.github.com/zen` is reachable. The container does not finish starting (`waitFor: postStartCommand`) if either check fails.
 

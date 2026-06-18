@@ -162,11 +162,8 @@ Runs via `postStartCommand` on every container start. Blocks all outbound traffi
 | `api.anthropic.com` | Claude Code inference |
 | `downloads.claude.ai` | Claude Code native installer and binary updates |
 | `registry.npmjs.org` | npm |
-| `marketplace.visualstudio.com` | VS Code extension installs |
-| `vscode.blob.core.windows.net` | VS Code extension downloads |
-| `update.code.visualstudio.com` | VS Code update metadata |
 | Host network subnet | Docker host communication |
-| DNS (UDP 53), SSH (TCP 22), localhost | Infrastructure |
+| DNS (UDP 53), localhost | Infrastructure |
 
 Verification: on completion the script confirms `https://example.com` is blocked and `https://api.github.com/zen` is reachable.
 
