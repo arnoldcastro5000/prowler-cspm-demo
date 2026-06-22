@@ -298,7 +298,7 @@ Full setup instructions, prerequisites, and credential configuration in [SETUP.m
 ## Known Limitations
 
 - Prowler is a point-in-time scanner, not continuous monitoring. The dashboard reflects scan snapshots, not live state.
-- Cloudflare's free WAF provides managed rulesets only. Custom rules and advanced rate limiting require a paid plan.
+- Cloudflare's free WAF provides a managed ruleset and a limited set of allowed custom rules.
 - A domain name is required for Cloudflare integration and is not free.
 - GCP Secret Manager covers 6 active secret versions. Azure credentials are consolidated into one JSON secret to stay within this limit.
 - Terraform state is stored locally on the WSL2 machine. If the local machine is lost, resources still exist in the cloud but state must be reconstructed via `terraform import`.
