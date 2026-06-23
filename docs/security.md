@@ -40,7 +40,7 @@
 
 ### Cloudflare Worker security rules
 
-The Cloudflare free plan include limited custom WAF rules, method filtering, or path filtering. The Worker fills that gap with 8 rules enforced before any request reaches Cloud Run. Rule numbers match the implementation order in `cloudflare/worker.js`.
+The Cloudflare free plan includes a limited set of custom WAF rules. The Worker fills that gap with 8 rules enforced before any request reaches Cloud Run. Rule numbers match the implementation order in `cloudflare/worker.js`.
 
 | Rule | What it does |
 |---|---|
